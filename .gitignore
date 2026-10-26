@@ -39,7 +39,9 @@ public/robots.txt
 public/sitemap.xml
 public/sitemap-0.xml
 
-# environment variables
+# environment variables (pero SÍ versionamos la plantilla .env.example —
+# nunca tiene secretos reales, solo nombres de variables vacíos)
 .env*
+!.env.example
 
 logs

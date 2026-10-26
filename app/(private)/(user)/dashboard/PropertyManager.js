@@ -64,6 +64,18 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
   // edición.
   const [pendingEditState, setPendingEditState] = useState("");
 
+  // Meta Model API (Muse Spark / Muse Image / SAM 3.1) — ver libs/metaModel.js.
+  // Mientras no haya MODEL_API_KEY configurada, las 3 rutas de abajo
+  // devuelven una respuesta "mock" claramente marcada (ver `data.mock`), así
+  // que este panel funciona igual antes y después de que lleguen los
+  // créditos del hackathon.
+  const [aiNotes, setAiNotes] = useState("");
+  const [aiCopyLoading, setAiCopyLoading] = useState(false);
+  const [aiImagePrompt, setAiImagePrompt] = useState("");
+  const [aiImageLoading, setAiImageLoading] = useState(false);
+  const [aiPrivacyLoading, setAiPrivacyLoading] = useState(false);
+  const [aiPrivacyResult, setAiPrivacyResult] = useState(null);
+
   const fetchProperties = async () => {
     try {
       setLoading(true);
@@ -264,6 +276,103 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
     }
   };
 
+  // Muse Spark: redacta título + descripción en español a partir de notas
+  // crudas del propietario + los datos ya elegidos en el formulario
+  // (ciudad/país/precio/criptos). El resultado SIEMPRE se puede editar antes
+  // de enviar — nunca se publica directo.
+  const handleGenerateCopy = async () => {
+    if (!form.city || !form.country || !form.price) {
+      toast.error("Elige país, ciudad y precio antes de usar Meta AI");
+      return;
+    }
+    setAiCopyLoading(true);
+    try {
+      const res = await apiClient.post("/ai/listing-copy", {
+        rawNotes: aiNotes,
+        city: form.city,
+        state: form.state,
+        country: form.country,
+        price: form.price,
+        currency: form.currency,
+        cryptoAccepted: form.cryptoAccepted,
+      });
+      setForm((f) => ({
+        ...f,
+        title: res.data.title,
+        description: res.data.description,
+      }));
+      toast.success(
+        res.data.mock
+          ? "Copy de muestra generado (conecta MODEL_API_KEY para usar Muse Spark real)"
+          : "Copy generado con Meta Muse Spark"
+      );
+    } catch (e) {
+      // apiClient already toasts the error
+    } finally {
+      setAiCopyLoading(false);
+    }
+  };
+
+  // Muse Image: genera una foto del listado a partir de un prompt y la
+  // agrega al campo de URLs de fotos (el dueño puede borrarla si no le
+  // gusta, igual que cualquier otra URL).
+  const handleGenerateImage = async () => {
+    if (aiImagePrompt.trim().length < 5) {
+      toast.error("Describe la imagen que quieres generar");
+      return;
+    }
+    setAiImageLoading(true);
+    try {
+      const res = await apiClient.post("/ai/listing-image", {
+        prompt: aiImagePrompt.trim(),
+      });
+      setForm((f) => ({
+        ...f,
+        images: f.images ? `${f.images}, ${res.data.imageUrl}` : res.data.imageUrl,
+      }));
+      toast.success(
+        res.data.mock
+          ? "Imagen de muestra agregada (conecta MODEL_API_KEY para usar Muse Image real)"
+          : "Imagen generada con Meta Muse Image"
+      );
+    } catch (e) {
+      // apiClient already toasts the error
+    } finally {
+      setAiImageLoading(false);
+    }
+  };
+
+  // SAM 3.1: revisa la primera foto pegada en busca de personas, rostros o
+  // placas visibles — informativo, no bloquea el envío a revisión.
+  const handleScanPrivacy = async () => {
+    const firstImage = form.images.split(",").map((u) => u.trim()).filter(Boolean)[0];
+    if (!firstImage) {
+      toast.error("Agrega al menos una URL de foto para revisarla");
+      return;
+    }
+    setAiPrivacyLoading(true);
+    setAiPrivacyResult(null);
+    try {
+      const res = await apiClient.post("/ai/privacy-scan", {
+        imageUrl: firstImage,
+      });
+      setAiPrivacyResult(res.data);
+      if (res.data.mock) {
+        toast("Vista previa — conecta MODEL_API_KEY para analizar con SAM 3.1", {
+          icon: "🛡️",
+        });
+      } else if (res.data.hasSensitiveContent) {
+        toast.error("SAM 3.1 detectó contenido sensible en la foto");
+      } else {
+        toast.success("SAM 3.1: sin contenido sensible visible");
+      }
+    } catch (e) {
+      // apiClient already toasts the error
+    } finally {
+      setAiPrivacyLoading(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm("¿Eliminar esta propiedad?")) return;
     try {
@@ -297,6 +406,37 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
           onSubmit={handleSubmit}
           className="glass-card rounded-2xl p-5 sm:p-6 space-y-4"
         >
+          {/* Meta AI — Muse Spark redacta título + descripción a partir de
+              notas crudas y los datos ya elegidos abajo (país/ciudad/precio).
+              El resultado siempre queda editable antes de enviar. */}
+          <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 space-y-2">
+            <p className="text-sm font-semibold flex items-center gap-2">
+              ✨ Redactar con Meta AI
+              <span className="badge badge-xs badge-secondary badge-outline">
+                Muse Spark
+              </span>
+            </p>
+            <textarea
+              placeholder="Notas rápidas para la IA (ej. 3 recámaras, alberca, a 2 cuadras de la playa)"
+              className="textarea textarea-bordered textarea-sm w-full"
+              rows={2}
+              value={aiNotes}
+              onChange={(e) => setAiNotes(e.target.value)}
+            />
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              disabled={aiCopyLoading}
+              onClick={handleGenerateCopy}
+            >
+              {aiCopyLoading ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : (
+                "✨ Generar título y descripción"
+              )}
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input
               required
@@ -431,6 +571,82 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             value={form.images}
             onChange={(e) => setForm({ ...form, images: e.target.value })}
           />
+
+          {/* Meta AI — Muse Image genera una foto a partir de un prompt; SAM
+              3.1 revisa la primera foto pegada en busca de personas, rostros
+              o placas visibles antes de publicar. Ambos son informativos: no
+              bloquean el envío a revisión. */}
+          <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-3">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold flex items-center gap-2">
+                🎨 Generar imagen con Meta AI
+                <span className="badge badge-xs badge-accent badge-outline">
+                  Muse Image
+                </span>
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  placeholder="Ej. villa frente al mar en Tulum, estilo moderno, atardecer"
+                  className="input input-bordered input-sm w-full"
+                  value={aiImagePrompt}
+                  onChange={(e) => setAiImagePrompt(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn-accent btn-sm whitespace-nowrap"
+                  disabled={aiImageLoading}
+                  onClick={handleGenerateImage}
+                >
+                  {aiImageLoading ? (
+                    <span className="loading loading-spinner loading-xs" />
+                  ) : (
+                    "🎨 Generar"
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1 border-t border-accent/20">
+              <p className="text-sm font-semibold flex items-center gap-2">
+                🛡️ Revisar privacidad de la primera foto
+                <span className="badge badge-xs badge-accent badge-outline">
+                  SAM 3.1
+                </span>
+              </p>
+              <button
+                type="button"
+                className="btn btn-outline btn-accent btn-sm"
+                disabled={aiPrivacyLoading}
+                onClick={handleScanPrivacy}
+              >
+                {aiPrivacyLoading ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  "🛡️ Escanear"
+                )}
+              </button>
+              {aiPrivacyResult && (
+                <p
+                  className={`text-xs ${
+                    aiPrivacyResult.mock
+                      ? "opacity-60"
+                      : aiPrivacyResult.hasSensitiveContent
+                        ? "text-error"
+                        : "text-success"
+                  }`}
+                >
+                  {aiPrivacyResult.mock
+                    ? aiPrivacyResult.note
+                    : aiPrivacyResult.hasSensitiveContent
+                      ? `⚠️ Se detectó: ${aiPrivacyResult.findings
+                          .map((f) => f.label)
+                          .join(", ")}`
+                      : "✅ Sin contenido sensible visible"}
+                </p>
+              )}
+            </div>
+          </div>
 
           <div>
             <p className="text-sm font-medium mb-2">Criptomonedas que aceptas</p>
