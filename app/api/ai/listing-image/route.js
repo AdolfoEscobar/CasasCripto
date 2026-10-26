@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/libs/auth";
 import { generateListingImage } from "@/libs/metaModel";
+import { checkAiRateLimit, AI_LIMITS } from "@/libs/aiRateLimit";
 
 // POST /api/ai/listing-image
 // Genera una imagen del listado con Meta Muse Image a partir de un prompt
@@ -12,6 +13,18 @@ export async function POST(req) {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { allowed } = await checkAiRateLimit({
+      key: `user:${session.user.id}`,
+      action: "listing-image",
+      limit: AI_LIMITS.authenticated["listing-image"],
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Alcanzaste el límite diario de imágenes con IA. Intenta mañana." },
+        { status: 429 }
+      );
     }
 
     const { prompt } = await req.json();

@@ -15,6 +15,7 @@ import {
   ChartBarIcon,
   QuestionMarkCircleIcon,
   UsersIcon,
+  CpuChipIcon,
 } from "@heroicons/react/24/outline";
 import logo from "@/app/icon.png";
 import config from "@/config";
@@ -36,6 +37,11 @@ const accentFont = Playfair_Display({
 const mainLinks = [
   { href: "/", label: "Inicio", icon: HomeIcon },
   { href: "/propiedades", label: "Propiedades", icon: BuildingOffice2Icon },
+  // Demo pública (sin login) de Muse Spark/Image + SAM 3.1 — ver
+  // app/demo-ai. Visible en la nav principal a propósito: es la forma más
+  // rápida para un juez del hackathon (o alguien en redes) de probar la
+  // integración de Meta Model API sin crear cuenta primero.
+  { href: "/demo-ai", label: "Demo Meta AI", icon: CpuChipIcon },
   { href: "/blog", label: "Blog", icon: NewspaperIcon },
 ];
 

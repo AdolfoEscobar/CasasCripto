@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/libs/auth";
 import { scanImagePrivacy } from "@/libs/metaModel";
+import { checkAiRateLimit, AI_LIMITS } from "@/libs/aiRateLimit";
 
 // POST /api/ai/privacy-scan
 // Usa Meta SAM 3.1 para avisar si una foto del listado muestra personas,
@@ -11,6 +12,18 @@ export async function POST(req) {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { allowed } = await checkAiRateLimit({
+      key: `user:${session.user.id}`,
+      action: "privacy-scan",
+      limit: AI_LIMITS.authenticated["privacy-scan"],
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Alcanzaste el límite diario de revisiones con IA. Intenta mañana." },
+        { status: 429 }
+      );
     }
 
     const { imageUrl } = await req.json();
