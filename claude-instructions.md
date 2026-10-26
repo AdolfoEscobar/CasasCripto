@@ -2,13 +2,14 @@
 
 ## Project Context
 
-You are working on **Casas Cripto**, a modern real estate **marketplace** focused on properties that accept cryptocurrency payments. It connects crypto-friendly property owners/agents with buyers **and investors**. Listing is **free by default** (plan Básico); Premium is optional for higher listing caps. The marketing home is still an investor-facing pitch (pre-seed, future `$CASA` token, donations). The product now also includes a real property catalog, owner dashboard, admin moderation, Stripe (subscriptions + donations + featured listings), and a premium dark "elite fintech" UI (gold / cyan / violet on obsidian).
+You are working on **Casas Cripto**, a modern real estate **marketplace** focused on properties that accept cryptocurrency payments. It connects crypto-friendly property owners/agents with buyers **and investors**. Listing is **free by default** (plan Básico); Premium is optional for higher listing caps. The marketing home is still an investor-facing pitch (pre-seed, future `$CASA` token, donations). The product now also includes a real property catalog, owner dashboard, admin moderation, Stripe (subscriptions + donations + featured listings), AI listing tools (Meta Model API: Muse Spark copy, Muse Image photos, SAM 3.1 privacy scan — dashboard + public `/demo-ai`, with sample-response fallbacks when `MODEL_API_KEY` is unset), and a premium dark "elite fintech" UI (gold / cyan / violet on obsidian).
 
 ### Technology Stack
 - **Frontend**: Next.js 16 with App Router, React 19, Tailwind CSS v4, DaisyUI v5 with a custom `casascripto` theme
 - **Backend**: Next.js API Routes, NextAuth v5 (beta), MongoDB with Mongoose
 - **Payments & monetization**: listing does **not** require Stripe/`hasAccess`. Plan Básico is free (`config.stripe.plans` `isFree: true`, sentinel `priceId` `price_free_basico`, `maxProperties: 20`). Premium is Stripe Checkout `subscription` + Customer Portal (`maxProperties: 100`). One-time Checkout with inline `price_data` for **donations** (`createDonationCheckout`) and **featured listings** (`createFeaturedListingCheckout`, `config.featuredListing`). On-chain donations via placeholder wallets in `components/CopyWalletAddress.js`. Property `cryptoAccepted` is informational — sale settlement is still off-platform.
 - **Email**: Resend for transactional emails (magic links, notifications)
+- **AI listing tools**: Meta Model API (`libs/metaModel.js`) — Muse Spark (`/api/ai/listing-copy`), Muse Image (`/api/ai/listing-image`), SAM 3.1 (`/api/ai/privacy-scan`), each with a stricter public variant under `/api/ai/public/*` for the no-login `/demo-ai`. Daily per-user/per-IP rate limits via `libs/aiRateLimit.js` + `models/AiUsage.js`. Without `MODEL_API_KEY` every route returns a sample response, so the UI is testable with no key.
 - **Authentication**: NextAuth with Google OAuth and Email (magic link) providers, JWT sessions carrying a `role` (`user`, `admin`, `editor`, `moderator`). Custom sign-in page at `/signin` (`pages.signIn` in `libs/auth.js`).
 - **Navigation**: global `AppShell` + left `Sidebar` mounted in `app/layout.js`. No `Header.js` / `HeaderBlog`.
 - **Deployment**: Optimized for Vercel deployment
@@ -34,9 +35,10 @@ This codebase started from the ShipFast Next.js boilerplate, was rebranded into 
   - Public marketplace: `/propiedades` (published, featured first), `/propiedades/[id]` (SEO + JSON-LD), `/propiedades/ciudad/[slug]` (programmatic SEO even for empty cities), `app/sitemap.js`.
   - APIs: `GET/POST /api/properties` (GET public published by default; non-published requires admin), `GET /api/properties/mine`, `PATCH/DELETE /api/properties/[id]` (owner can edit content — published/rejected go back to pending; owner can set `dealStatus` without re-review; admin sets status), `/api/geo/countries|states|cities`.
   - Stripe: `create-checkout`, `create-portal`, `create-donation`, `create-featured-listing`; webhook grants Premium `hasAccess` **or** sets `featured`/`featuredUntil` when `metadata.type === "featured_listing"`.
-  - Blog `app/blog` (index copy updated); legal `/tos` and `/privacy-policy`; `/api/lead` persists to `Lead` (`source`: `"waitlist"` | `"investor"`).
+  - Blog `app/blog` (index copy updated); legal `/tos` and `/privacy-policy`; `/api/lead` persists to `Lead` (`source`: free-form string, default `"waitlist"` — e.g. `"investor"` from `<ButtonLead source="investor" />`).
+  - AI listing tools in the owner dashboard (`PropertyManager.js` buttons → `/api/ai/*`) + public no-login demo `/demo-ai` (`DemoAIClient.js` → `/api/ai/public/*`); `libs/metaModel.js` (sample fallback without key), `libs/aiRateLimit.js` + `models/AiUsage.js` (daily per-user/IP counters).
 - 🚧 **Not implemented yet**: native image upload/CDN; on-chain escrow or in-app crypto payment to close a sale; automatic commission invoice when a deal is marked `closed`; KYC/AML; `$CASA` token (no contracts, no sale).
-- ⚠️ **Known placeholders**: dummy wallets in `CopyWalletAddress.js`; empty `config.investors.deckUrl` / `calendlyUrl`; Premium Stripe `priceId` is still a ShipFast/template placeholder; Stripe env keys may be unset locally; `app/blog/_assets/content.js` is still ShipFast tutorials; unused leftovers `Testimonials1.js`, `Testimonials3.js`, `Testimonials11.js`, `FeaturesGrid.js`, `FeaturesListicle.js`.
+- ⚠️ **Known placeholders**: dummy wallets in `CopyWalletAddress.js`; empty `config.investors.deckUrl` / `calendlyUrl`; Premium Stripe `priceId` is still a ShipFast/template placeholder; Stripe env keys may be unset locally; `MODEL_API_KEY` unset → AI routes return sample responses; `app/blog/_assets/content.js` is still ShipFast tutorials; unused leftovers `Testimonials1.js`, `Testimonials3.js`, `Testimonials11.js`, `FeaturesGrid.js`, `FeaturesListicle.js`, `libs/gpt.js` (dead code — nothing imports it).
 - Listing rules already encoded — keep them: publish is free; cap via `maxProperties`; only `published` is public; geo fields come from `/api/geo/*` (do **not** import `country-state-city` in Client Components — it would balloon the bundle; `libs/geo.js` is server-only).
 - `$CASA` is narrative only (`config.token`). New copy must match `config.legal.disclaimer`.
 - Do **not** re-comment out `/api/lead`.
@@ -82,11 +84,13 @@ CasasCripto/
 │   │   ├── geo/                   # countries, states, cities (server-only geo data)
 │   │   ├── lead/                  # Lead capture — persists to Lead
 │   │   ├── stripe/                # create-checkout, create-portal, create-donation, create-featured-listing
+│   │   ├── ai/                    # listing-copy, listing-image, privacy-scan (+ public/* for /demo-ai)
 │   │   └── webhook/stripe/        # Subscriptions + featured_listing metadata
 │   ├── (private)/
 │   │   ├── (user)/dashboard/      # Owner panel + PropertyManager.js
 │   │   └── admin/dashboard/       # Admin home, users, properties moderation
 │   ├── propiedades/               # Marketplace: index, [id], ciudad/[slug]
+│   ├── demo-ai/                   # Public no-login Meta AI demo (DemoAIClient.js)
 │   ├── signin/                    # Custom elite sign-in
 │   ├── blog/, privacy-policy/, tos/
 │   ├── sitemap.js
@@ -102,8 +106,8 @@ CasasCripto/
 │   ├── auth/SignInCard.js
 │   ├── admin/, common/, forms/
 │   └── Testimonials*.js, FeaturesGrid.js, FeaturesListicle.js  # unused leftovers
-├── libs/                          # auth, mongoose, mongo, stripe, resend, api, seo, gpt, geo, slugify, leanToJSON
-├── models/                        # User.js, Lead.js, Property.js
+├── libs/                          # auth, mongoose, mongo, stripe, resend, api, seo, geo, slugify, leanToJSON, metaModel, aiRateLimit (+ gpt — unused ShipFast leftover)
+├── models/                        # User.js, Lead.js, Property.js, AiUsage.js
 └── config.js                      # plans (incl. isFree/maxProperties), featuredListing, donations, investors, token, legal, colors, auth
 ```
 
@@ -338,7 +342,7 @@ export default mongoose.models.ExampleModel ||
 
 ### Protecting Pages
 ```javascript
-// app/dashboard/page.js
+// app/(private)/(user)/dashboard/page.js
 import { auth } from "@/libs/auth";
 import { redirect } from "next/navigation";
 import config from "@/config";
@@ -443,6 +447,7 @@ import Stripe from "stripe";
 import connectMongo from "@/libs/mongoose";
 import User from "@/models/User";
 import Property from "@/models/Property";
+import { findCheckoutSession } from "@/libs/stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -450,8 +455,8 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export async function POST(req) {
   try {
     const body = await req.text();
-    const headersList = headers();
-    const signature = headersList.get("stripe-signature");
+    // Next.js 16: headers() is async
+    const signature = (await headers()).get("stripe-signature");
 
     let event;
     try {
@@ -492,11 +497,14 @@ export async function POST(req) {
   }
 }
 
-async function handleCheckoutCompleted(session) {
-  const user = await User.findById(session.client_reference_id);
+async function handleCheckoutCompleted(sessionObject) {
+  // line_items are NOT expanded on the event object — re-fetch like the real
+  // webhook does (see app/api/webhook/stripe/route.js)
+  const session = await findCheckoutSession(sessionObject.id);
+  const user = await User.findById(sessionObject.client_reference_id);
   if (user) {
     user.customerId = session.customer;
-    user.priceId = session.line_items?.data[0]?.price?.id;
+    user.priceId = session?.line_items?.data[0]?.price.id;
     user.hasAccess = true;
     await user.save();
   }
@@ -672,6 +680,8 @@ if (!process.env.REQUIRED_VAR) {
   throw new Error("REQUIRED_VAR environment variable is not set");
 }
 ```
+
+Coordinated with `.cursorrules` — required: `NEXTAUTH_SECRET`, `MONGODB_URI`, `RESEND_API_KEY`. Optional: `GOOGLE_ID`/`GOOGLE_SECRET` (Google OAuth), `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` (payments only — the app runs without them), `MODEL_API_KEY` (Meta AI tools, else sample responses). Not used: `NEXTAUTH_URL`, `STRIPE_PUBLIC_KEY`, `OPENAI_API_KEY` (see `.cursorrules` for why).
 
 ## Testing Considerations
 

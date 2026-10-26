@@ -3,22 +3,23 @@
 You are an expert full-stack developer working on Casas Cripto, a modern real estate platform focused on listing properties that accept cryptocurrency payments, built with Next.js, NextAuth, MongoDB, and modern UI components.
 
 ## Project Overview
-- **Tech Stack**: Next.js 16, React 19, NextAuth v5 (beta), MongoDB, Mongoose, Tailwind CSS v4, DaisyUI v5, Resend, Stripe
+- **Tech Stack**: Next.js 16, React 19, NextAuth v5 (beta), MongoDB, Mongoose, Tailwind CSS v4, DaisyUI v5, Resend, Stripe, Meta Model API (AI listing tools)
 - **Architecture**: App Router, API Routes, Server Components, Client Components
 - **Authentication**: NextAuth with Google OAuth and Email (magic link) providers, MongoDB adapter, JWT sessions with a `role` claim (`user`, `admin`, `editor`, `moderator`)
 - **Database**: MongoDB with Mongoose ODM
 - **Payments & monetization**: listing is **free by default** (plan Básico `isFree: true`, sentinel `priceId` `price_free_basico` — does **not** require `hasAccess`). Premium is a paid Stripe Checkout `subscription` + Customer Portal (`config.stripe.plans`, higher `maxProperties`). One-time Stripe Checkout with inline `price_data` (no pre-created priceId) for **donations** (`/api/stripe/create-donation`, `<DonateButton />`) and **featured listings** (`/api/stripe/create-featured-listing`, `config.featuredListing` — currently $15 / 7 days). On-chain crypto donations via `<CopyWalletAddress />` (placeholder wallets). Closing a property sale in crypto is still **off-platform / informational** (`cryptoAccepted`, `dealStatus`, `commissionRate` are not billed automatically).
 - **Email**: Resend for transactional emails (magic links, notifications)
-- **UI / Design system**: Tailwind CSS + DaisyUI with a custom dark theme named `casascripto` (gold primary, cyan secondary, violet accent, obsidian base) defined with `@plugin "daisyui/theme"` in `app/globals.css`. Utility classes `text-gradient-gold`, `text-gradient-crypto`, `glass-card`, `glow-primary`, `bg-grid-fade` are available for the "elite fintech" look — reuse them instead of inventing new ad-hoc styles.
+- **AI**: Meta Model API — Muse Spark (listing copy), Muse Image (listing photos), SAM 3.1 (privacy scan). Dashboard buttons (`PropertyManager.js` → `/api/ai/*`) plus a public no-login `/demo-ai` (→ `/api/ai/public/*`, stricter per-IP daily limit). Without `MODEL_API_KEY` the routes return sample responses (`libs/metaModel.js`); usage is rate-limited per user/IP per day (`libs/aiRateLimit.js` + `models/AiUsage.js`).
+- **UI / Design system**: Tailwind CSS + DaisyUI with a custom dark theme named `casascripto` (gold primary, cyan secondary, violet accent, obsidian base) defined with `@plugin "daisyui/theme"` in `app/globals.css`. Utility classes `text-gradient-gold`, `text-gradient-crypto`, `glass-card`, `glow-primary`, `glow-secondary`, `bg-grid-fade`, `badge-elite` are available for the "elite fintech" look — reuse them instead of inventing new ad-hoc styles.
 - **Navigation**: global left **sidebar** (`components/Sidebar.js` + `components/AppShell.js` in `app/layout.js`). There is **no** `Header.js` / `HeaderBlog` — do not reintroduce a floating header. Desktop: `lg:drawer-open`; mobile: drawer + compact topbar.
 - **Business Model**: marketplace connecting crypto-friendly owners/agents with buyers, **plus an investor-pitch landing**: pre-seed section, future utility token (`$CASA`, not launched, no sale), donations to fund development. Revenue today: optional Premium subscription + featured-listing boosts + donations. Future: commission on closed deals (`commissionRate`, default 1.5%).
 
 ### Current Project State (read before building new features)
 This repo was bootstrapped from the ShipFast Next.js boilerplate, rebranded into Casas Cripto, then given a full investor-pitch landing **and a working property marketplace**. Do not rebuild listing CRUD, `/propiedades`, or the sidebar from scratch — they already exist.
-- **Implemented**: Spanish landing (`app/page.js`: `Hero`, `Problem`, `MarketplacePreview`, `FeaturesAccordion`, `StatsSection`, `Pricing`, `TokenRoadmap`, `InvestAndDonate`, `FAQ`, `CTA`, `Footer`); custom sign-in (`app/signin`, `components/auth/SignInCard.js`); auth with roles; **Property model** (`models/Property.js`) + APIs (`/api/properties`, `/api/properties/mine`, `/api/properties/[id]`); owner dashboard with `<PropertyManager />` (`app/(private)/(user)/dashboard`); admin RBAC + user API (`app/api/admin/*`) + **property moderation** (`app/(private)/admin/dashboard/properties`); public marketplace `/propiedades`, detail `/propiedades/[id]`, SEO city pages `/propiedades/ciudad/[slug]` + `app/sitemap.js`; geo dropdowns `/api/geo/countries|states|cities` (`libs/geo.js`, country-state-city — **never import that package in a Client Component**); Stripe subscriptions, donations, and featured listings (webhook handles `metadata.type === "featured_listing"`); blog (`app/blog`, index copy updated); rewritten `/tos` and `/privacy-policy`; leads persist via `/api/lead` + `models/Lead.js`.
+- **Implemented**: Spanish landing (`app/page.js`: `Hero`, `Problem`, `MarketplacePreview`, `FeaturesAccordion`, `StatsSection`, `Pricing`, `TokenRoadmap`, `InvestAndDonate`, `FAQ`, `CTA`, `Footer`); custom sign-in (`app/signin`, `components/auth/SignInCard.js`); auth with roles; **Property model** (`models/Property.js`) + APIs (`/api/properties`, `/api/properties/mine`, `/api/properties/[id]`); owner dashboard with `<PropertyManager />` (`app/(private)/(user)/dashboard`); admin RBAC + user API (`app/api/admin/*`) + **property moderation** (`app/(private)/admin/dashboard/properties`); public marketplace `/propiedades`, detail `/propiedades/[id]`, SEO city pages `/propiedades/ciudad/[slug]` + `app/sitemap.js`; geo dropdowns `/api/geo/countries|states|cities` (`libs/geo.js`, country-state-city — **never import that package in a Client Component**); Stripe subscriptions, donations, and featured listings (webhook handles `metadata.type === "featured_listing"`); blog (`app/blog`, index copy updated); rewritten `/tos` and `/privacy-policy`; leads persist via `/api/lead` + `models/Lead.js`; AI listing tools (`/api/ai/listing-copy|listing-image|privacy-scan` + `public/*` variants, public `/demo-ai`, `models/AiUsage.js` rate-limit counters).
 - **Listing rules that already exist — keep them**: new properties start as `status: "pending"` until an admin sets `"published"` or `"rejected"` (owner edits of published/rejected listings go back to pending). Only `"published"` listings appear on `/propiedades`. Country+city are structured fields; `citySlug` is auto-set in the Property `pre("save")` hook via `libs/slugify.js`. Images are **external URLs**, not an upload pipeline. `hasAccess` gates Premium, **not** the right to publish.
 - **Not implemented yet — do not assume it exists**: image upload/CDN; on-chain escrow or in-app crypto settlement for a sale; automatic commission billing when `dealStatus` is `"closed"`; KYC/AML; the `$CASA` token (contracts, sale, or on-chain utility).
-- **Known placeholders**: wallets in `components/CopyWalletAddress.js`; `config.investors.deckUrl`/`calendlyUrl` empty; Stripe `priceId` for Premium is still a template placeholder and Stripe env keys may be unset locally; `app/blog/_assets/content.js` is still ShipFast tutorial copy; `Testimonials1.js`, `Testimonials3.js`, `Testimonials11.js`, `FeaturesGrid.js`, `FeaturesListicle.js` exist but are unused.
+- **Known placeholders**: wallets in `components/CopyWalletAddress.js`; `config.investors.deckUrl`/`calendlyUrl` empty; Stripe `priceId` for Premium is still a template placeholder and Stripe env keys may be unset locally; `MODEL_API_KEY` unset → AI routes return sample responses; `app/blog/_assets/content.js` is still ShipFast tutorial copy; `Testimonials1.js`, `Testimonials3.js`, `Testimonials11.js`, `FeaturesGrid.js`, `FeaturesListicle.js` and `libs/gpt.js` exist but are unused.
 - The `$CASA` token is a roadmap/narrative concept (`config.token`) — not implemented, not sold. Any copy must stay consistent with `config.legal.disclaimer`.
 - There is **no `middleware.js`**. Protect routes in server `layout.js` with `auth()` + `redirect()` (see `app/(private)/(user)/dashboard/layout.js` and `app/(private)/admin/dashboard/layout.js`). In Next.js 16 route handlers, `params` is a Promise — `const { id } = await params`.
 
@@ -126,16 +127,20 @@ export async function POST(req) {
 - Include proper accessibility attributes
 
 ## Environment Variables
-Required environment variables:
+Required:
 - `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL`
 - `MONGODB_URI`
-- `STRIPE_PUBLIC_KEY`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `GOOGLE_ID` (optional)
-- `GOOGLE_SECRET` (optional)
-- `RESEND_API_KEY`
+- `RESEND_API_KEY` (magic-link emails via Resend SMTP)
+
+Optional / feature-gated:
+- `GOOGLE_ID` + `GOOGLE_SECRET` (Google OAuth; without them only Email login works)
+- `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (only needed for Premium, donations and featured listings — the app runs without them)
+- `MODEL_API_KEY` (+ optional `META_MODEL_BASE_URL`) — Meta Model API for the AI listing tools; without it the `/api/ai/*` routes return sample responses
+
+Not used (do not add):
+- `NEXTAUTH_URL` — nothing reads it (NextAuth v5 resolves the host automatically)
+- `STRIPE_PUBLIC_KEY` — the Stripe integration is fully server-side (Checkout + Portal + webhook); no Stripe.js on the client
+- `OPENAI_API_KEY` — only referenced by the unused ShipFast leftover `libs/gpt.js`
 
 ## Common Patterns
 

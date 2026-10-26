@@ -12,6 +12,7 @@
 - **Pagos**: Stripe — Checkout + Customer Portal para Premium; Checkout de monto libre (`price_data`) para donaciones y para **destacar un listado**; donaciones on-chain (wallets placeholder)
 - **Geo**: `country-state-city` + `i18n-iso-countries` **solo en servidor** (`libs/geo.js` → `/api/geo/*`)
 - **Email**: Resend
+- **IA**: Meta Model API (Muse Spark para copy, Muse Image para fotos, SAM 3.1 para revisión de privacidad) — botones en el dashboard (`PropertyManager.js` → `/api/ai/*`) y demo pública sin login en `/demo-ai` (→ `/api/ai/public/*`, con límite diario por IP). Sin `MODEL_API_KEY`, las rutas devuelven respuestas de muestra.
 - **UI**: Tailwind CSS v4 + DaisyUI v5, tema custom `casascripto` (oro metálico + cian eléctrico + violeta sobre fondo obsidiana) en `app/globals.css`
 - **Navegación**: sidebar global (`AppShell` + `Sidebar`) en `app/layout.js` — no hay `Header` flotante
 - **Despliegue objetivo**: Vercel
@@ -23,7 +24,8 @@
 - Landing en español con copy propio (`app/page.js`): `Hero`, `Problem`, `MarketplacePreview`, `FeaturesAccordion`, `StatsSection`, `Pricing`, `TokenRoadmap`, `InvestAndDonate`, `FAQ`, `CTA`, `Footer`.
 - Marketplace público: `/propiedades` (solo `published`, destacadas primero), ficha `/propiedades/[id]` (SEO + datos estructurados), páginas por ciudad `/propiedades/ciudad/[slug]` y `app/sitemap.js`.
 - Modelo `Property` + APIs `/api/properties`, `/api/properties/mine`, `/api/properties/[id]`. Crear listado es gratis; queda en `pending` hasta que un admin lo aprueba o rechaza. El dueño edita desde el dashboard; un edit de una publicada/rechazada vuelve a `pending`.
-- Dashboard de propietario (`app/(private)/(user)/dashboard` + `PropertyManager.js`): CRUD, selects de país/estado/ciudad, criptos aceptadas (USDC/USDT/BTC/ETH, informativo), URLs de imagen, destacar listado publicado.
+- Dashboard de propietario (`app/(private)/(user)/dashboard` + `PropertyManager.js`): CRUD, selects de país/estado/ciudad, criptos aceptadas (USDC/USDT/BTC/ETH, informativo), URLs de imagen, destacar listado publicado, herramientas IA (redactar copy, generar foto, escanear privacidad).
+- Demo pública de IA (`/demo-ai` → `/api/ai/public/*`, sin login, con límite diario por IP) y rate-limit diario por usuario/IP en las rutas autenticadas (`libs/aiRateLimit.js` + modelo `AiUsage`).
 - Panel admin: usuarios (`app/api/admin/*`) y **revisión de propiedades** (`/admin/dashboard/properties`).
 - Geo estandarizado: `/api/geo/countries`, `/states`, `/cities` (mercados LatAm + ES + US priorizados en el select de país).
 - Inversión (`#invertir`): captura de leads (`<ButtonLead source="investor" />` → modelo `Lead`).
@@ -41,6 +43,7 @@
 - Cierre de venta en cripto **dentro** de la plataforma (escrow on-chain, KYC/AML). `cryptoAccepted`, `dealStatus` y `commissionRate` (1.5% por defecto) son informativos; no hay cobro automático al marcar `closed`.
 - Token `$CASA`: no implementado, no se vende.
 - Claves/Price IDs reales de Stripe: el `priceId` de Premium sigue siendo placeholder del template; en local las env de Stripe pueden estar comentadas.
+- `MODEL_API_KEY` real de Meta Model API: sin ella, las rutas `/api/ai/*` devuelven respuestas de muestra (la UI es testeable sin clave).
 - Wallets de `CopyWalletAddress.js` — reemplazar por tesorería/multisig reales antes de donaciones on-chain.
 - Pitch deck, Calendly y métricas reales en `config.investors` (vacíos).
 - Artículos del blog y algunos assets de marca aún genéricos de ShipFast.
@@ -52,7 +55,7 @@
    ```bash
    npm install
    ```
-2. Configura `.env.local` (ver lista en [`.cursorrules`](.cursorrules)): `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `MONGODB_URI`, `GOOGLE_ID`/`GOOGLE_SECRET`, `RESEND_API_KEY`, y opcionalmente `STRIPE_PUBLIC_KEY`/`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` para probar Premium, donaciones y destacados.
+2. Configura `.env.local` (lista completa y coordinada en [`.cursorrules`](.cursorrules)): requeridas `NEXTAUTH_SECRET`, `MONGODB_URI`, `RESEND_API_KEY`; opcionales `GOOGLE_ID`/`GOOGLE_SECRET` (login con Google), `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` (para probar Premium, donaciones y destacados) y `MODEL_API_KEY` (para las herramientas IA con modelos reales en vez de respuestas de muestra).
 3. Levanta el servidor:
    ```bash
    npm run dev
