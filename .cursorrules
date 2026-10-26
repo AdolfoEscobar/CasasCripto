@@ -1,0 +1,226 @@
+# Casas Cripto - Inmobiliaria con Criptomonedas - Cursor Rules
+
+You are an expert full-stack developer working on Casas Cripto, a modern real estate platform focused on listing properties that accept cryptocurrency payments, built with Next.js, NextAuth, MongoDB, and modern UI components.
+
+## Project Overview
+- **Tech Stack**: Next.js 16, React 19, NextAuth v5 (beta), MongoDB, Mongoose, Tailwind CSS v4, DaisyUI v5, Resend, Stripe
+- **Architecture**: App Router, API Routes, Server Components, Client Components
+- **Authentication**: NextAuth with Google OAuth and Email (magic link) providers, MongoDB adapter, JWT sessions with a `role` claim (`user`, `admin`, `editor`, `moderator`)
+- **Database**: MongoDB with Mongoose ODM
+- **Payments & monetization**: listing is **free by default** (plan Básico `isFree: true`, sentinel `priceId` `price_free_basico` — does **not** require `hasAccess`). Premium is a paid Stripe Checkout `subscription` + Customer Portal (`config.stripe.plans`, higher `maxProperties`). One-time Stripe Checkout with inline `price_data` (no pre-created priceId) for **donations** (`/api/stripe/create-donation`, `<DonateButton />`) and **featured listings** (`/api/stripe/create-featured-listing`, `config.featuredListing` — currently $15 / 7 days). On-chain crypto donations via `<CopyWalletAddress />` (placeholder wallets). Closing a property sale in crypto is still **off-platform / informational** (`cryptoAccepted`, `dealStatus`, `commissionRate` are not billed automatically).
+- **Email**: Resend for transactional emails (magic links, notifications)
+- **UI / Design system**: Tailwind CSS + DaisyUI with a custom dark theme named `casascripto` (gold primary, cyan secondary, violet accent, obsidian base) defined with `@plugin "daisyui/theme"` in `app/globals.css`. Utility classes `text-gradient-gold`, `text-gradient-crypto`, `glass-card`, `glow-primary`, `bg-grid-fade` are available for the "elite fintech" look — reuse them instead of inventing new ad-hoc styles.
+- **Navigation**: global left **sidebar** (`components/Sidebar.js` + `components/AppShell.js` in `app/layout.js`). There is **no** `Header.js` / `HeaderBlog` — do not reintroduce a floating header. Desktop: `lg:drawer-open`; mobile: drawer + compact topbar.
+- **Business Model**: marketplace connecting crypto-friendly owners/agents with buyers, **plus an investor-pitch landing**: pre-seed section, future utility token (`$CASA`, not launched, no sale), donations to fund development. Revenue today: optional Premium subscription + featured-listing boosts + donations. Future: commission on closed deals (`commissionRate`, default 1.5%).
+
+### Current Project State (read before building new features)
+This repo was bootstrapped from the ShipFast Next.js boilerplate, rebranded into Casas Cripto, then given a full investor-pitch landing **and a working property marketplace**. Do not rebuild listing CRUD, `/propiedades`, or the sidebar from scratch — they already exist.
+- **Implemented**: Spanish landing (`app/page.js`: `Hero`, `Problem`, `MarketplacePreview`, `FeaturesAccordion`, `StatsSection`, `Pricing`, `TokenRoadmap`, `InvestAndDonate`, `FAQ`, `CTA`, `Footer`); custom sign-in (`app/signin`, `components/auth/SignInCard.js`); auth with roles; **Property model** (`models/Property.js`) + APIs (`/api/properties`, `/api/properties/mine`, `/api/properties/[id]`); owner dashboard with `<PropertyManager />` (`app/(private)/(user)/dashboard`); admin RBAC + user API (`app/api/admin/*`) + **property moderation** (`app/(private)/admin/dashboard/properties`); public marketplace `/propiedades`, detail `/propiedades/[id]`, SEO city pages `/propiedades/ciudad/[slug]` + `app/sitemap.js`; geo dropdowns `/api/geo/countries|states|cities` (`libs/geo.js`, country-state-city — **never import that package in a Client Component**); Stripe subscriptions, donations, and featured listings (webhook handles `metadata.type === "featured_listing"`); blog (`app/blog`, index copy updated); rewritten `/tos` and `/privacy-policy`; leads persist via `/api/lead` + `models/Lead.js`.
+- **Listing rules that already exist — keep them**: new properties start as `status: "pending"` until an admin sets `"published"` or `"rejected"` (owner edits of published/rejected listings go back to pending). Only `"published"` listings appear on `/propiedades`. Country+city are structured fields; `citySlug` is auto-set in the Property `pre("save")` hook via `libs/slugify.js`. Images are **external URLs**, not an upload pipeline. `hasAccess` gates Premium, **not** the right to publish.
+- **Not implemented yet — do not assume it exists**: image upload/CDN; on-chain escrow or in-app crypto settlement for a sale; automatic commission billing when `dealStatus` is `"closed"`; KYC/AML; the `$CASA` token (contracts, sale, or on-chain utility).
+- **Known placeholders**: wallets in `components/CopyWalletAddress.js`; `config.investors.deckUrl`/`calendlyUrl` empty; Stripe `priceId` for Premium is still a template placeholder and Stripe env keys may be unset locally; `app/blog/_assets/content.js` is still ShipFast tutorial copy; `Testimonials1.js`, `Testimonials3.js`, `Testimonials11.js`, `FeaturesGrid.js`, `FeaturesListicle.js` exist but are unused.
+- The `$CASA` token is a roadmap/narrative concept (`config.token`) — not implemented, not sold. Any copy must stay consistent with `config.legal.disclaimer`.
+- There is **no `middleware.js`**. Protect routes in server `layout.js` with `auth()` + `redirect()` (see `app/(private)/(user)/dashboard/layout.js` and `app/(private)/admin/dashboard/layout.js`). In Next.js 16 route handlers, `params` is a Promise — `const { id } = await params`.
+
+## Code Style & Conventions
+
+### File Structure
+- Use App Router structure (`app/` directory)
+- API routes in `app/api/[endpoint]/route.js`
+- Components in `components/` directory
+- Utilities/libs in `libs/` directory
+- Models in `models/` directory
+- Configuration in `config.js`
+
+### Naming Conventions
+- **Components**: PascalCase (e.g., `ButtonCheckout.js`, `PropertyCard.js`, `Sidebar.js`)
+- **API Routes**: kebab-case directories with `route.js` files
+- **Utilities**: camelCase (e.g., `connectMongo`, `createCheckout`)
+- **Constants**: UPPER_SNAKE_CASE
+- **Variables**: camelCase
+
+### Component Patterns
+- Use `"use client"` directive for client components
+- Import config from `@/config` for app-wide settings
+- Use absolute imports with `@/` prefix
+- Export default for single-purpose components
+- Include descriptive comments for complex components
+
+### API Route Structure
+```javascript
+import { NextResponse } from "next/server";
+import { auth } from "@/libs/auth";
+
+export async function POST(req) {
+  try {
+    const session = await auth();
+    const body = await req.json();
+    
+    // Validation
+    if (!body.requiredField) {
+      return NextResponse.json(
+        { error: "Required field is missing" },
+        { status: 400 }
+      );
+    }
+    
+    // Logic here
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Database Patterns
+- Use Mongoose for MongoDB operations
+- Always call `connectMongo()` before database operations
+- Use schema validation and plugins
+- Include timestamps in schemas
+- Use the `toJSON` plugin for clean API responses
+
+### Authentication
+- Use `auth()` from `@/libs/auth` to get session
+- Check authentication in API routes when needed
+- Use `session?.user?.id` to access user ID
+- Redirect unauthenticated users to `config.auth.loginUrl`
+
+### Stripe Integration
+- Use `createCheckout()` from `@/libs/stripe` for Premium subscriptions
+- Use `createDonationCheckout()` for free-amount donations and `createFeaturedListingCheckout()` for listing boosts (both use inline `price_data`)
+- Handle webhooks in `app/api/webhook/stripe/route.js` — branch on `metadata.type === "featured_listing"` before treating the session as a subscription
+- Store `customerId` and `priceId` on the User model; `hasAccess` means Premium is active, **not** “can publish”
+- Enforce listing caps with `config.stripe.plans[].maxProperties` (Básico is the default for anyone without a paid plan)
+
+## Best Practices
+
+### Error Handling
+- Always wrap async operations in try-catch blocks
+- Return appropriate HTTP status codes
+- Log errors to console for debugging
+- Provide user-friendly error messages
+
+### Security
+- Validate all inputs in API routes
+- Use environment variables for sensitive data
+- Implement proper CORS headers where needed
+- Sanitize user inputs before database operations
+
+### Performance
+- Use Server Components by default
+- Only use Client Components when necessary (interactivity, hooks)
+- Implement proper loading states
+- Use Next.js Image component for optimized images
+- Leverage MongoDB indexes for queries
+
+### UI/UX
+- Use DaisyUI classes for consistent styling
+- Implement loading states with DaisyUI spinners
+- Use semantic HTML elements
+- Ensure responsive design with Tailwind breakpoints
+- Include proper accessibility attributes
+
+## Environment Variables
+Required environment variables:
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- `MONGODB_URI`
+- `STRIPE_PUBLIC_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `GOOGLE_ID` (optional)
+- `GOOGLE_SECRET` (optional)
+- `RESEND_API_KEY`
+
+## Common Patterns
+
+### Client Component with API Call
+```javascript
+"use client";
+import { useState } from "react";
+import apiClient from "@/libs/api";
+
+const ComponentName = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleAction = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiClient.post("/endpoint", data);
+      // Handle success
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <button 
+      className="btn btn-primary"
+      onClick={handleAction}
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <span className="loading loading-spinner loading-xs"></span>
+      ) : (
+        "Action"
+      )}
+    </button>
+  );
+};
+```
+
+### Mongoose Model
+```javascript
+import mongoose from "mongoose";
+import toJSON from "./plugins/toJSON";
+
+const schema = mongoose.Schema(
+  {
+    field: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+  }
+);
+
+schema.plugin(toJSON);
+
+export default mongoose.models.ModelName || mongoose.model("ModelName", schema);
+```
+
+## Configuration
+- All app configuration is centralized in `config.js`
+- Use `config.appName`, `config.domainName`, etc. throughout the app
+- Stripe plans are defined in `config.stripe.plans` (include `isFree` / `maxProperties`)
+- Featured listing price/duration in `config.featuredListing`
+- Email settings in `config.resend`
+- Theme settings in `config.colors`
+- Investors / token / legal copy in `config.investors`, `config.token`, `config.legal`
+
+## Testing & Development
+- Use `npm run dev` for development
+- Use `npm run build` for production builds
+- Follow conventional commit messages
+- Test Stripe webhooks using Stripe CLI
+- Use MongoDB Compass for database inspection
+
+## Deployment Considerations
+- Set all required environment variables
+- Configure Stripe webhooks endpoint
+- Set up MongoDB Atlas connection
+- Configure domain for NextAuth
+- Set up Resend domain for emails
+
+Remember to always check the existing codebase patterns before implementing new features to maintain consistency. 
