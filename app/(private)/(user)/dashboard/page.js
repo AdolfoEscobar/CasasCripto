@@ -3,7 +3,6 @@ import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import User from "@/models/User";
 import config from "@/config";
-import ButtonAccount from "@/components/ButtonAccount";
 import PropertyManager from "./PropertyManager";
 
 export const dynamic = "force-dynamic";
@@ -30,11 +29,13 @@ export default async function Dashboard() {
   return (
     <main className="min-h-screen p-6 sm:p-8 pb-24 bg-base-100">
       <section className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold">
             Mi panel de propietario
           </h1>
-          <ButtonAccount />
+          <p className="mt-1 text-sm text-base-content/60">
+            Publica nuevos listados y gestiona los que ya tienes.
+          </p>
         </div>
 
         <div className="glass-card rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">

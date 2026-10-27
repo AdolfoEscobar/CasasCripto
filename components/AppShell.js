@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 import logo from "@/app/icon.png";
 import config from "@/config";
 
@@ -50,11 +51,11 @@ const MobileTopbar = () => (
   </div>
 );
 
-// Shell global de navegación "estilo marketplace" (OpenSea/SxBook): sidebar
-// fijo a la izquierda en desktop (siempre visible, vía `lg:drawer-open`) y
-// drawer deslizable en mobile. Se monta UNA sola vez en app/layout.js, así
-// que es la única navegación de TODO el sitio — páginas individuales ya no
-// renderizan su propio Header.
+// Shell global de navegación: sidebar fijo a la izquierda en desktop
+// (siempre visible, vía `lg:drawer-open`) + header superior clásico
+// (<Topbar/>, solo desktop) y drawer deslizable + topbar compacta en mobile.
+// Se monta UNA sola vez en app/layout.js, así que es la única navegación de
+// TODO el sitio — páginas individuales ya no renderizan su propio Header.
 export default function AppShell({ children }) {
   const pathname = usePathname();
 
@@ -71,6 +72,7 @@ export default function AppShell({ children }) {
 
       <div className="drawer-content flex flex-col min-h-screen">
         <MobileTopbar />
+        <Topbar />
         {children}
       </div>
 

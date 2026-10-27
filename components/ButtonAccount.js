@@ -4,24 +4,66 @@
 import { useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import apiClient from "@/libs/api";
 import Link from "next/link";
 import config from "@/config";
 
+// Ítem de navegación del menú de cuenta. Si es la página actual, no se
+// renderiza como link (ir a donde ya estás es ruido) sino como estado
+// activo con insignia "Estás aquí" — el menú nunca cambia de forma.
+const MenuLink = ({ href, isActive, children }) => {
+	if (isActive) {
+		return (
+			<span
+				aria-current="page"
+				className="flex items-center gap-2 py-1.5 px-4 w-full rounded-lg font-medium cursor-default bg-primary/15 text-primary ring-1 ring-primary/25"
+			>
+				{children}
+				<span className="badge badge-primary badge-xs ml-auto font-semibold">
+					Estás aquí
+				</span>
+			</span>
+		);
+	}
+
+	return (
+		<Link
+			href={href}
+			className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
+		>
+			{children}
+		</Link>
+	);
+};
+
 // A button to show user some account actions
-//  1. Inicio / Mi panel / Propiedades: navegación rápida — las páginas
-//     privadas (dashboard de usuario y de admin) no tienen Header/Footer del
-//     sitio público, así que sin esto un usuario logueado queda "atrapado"
-//     sin forma de volver al home.
+//  1. Inicio / Mi panel / Propiedades: navegación rápida dentro del menú.
+//     Vive en el header global (desktop) y al fondo del drawer (mobile),
+//     así que está disponible en todas las páginas sin duplicarlo en cada
+//     vista privada.
 //  2. Billing: open a Stripe Customer Portal to manage their billing (cancel subscription, update payment method, etc.).
 //     You have to manually activate the Customer Portal in your Stripe Dashboard (https://dashboard.stripe.com/test/settings/billing/portal)
 //     This is only available if the customer has a customerId (they made a purchase previously)
 //  3. Admin Panel: link to admin dashboard (only for admin users)
 //  4. Logout: sign out and go back to homepage
 // See more at https://shipfa.st/docs/components/buttonAccount
-const ButtonAccount = () => {
+// `direction`: hacia dónde abre el menú — "down" (default) para botones en
+// la parte superior (Topbar, dashboard) y "up" para botones al fondo del
+// viewport (footer del sidebar), donde abrir hacia abajo quedaría fuera de
+// la pantalla.
+const ButtonAccount = ({ direction = "down" }) => {
 	const { data: session, status } = useSession();
+	const pathname = usePathname();
 	const [isLoading, setIsLoading] = useState(false);
+
+	// Página actual: se marca con "Estás aquí" (ver <MenuLink/>) en vez de
+	// ocultarse, para que el menú no cambie de forma entre páginas.
+	const isHome = pathname === "/";
+	const isPanel = pathname === config.auth.callbackUrl;
+	const isPropiedades =
+		pathname === "/propiedades" || pathname.startsWith("/propiedades/");
+	const isAdmin = pathname.startsWith("/admin");
 
 	const handleSignOut = () => {
 		signOut({ callbackUrl: "/" });
@@ -102,13 +144,14 @@ const ButtonAccount = () => {
 					sobrepuesto fuera de la página. Con `right-0` el panel crece
 					hacia la izquierda desde el borde derecho del botón, quedando
 					siempre dentro del viewport. */}
-					<Popover.Panel className="absolute right-0 z-10 mt-3 w-screen max-w-[16rem] transform">
+					<Popover.Panel
+						className={`absolute right-0 z-10 w-screen max-w-[16rem] transform ${
+							direction === "up" ? "bottom-full mb-3" : "mt-3"
+						}`}
+					>
 							<div className="overflow-hidden rounded-xl shadow-xl ring-1 ring-base-content/10 bg-base-100 p-1">
 								<div className="space-y-0.5 text-sm">
-									<Link
-										href="/"
-										className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
-									>
+									<MenuLink href="/" isActive={isHome}>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											viewBox="0 0 20 20"
@@ -118,12 +161,9 @@ const ButtonAccount = () => {
 											<path d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-3a1 1 0 01-1-1v-3H9v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" />
 										</svg>
 										Inicio
-									</Link>
+									</MenuLink>
 
-									<Link
-										href={config.auth.callbackUrl}
-										className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
-									>
+									<MenuLink href={config.auth.callbackUrl} isActive={isPanel}>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											viewBox="0 0 20 20"
@@ -137,12 +177,9 @@ const ButtonAccount = () => {
 											/>
 										</svg>
 										Mi panel
-									</Link>
+									</MenuLink>
 
-									<Link
-										href="/propiedades"
-										className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
-									>
+									<MenuLink href="/propiedades" isActive={isPropiedades}>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											viewBox="0 0 20 20"
@@ -156,7 +193,7 @@ const ButtonAccount = () => {
 											/>
 										</svg>
 										Propiedades
-									</Link>
+									</MenuLink>
 
 									<div className="divider my-0.5"></div>
 
@@ -181,10 +218,7 @@ const ButtonAccount = () => {
 
 									{/* Admin Panel link - only show if user is admin */}
 									{session?.user?.role === "admin" && (
-										<Link
-											href="/admin/dashboard"
-											className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
-										>
+										<MenuLink href="/admin/dashboard" isActive={isAdmin}>
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
 												viewBox="0 0 20 20"
@@ -198,7 +232,7 @@ const ButtonAccount = () => {
 												/>
 											</svg>
 											Admin Panel
-										</Link>
+										</MenuLink>
 									)}
 
 									<button

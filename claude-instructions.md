@@ -11,7 +11,7 @@ You are working on **Casas Cripto**, a modern real estate **marketplace** focuse
 - **Email**: Resend for transactional emails (magic links, notifications)
 - **AI listing tools**: Meta Model API (`libs/metaModel.js`) — Muse Spark (`/api/ai/listing-copy`), Muse Image (`/api/ai/listing-image`), SAM 3.1 (`/api/ai/privacy-scan`), each with a stricter public variant under `/api/ai/public/*` for the no-login `/demo-ai`. Daily per-user/per-IP rate limits via `libs/aiRateLimit.js` + `models/AiUsage.js`. Without `MODEL_API_KEY` every route returns a sample response, so the UI is testable with no key.
 - **Authentication**: NextAuth with Google OAuth and Email (magic link) providers, JWT sessions carrying a `role` (`user`, `admin`, `editor`, `moderator`). Custom sign-in page at `/signin` (`pages.signIn` in `libs/auth.js`).
-- **Navigation**: global `AppShell` + left `Sidebar` mounted in `app/layout.js`. No `Header.js` / `HeaderBlog`.
+- **Navigation**: global `AppShell` + left `Sidebar` + classic desktop top `Topbar` (quick links + account, `hidden lg:flex`) mounted in `app/layout.js`. No legacy `Header.js` / `HeaderBlog`.
 - **Deployment**: Optimized for Vercel deployment
 
 ### Design system — read before touching any landing component
@@ -96,7 +96,7 @@ CasasCripto/
 │   ├── sitemap.js
 │   └── page.js, layout.js         # Landing + global AppShell
 ├── components/
-│   ├── AppShell.js, Sidebar.js    # Site-wide navigation (replaces Header)
+│   ├── AppShell.js, Sidebar.js, Topbar.js  # Site-wide navigation (sidebar + desktop topbar)
 │   ├── Hero.js, Problem.js, MarketplacePreview.js, FeaturesAccordion.js,
 │   │   StatsSection.js, Pricing.js, TokenRoadmap.js, InvestAndDonate.js,
 │   │   FAQ.js, CTA.js, Footer.js
@@ -114,7 +114,7 @@ CasasCripto/
 > Notes:
 > - There is no top-level `auth.js`; NextAuth lives in `libs/auth.js` (`auth`, `signIn`, `signOut`, `handlers`).
 > - There is **no `middleware.js`**. Protect new private routes with a server `layout.js` that calls `auth()` and `redirect()`, same as `app/(private)/(user)/dashboard/layout.js` and `app/(private)/admin/dashboard/layout.js`.
-> - Do not add a floating `Header` — navigation is only `AppShell`/`Sidebar`.
+> - Do not add a floating legacy `Header` — navigation is `AppShell` (`Sidebar` + desktop `Topbar` + compact mobile topbar).
 
 ## Coding Standards
 

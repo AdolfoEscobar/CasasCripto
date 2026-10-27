@@ -97,10 +97,9 @@ function NavLink({ href, label, icon: Icon, isActive, onNavigate }) {
   );
 }
 
-// Sidebar izquierdo "estilo marketplace" (OpenSea/SxBook): navegación fija
-// a la izquierda en desktop, reemplaza por completo al antiguo Header
-// flotante. Es la ÚNICA navegación del sitio — se usa en absolutamente
-// todas las páginas vía <AppShell/> en app/layout.js.
+// Sidebar izquierdo: navegación fija a la izquierda en desktop,
+// complementado por el header superior (<Topbar/>, solo desktop). Se usa en
+// absolutamente todas las páginas vía <AppShell/> en app/layout.js.
 const Sidebar = () => {
   const pathname = usePathname();
   const { status } = useSession();
@@ -133,7 +132,7 @@ const Sidebar = () => {
           />
         </span>
         <span
-          className={`${accentFont.className} italic text-xl tracking-wide text-gradient-gold leading-none`}
+          className={`${accentFont.className} italic text-xl tracking-wide text-gradient-gold leading-tight pb-1`}
         >
           {config.appName}
         </span>
@@ -189,7 +188,10 @@ const Sidebar = () => {
         )}
       </nav>
 
-      {/* CTA + cuenta, siempre anclados abajo */}
+      {/* CTA + cuenta, siempre anclados abajo. Los controles de cuenta
+          son solo-mobile (`lg:hidden`): en desktop viven en el <Topbar/>
+          superior. El menú abre hacia arriba (`direction="up"`) porque el
+          botón está al fondo del viewport. */}
       <div className="p-4 border-t border-base-content/10 space-y-2.5 shrink-0">
         <Link
           href="/#invertir"
@@ -198,16 +200,18 @@ const Sidebar = () => {
         >
           Invertir
         </Link>
-        {status === "authenticated" ? (
-          <div className="w-full [&>div>button]:w-full [&>div>button]:justify-between">
-            <ButtonAccount />
-          </div>
-        ) : (
-          <ButtonSignin
-            extraStyle="btn-primary btn-sm rounded-full glow-primary w-full"
-            text="Entrar"
-          />
-        )}
+        <div className="lg:hidden">
+          {status === "authenticated" ? (
+            <div className="w-full [&>div>button]:w-full [&>div>button]:justify-between">
+              <ButtonAccount direction="up" />
+            </div>
+          ) : (
+            <ButtonSignin
+              extraStyle="btn-primary btn-sm rounded-full glow-primary w-full"
+              text="Entrar"
+            />
+          )}
+        </div>
       </div>
     </div>
   );

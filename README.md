@@ -14,7 +14,7 @@
 - **Email**: Resend
 - **IA**: Meta Model API (Muse Spark para copy, Muse Image para fotos, SAM 3.1 para revisión de privacidad) — botones en el dashboard (`PropertyManager.js` → `/api/ai/*`) y demo pública sin login en `/demo-ai` (→ `/api/ai/public/*`, con límite diario por IP). Sin `MODEL_API_KEY`, las rutas devuelven respuestas de muestra.
 - **UI**: Tailwind CSS v4 + DaisyUI v5, tema custom `casascripto` (oro metálico + cian eléctrico + violeta sobre fondo obsidiana) en `app/globals.css`
-- **Navegación**: sidebar global (`AppShell` + `Sidebar`) en `app/layout.js` — no hay `Header` flotante
+- **Navegación**: sidebar global a la izquierda (`AppShell` + `Sidebar`) + header superior clásico en desktop (`Topbar`, con accesos rápidos y cuenta; en mobile es una barra compacta con logo + burger) en `app/layout.js` — no hay `Header` flotante legacy
 - **Despliegue objetivo**: Vercel
 
 ## Estado actual del proyecto
