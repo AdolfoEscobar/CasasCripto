@@ -111,11 +111,10 @@ body {
   background-color: var(--color-base-100);
 }
 
-/* Los anchors (/#pricing, /#invertir, /#faq) no quedan ocultos bajo las
-   barras sticky (MobileTopbar/Topbar) al navegar a ellos. */
-html {
-  scroll-padding-top: 4.5rem;
-}
+/* NOTA: no usar scroll-padding-top global — hace que el navegador suba
+   la página al enfocar (clic) controles dentro de las barras sticky
+   (Topbar, MobileTopbar, logo del sidebar). El offset para anchors vive
+   en cada sección destino con scroll-mt-20. */
 
 @media (prefers-reduced-motion: reduce) {
   html,

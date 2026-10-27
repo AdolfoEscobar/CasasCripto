@@ -148,7 +148,7 @@ const Item = ({ item }) => {
 const FAQ = () => {
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section id="faq">
+    <section id="faq" className="scroll-mt-20">
       <div className="py-24 px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
         <div className="flex flex-col text-left basis-1/2">
           <p className="inline-block font-semibold text-primary mb-4">FAQ</p>

@@ -257,7 +257,7 @@ const MarketplacePreview = () => {
 
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section id="marketplace-preview">
+    <section id="marketplace-preview" className="scroll-mt-20">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-4">
           <p className="font-medium text-primary mb-3">Próximamente</p>

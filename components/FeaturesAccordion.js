@@ -225,7 +225,7 @@ const FeaturesAccordion = () => {
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
     <section
-      className="py-24 md:py-32 space-y-24 md:space-y-32 max-w-7xl mx-auto"
+      className="py-24 md:py-32 space-y-24 md:space-y-32 max-w-7xl mx-auto scroll-mt-20"
       id="features"
     >
       <div className="px-8">

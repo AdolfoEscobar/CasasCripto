@@ -12,7 +12,7 @@ const Pricing = () => {
     // (app/page.js). Las tarjetas de plan usan `glass-card` (en vez de un
     // bg-base-100 sólido) para seguir distinguiéndose del fondo sin crear un
     // bloque de color aparte.
-    <section className="overflow-hidden border-y border-base-content/10" id="pricing">
+    <section className="overflow-hidden border-y border-base-content/10 scroll-mt-20" id="pricing">
       <div className="py-20 sm:py-24 px-5 sm:px-8 max-w-6xl mx-auto">
         <div className="flex flex-col text-center w-full mb-12 sm:mb-16">
           <p className="font-medium text-primary mb-3">Planes</p>

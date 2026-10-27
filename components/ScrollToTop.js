@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
 // - Atrás/adelante (popstate reciente): NO toca el scroll — el navegador
 //   restaura la posición anterior, que es el comportamiento esperado ahí.
 // - Anchors (/#pricing): si la URL destino trae hash, no interfiere — Next
-//   hace el salto al anchor (con smooth + scroll-padding-top).
+//   hace el salto al anchor (con smooth + scroll-mt-20 de la sección).
 //
 // useLayoutEffect (no useEffect) para que el reseteo ocurra antes del
 // pintado y no haya un flash de la posición vieja.

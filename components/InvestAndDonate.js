@@ -15,7 +15,7 @@ const InvestAndDonate = () => {
 
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section className="border-y border-base-content/10" id="invertir">
+    <section className="border-y border-base-content/10 scroll-mt-20" id="invertir">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-20 sm:py-24 md:py-32">
         <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <p className="font-medium text-primary mb-3">Para inversionistas</p>
@@ -68,7 +68,7 @@ const InvestAndDonate = () => {
           </div>
 
           {/* Donations */}
-          <div className="glass-card rounded-2xl p-6 sm:p-8 flex flex-col gap-5" id="donar">
+          <div className="glass-card rounded-2xl p-6 sm:p-8 flex flex-col gap-5 scroll-mt-20" id="donar">
             <h3 className="font-bold text-xl">Quiero donar / apoyar</h3>
             <p className="text-sm opacity-70">
               {config.donations.description}

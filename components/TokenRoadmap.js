@@ -8,7 +8,7 @@ const TokenRoadmap = () => {
 
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section className="border-y border-base-content/10" id="token">
+    <section className="border-y border-base-content/10 scroll-mt-20" id="token">
       <div className="max-w-6xl mx-auto px-8 py-24 md:py-32">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="font-medium text-primary mb-3">Roadmap</p>
