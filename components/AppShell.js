@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import ScrollToTop from "./ScrollToTop";
 import logo from "@/app/icon.png";
 import config from "@/config";
 
@@ -76,6 +77,7 @@ export default function AppShell({ children }) {
 
   return (
     <div className="drawer lg:drawer-open">
+      <ScrollToTop />
       <input id="app-sidebar" type="checkbox" className="drawer-toggle" />
 
       <div className="drawer-content flex flex-col min-h-screen min-w-0">

@@ -23,6 +23,7 @@ export default function RootLayout({ children }) {
 		<html
 			lang="es"
 			data-theme={config.colors.theme}
+			data-scroll-behavior="smooth"
 			className={font.className}
 		>
 			<body>

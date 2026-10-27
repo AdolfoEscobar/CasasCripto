@@ -30,7 +30,7 @@ const InvestAndDonate = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
           {highlights.map((h) => (
             <div key={h.label} className="glass-card rounded-2xl p-5">
               <p className="text-xs uppercase tracking-wide opacity-60 mb-1">

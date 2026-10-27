@@ -223,7 +223,7 @@ const TrendingCard = ({ property, highlight }) => (
         <AgencyAvatar name={property.agency} className="w-4 h-4 text-[8px]" />
         <span className="truncate">{property.agency}</span>
       </div>
-      <div className="flex items-center gap-2 mt-1.5">
+      <div className="flex flex-wrap items-center gap-2 mt-1.5">
         <span className="font-bold text-sm text-gradient-gold">
           {property.price}
         </span>
@@ -314,7 +314,7 @@ const MarketplacePreview = () => {
           <p className="font-semibold text-sm uppercase tracking-wider opacity-60 mb-3">
             Tendencias en el marketplace
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
             {filtered.map((property, i) => (
               <TrendingCard
                 key={property.title}
