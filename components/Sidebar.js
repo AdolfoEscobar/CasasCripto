@@ -102,7 +102,7 @@ function NavLink({ href, label, icon: Icon, isActive, onNavigate }) {
 // absolutamente todas las páginas vía <AppShell/> en app/layout.js.
 const Sidebar = () => {
   const pathname = usePathname();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const isAdminArea = pathname.startsWith("/admin");
 
   // Cierra el drawer en mobile al navegar. En desktop (lg:drawer-open) el
@@ -113,7 +113,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-72 h-full flex flex-col bg-base-200/95 lg:bg-base-100/60 lg:backdrop-blur-xl border-r border-base-content/10">
+    <div className="w-72 max-w-[85vw] h-full flex flex-col bg-base-200/95 lg:bg-base-100/60 lg:backdrop-blur-xl border-r border-base-content/10">
       {/* Logo */}
       <Link
         href="/"
@@ -171,7 +171,7 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {isAdminArea && (
+        {isAdminArea && session?.user?.role === "admin" && (
           <div>
             <NavSectionLabel>Admin</NavSectionLabel>
             <div className="space-y-1">
@@ -196,7 +196,7 @@ const Sidebar = () => {
         <Link
           href="/#invertir"
           onClick={closeDrawer}
-          className="btn btn-sm btn-outline border-primary/40 text-primary hover:bg-primary/10 hover:border-primary rounded-full w-full"
+          className="btn btn-sm btn-outline border-primary/40 text-primary hover:bg-primary/10 hover:border-primary rounded-full w-full min-h-[40px]"
         >
           Invertir
         </Link>
@@ -207,7 +207,7 @@ const Sidebar = () => {
             </div>
           ) : (
             <ButtonSignin
-              extraStyle="btn-primary btn-sm rounded-full glow-primary w-full"
+              extraStyle="btn-primary btn-sm rounded-full glow-primary w-full min-h-[40px]"
               text="Entrar"
             />
           )}

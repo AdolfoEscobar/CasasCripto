@@ -25,7 +25,7 @@ const ButtonSignin = ({ text = "Get started", extraStyle }) => {
     return (
       <Link
         href={config.auth.callbackUrl}
-        className={`btn ${extraStyle ? extraStyle : ""}`}
+        className={`btn max-w-full ${extraStyle ? extraStyle : ""}`}
       >
         {session.user?.image ? (
           <img
@@ -41,7 +41,9 @@ const ButtonSignin = ({ text = "Get started", extraStyle }) => {
             {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
           </span>
         )}
-        {session.user?.name || session.user?.email || "Account"}
+        <span className="truncate min-w-0">
+          {session.user?.name || session.user?.email || "Account"}
+        </span>
       </Link>
     );
   }

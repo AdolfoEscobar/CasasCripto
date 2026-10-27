@@ -49,7 +49,7 @@ const Topbar = () => {
           <ButtonAccount />
         ) : (
           <ButtonSignin
-            extraStyle="btn-primary btn-sm rounded-full glow-primary"
+            extraStyle="btn-primary btn-sm rounded-full glow-primary min-h-[40px]"
             text="Entrar"
           />
         )}

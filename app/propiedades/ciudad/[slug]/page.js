@@ -77,7 +77,11 @@ export default async function CiudadPage({ params }) {
               <li>
                 <Link href="/propiedades">Propiedades</Link>
               </li>
-              <li>{cityName}</li>
+              <li className="min-w-0">
+                <span className="truncate max-w-[40vw] block" title={cityName}>
+                  {cityName}
+                </span>
+              </li>
             </ul>
           </div>
 
@@ -108,12 +112,15 @@ export default async function CiudadPage({ params }) {
                 </Link>
                 .
               </p>
-              <Link href="/dashboard" className="btn btn-primary">
+              <Link
+                href="/dashboard"
+                className="btn btn-primary max-w-full whitespace-normal text-center"
+              >
                 Publicar en {cityName} gratis
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
               {properties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}

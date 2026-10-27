@@ -30,6 +30,7 @@ const PropertyCard = ({ property }) => (
           className="w-full aspect-[4/3] object-cover"
           width={600}
           height={450}
+          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
         />
       ) : (
         <div className="w-full aspect-[4/3] bg-base-300 flex items-center justify-center text-4xl">
@@ -38,8 +39,8 @@ const PropertyCard = ({ property }) => (
       )}
     </div>
     <div className="p-5 flex flex-col gap-2 flex-1">
-      <p className="font-bold text-lg leading-snug">{property.title}</p>
-      <p className="text-sm opacity-60">
+      <p className="font-bold text-lg leading-snug line-clamp-2">{property.title}</p>
+      <p className="text-sm opacity-60 truncate">
         {property.city}
         {property.country ? `, ${property.country}` : ""}
         {property.location ? ` · ${property.location}` : ""}
@@ -47,15 +48,15 @@ const PropertyCard = ({ property }) => (
       {property.description && (
         <p className="text-sm opacity-70 line-clamp-2">{property.description}</p>
       )}
-      <div className="flex items-center justify-between mt-2 pt-3 border-t border-base-content/10">
-        <span className="font-extrabold text-gradient-gold">
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-3 border-t border-base-content/10">
+        <span className="font-extrabold text-gradient-gold whitespace-nowrap">
           ${property.price?.toLocaleString()} {property.currency}
         </span>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap justify-end gap-1.5 min-w-0">
           {(property.cryptoAccepted || []).map((c) => (
             <span
               key={c}
-              className="badge badge-ghost border border-base-content/10 text-[10px] sm:text-xs"
+              className="badge badge-ghost border border-base-content/10 text-xs"
             >
               {c}
             </span>

@@ -119,8 +119,12 @@ export default async function PropertyDetailPage({ params }) {
                 <Link href="/propiedades">Propiedades</Link>
               </li>
               {property.citySlug && (
-                <li>
-                  <Link href={`/propiedades?ciudad=${property.citySlug}`}>
+                <li className="min-w-0">
+                  <Link
+                    href={`/propiedades?ciudad=${property.citySlug}`}
+                    title={property.city}
+                    className="truncate max-w-[35vw] block"
+                  >
                     {property.city}
                   </Link>
                 </li>
@@ -135,8 +139,9 @@ export default async function PropertyDetailPage({ params }) {
                 <Image
                   src={property.images[0]}
                   alt={property.title}
-                  width={900}
-                  height={600}
+                  width={1200}
+                  height={900}
+                  sizes="(max-width: 1024px) 100vw, 60vw"
                   className="w-full aspect-[4/3] object-cover rounded-2xl"
                 />
               ) : (
@@ -171,21 +176,21 @@ export default async function PropertyDetailPage({ params }) {
               <h1 className="font-extrabold text-2xl sm:text-3xl tracking-tight mt-4">
                 {property.title}
               </h1>
-              <p className="opacity-60 mt-1">
+              <p className="opacity-60 mt-1 break-words">
                 {property.city}
                 {property.country ? `, ${property.country}` : ""}
                 {property.location ? ` · ${property.location}` : ""}
               </p>
 
               {property.description && (
-                <p className="mt-6 leading-relaxed opacity-80 whitespace-pre-line">
+                <p className="mt-6 leading-relaxed opacity-80 whitespace-pre-line break-words">
                   {property.description}
                 </p>
               )}
             </div>
 
             <div className="lg:col-span-2">
-              <div className="glass-card rounded-2xl p-6 flex flex-col gap-4 lg:sticky lg:top-8">
+              <div className="glass-card rounded-2xl p-6 flex flex-col gap-4 lg:sticky lg:top-24">
                 <p className="font-extrabold text-3xl text-gradient-gold">
                   ${property.price?.toLocaleString()} {property.currency}
                 </p>

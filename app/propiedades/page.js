@@ -80,7 +80,7 @@ export default async function PropiedadesPage() {
                 <Link
                   key={city.slug}
                   href={`/propiedades/ciudad/${city.slug}`}
-                  className="badge badge-lg badge-ghost border border-base-content/20"
+                  className="badge badge-lg badge-ghost border border-base-content/20 min-h-[40px]"
                 >
                   {city.name} ({city.count})
                 </Link>
@@ -105,7 +105,7 @@ export default async function PropiedadesPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
               {properties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}

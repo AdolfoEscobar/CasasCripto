@@ -31,7 +31,15 @@ const MobileTopbar = () => (
     <label
       htmlFor="app-sidebar"
       aria-label="Abrir menú"
-      className="btn btn-ghost btn-sm btn-circle"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          document.getElementById("app-sidebar")?.click();
+        }
+      }}
+      className="btn btn-ghost btn-sm btn-circle min-w-[40px] min-h-[40px]"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +78,7 @@ export default function AppShell({ children }) {
     <div className="drawer lg:drawer-open">
       <input id="app-sidebar" type="checkbox" className="drawer-toggle" />
 
-      <div className="drawer-content flex flex-col min-h-screen">
+      <div className="drawer-content flex flex-col min-h-screen min-w-0">
         <MobileTopbar />
         <Topbar />
         {children}

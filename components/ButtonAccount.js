@@ -17,7 +17,7 @@ const MenuLink = ({ href, isActive, children }) => {
 		return (
 			<span
 				aria-current="page"
-				className="flex items-center gap-2 py-1.5 px-4 w-full rounded-lg font-medium cursor-default bg-primary/15 text-primary ring-1 ring-primary/25"
+				className="flex items-center gap-2 py-2.5 px-4 w-full rounded-lg font-medium cursor-default bg-primary/15 text-primary ring-1 ring-primary/25"
 			>
 				{children}
 				<span className="badge badge-primary badge-xs ml-auto font-semibold">
@@ -30,7 +30,7 @@ const MenuLink = ({ href, isActive, children }) => {
 	return (
 		<Link
 			href={href}
-			className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
+			className="flex items-center gap-2 hover:bg-base-300 duration-200 py-2.5 px-4 w-full rounded-lg font-medium cursor-pointer"
 		>
 			{children}
 		</Link>
@@ -198,7 +198,7 @@ const ButtonAccount = ({ direction = "down" }) => {
 									<div className="divider my-0.5"></div>
 
 									<button
-										className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
+										className="flex items-center gap-2 hover:bg-base-300 duration-200 py-2.5 px-4 w-full rounded-lg font-medium cursor-pointer"
 										onClick={handleBilling}
 									>
 										<svg
@@ -236,7 +236,7 @@ const ButtonAccount = ({ direction = "down" }) => {
 									)}
 
 									<button
-										className="flex items-center gap-2 hover:bg-error/20 hover:text-error duration-200 py-1.5 px-4 w-full rounded-lg font-medium cursor-pointer"
+										className="flex items-center gap-2 hover:bg-error/20 hover:text-error duration-200 py-2.5 px-4 w-full rounded-lg font-medium cursor-pointer"
 										onClick={handleSignOut}
 									>
 										<svg

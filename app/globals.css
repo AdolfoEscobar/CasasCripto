@@ -56,8 +56,6 @@
 }
 
 @theme {
-  --font-display: "Satoshi", "sans-serif";
-
   --animate-shimmer: shimmer 3s ease-out infinite alternate;
   --animate-opacity: opacity 0.25s ease-in-out;
   --animate-appearFromRight: appearFromRight 300ms ease-in-out;
@@ -113,34 +111,31 @@ body {
   background-color: var(--color-base-100);
 }
 
+/* Los anchors (/#pricing, /#invertir, /#faq) no quedan ocultos bajo las
+   barras sticky (MobileTopbar/Topbar) al navegar a ellos. */
+html {
+  scroll-padding-top: 4.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 progress::-webkit-progress-value {
   transition: 0.6s width ease-out;
 }
 
 /* ---------- Gradients & brand utilities ---------- */
-
-.btn-gradient {
-  background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82) !important;
-  background-size: 300% 300% !important;
-  animation: var(--animate-shimmer) !important;
-  border: 0 !important;
-  border-color: transparent !important;
-  color: white !important;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
-}
-
-.btn-gradient:hover {
-  filter: saturate(1.2) !important;
-}
-
-.btn-gradient:disabled {
-  background: rgb(107 114 128 / 0.3) !important;
-  color: rgb(156 163 175) !important;
-}
-
-.btn {
-  text-transform: capitalize !important;
-}
 
 /* Elite gold → amber gradient text, used for key headlines/numbers */
 .text-gradient-gold {
@@ -161,8 +156,8 @@ progress::-webkit-progress-value {
 .text-gradient-crypto {
   background-image: linear-gradient(
     90deg,
-    oklch(78% 0.13 215),
-    oklch(68% 0.19 288)
+    var(--color-secondary),
+    var(--color-accent)
   );
   -webkit-background-clip: text;
   background-clip: text;
