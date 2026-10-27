@@ -1,33 +1,60 @@
 import Link from "next/link";
-import Script from "next/script";
+import { notFound } from "next/navigation";
 import { articles } from "../_assets/content";
 import BadgeCategory from "../_assets/components/BadgeCategory";
 import Avatar from "../_assets/components/Avatar";
-import { getSEOTags } from "@/libs/seo";
+import { getSEOTags, renderBreadcrumbSchema } from "@/libs/seo";
 import config from "@/config";
+
+export async function generateStaticParams() {
+  return articles.map((article) => ({ articleId: article.slug }));
+}
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const article = articles.find((article) => article.slug === resolvedParams.articleId);
+  const article = articles.find(
+    (article) => article.slug === resolvedParams.articleId
+  );
+
+  if (!article) {
+    return getSEOTags({
+      title: `Artículo no encontrado | Blog de ${config.appName}`,
+      description: `El artículo que buscas no existe. Explora el blog de ${config.appName} sobre real estate y criptomonedas.`,
+      canonicalUrlRelative: "/blog",
+    });
+  }
 
   return getSEOTags({
-    title: article.title,
+    title: `${article.title} | Blog de ${config.appName}`,
     description: article.description,
+    keywords: article.keywords,
+    // openGraph aquí alimenta la tarjeta de Twitter; el objeto Open Graph
+    // completo (type article, fechas) va en extraTags y lo reemplaza.
+    openGraph: {
+      title: article.title,
+      description: article.description,
+      url: `/blog/${article.slug}`,
+    },
     canonicalUrlRelative: `/blog/${article.slug}`,
     extraTags: {
       openGraph: {
         title: article.title,
         description: article.description,
-        url: `/blog/${article.slug}`,
+        url: `https://${config.domainName}/blog/${article.slug}`,
+        siteName: config.appName,
         images: [
           {
             url: article.image.urlRelative,
             width: 1200,
             height: 660,
+            alt: article.image.alt,
           },
         ],
-        locale: "en_US",
-        type: "website",
+        locale: "es_ES",
+        type: "article",
+        publishedTime: article.publishedAt,
+        modifiedTime: article.updatedAt || article.publishedAt,
+        authors: [`https://${config.domainName}/blog/author/${article.author.slug}`],
       },
     },
   });
@@ -35,7 +62,14 @@ export async function generateMetadata({ params }) {
 
 export default async function Article({ params }) {
   const resolvedParams = await params;
-  const article = articles.find((article) => article.slug === resolvedParams.articleId);
+  const article = articles.find(
+    (article) => article.slug === resolvedParams.articleId
+  );
+
+  if (!article) {
+    notFound();
+  }
+
   const articlesRelated = articles
     .filter(
       (a) =>
@@ -47,40 +81,74 @@ export default async function Article({ params }) {
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
     .slice(0, 3);
 
+  const baseUrl = `https://${config.domainName}`;
+  const articleUrl = `${baseUrl}/blog/${article.slug}`;
+  const dateModified = article.updatedAt || article.publishedAt;
+
+  // BlogPosting + FAQPage: el primero habilita resultados enriquecidos de
+  // artículo (imagen, fecha, autor); el segundo, preguntas frecuentes en el
+  // snippet. Solo se emite FAQPage cuando el artículo define `faqs` visibles
+  // en el contenido (requisito de Google para este rich result).
+  const blogPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+    headline: article.title,
+    description: article.description,
+    image: `${baseUrl}${article.image.urlRelative}`,
+    datePublished: article.publishedAt,
+    dateModified,
+    inLanguage: "es",
+    author: {
+      "@type": "Organization",
+      "@id": `${baseUrl}/#organization`,
+      name: article.author.name,
+      url: `${baseUrl}/blog/author/${article.author.slug}`,
+    },
+    publisher: {
+      "@id": `${baseUrl}/#organization`,
+    },
+  };
+
+  const faqSchema =
+    article.faqs?.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: article.faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.q,
+            acceptedAnswer: { "@type": "Answer", text: faq.a },
+          })),
+        }
+      : null;
+
   return (
     <>
-      {/* SCHEMA JSON-LD MARKUP FOR GOOGLE */}
-      <Script
+      <script
         type="application/ld+json"
         id={`json-ld-article-${article.slug}`}
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            mainEntityOfPage: {
-              "@type": "WebPage",
-              "@id": `https://${config.domainName}/blog/${article.slug}`,
-            },
-            name: article.title,
-            headline: article.title,
-            description: article.description,
-            image: `https://${config.domainName}${article.image.urlRelative}`,
-            datePublished: article.publishedAt,
-            dateModified: article.publishedAt,
-            author: {
-              "@type": "Person",
-              name: article.author.name,
-            },
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          id={`json-ld-faq-${article.slug}`}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+      {renderBreadcrumbSchema([
+        { name: "Inicio", url: `${baseUrl}/` },
+        { name: "Blog", url: `${baseUrl}/blog` },
+        { name: article.title, url: articleUrl },
+      ])}
 
-      {/* GO BACK LINK */}
+      {/* VOLVER AL BLOG */}
       <div>
         <Link
           href="/blog"
           className="link !no-underline text-base-content/80 hover:text-base-content inline-flex items-center gap-1"
-          title="Back to Blog"
+          title="Volver al blog"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -94,12 +162,12 @@ export default async function Article({ params }) {
               clipRule="evenodd"
             />
           </svg>
-          Back to Blog
+          Volver al blog
         </Link>
       </div>
 
       <article>
-        {/* HEADER WITH CATEGORIES AND DATE AND TITLE */}
+        {/* HEADER CON CATEGORÍAS, FECHA Y TÍTULO */}
         <section className="my-12 md:my-20 max-w-[800px]">
           <div className="flex items-center gap-4 mb-6">
             {article.categories.map((category) => (
@@ -110,11 +178,14 @@ export default async function Article({ params }) {
               />
             ))}
             <span className="text-base-content/80" itemProp="datePublished">
-              {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+              {new Date(`${article.publishedAt}T12:00:00`).toLocaleDateString(
+                "es-ES",
+                {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                }
+              )}
             </span>
           </div>
 
@@ -128,17 +199,17 @@ export default async function Article({ params }) {
         </section>
 
         <div className="flex flex-col md:flex-row">
-          {/* SIDEBAR WITH AUTHORS AND 3 RELATED ARTICLES */}
+          {/* SIDEBAR CON AUTOR Y ARTÍCULOS RELACIONADOS */}
           <section className="max-md:pb-4 md:pl-12 max-md:border-b md:border-l md:order-last md:w-72 shrink-0 border-base-content/10">
             <p className="text-base-content/80 text-sm mb-2 md:mb-3">
-              Posted by
+              Publicado por
             </p>
             <Avatar article={article} />
 
             {articlesRelated.length > 0 && (
               <div className="hidden md:block mt-12">
                 <p className=" text-base-content/80 text-sm  mb-2 md:mb-3">
-                  Related reading
+                  Lectura relacionada
                 </p>
                 <div className="space-y-2 md:space-y-5">
                   {articlesRelated.map((article) => (
@@ -163,7 +234,7 @@ export default async function Article({ params }) {
             )}
           </section>
 
-          {/* ARTICLE CONTENT */}
+          {/* CONTENIDO DEL ARTÍCULO */}
           <section className="w-full max-md:pt-4 md:pr-20 space-y-12 md:space-y-20">
             {article.content}
           </section>

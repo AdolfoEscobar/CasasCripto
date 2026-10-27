@@ -33,7 +33,7 @@
 - Destacados: pago único (`config.featuredListing`, p. ej. $15 / 7 días) vía `/api/stripe/create-featured-listing`; el webhook marca `featured` + `featuredUntil`.
 - Planes en `config.stripe.plans`: **Básico gratis** (hasta 20 propiedades, sin tarjeta) y **Premium** ($99/mes, hasta 100, `hasAccess` vía Stripe). La tarjeta "Elite / Inversionistas" es CTA de contacto, no un Price de Stripe.
 - Auth (Google + Email) con roles (`user`, `admin`, `editor`, `moderator`). Rutas privadas protegidas en `layout.js` (no hay `middleware.js`).
-- Blog (`app/blog`) — índice con copy propio; artículos de ejemplo aún de ShipFast.
+- Blog (`app/blog`) — 8 artículos propios en español (comprar/vender con cripto, legalidad e impuestos, stablecoins, seguridad, inversión LatAm, tokenización, tutorial de publicación), 5 categorías, sitemap del blog y JSON-LD (BlogPosting + FAQ + breadcrumbs).
 - Legales (`/tos`, `/privacy-policy`) reescritos — **placeholder, no asesoría legal**.
 - Roadmap informativo de `$CASA` + `config.legal.disclaimer` (no es oferta de valores).
 
@@ -46,7 +46,7 @@
 - `MODEL_API_KEY` real de Meta Model API: sin ella, las rutas `/api/ai/*` devuelven respuestas de muestra (la UI es testeable sin clave).
 - Wallets de `CopyWalletAddress.js` — reemplazar por tesorería/multisig reales antes de donaciones on-chain.
 - Pitch deck, Calendly y métricas reales en `config.investors` (vacíos).
-- Artículos del blog y algunos assets de marca aún genéricos de ShipFast.
+- Imágenes OG por artículo (hoy reutilizan la OG global) y algunos assets de marca aún genéricos del template.
 - Componentes `Testimonials1.js`, `Testimonials3.js`, `Testimonials11.js`, `FeaturesGrid.js`, `FeaturesListicle.js` **no se usan**.
 
 ## Primeros pasos (desarrollo local)

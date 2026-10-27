@@ -8,7 +8,7 @@ const Category = ({ category, extraStyle }) => {
       className={`badge badge-sm md:badge-md hover:badge-primary ${
         extraStyle ? extraStyle : ""
       }`}
-      title={`Posts in ${category.title}`}
+      title={`Artículos de ${category.title}`}
       rel="tag"
     >
       {category.titleShort}

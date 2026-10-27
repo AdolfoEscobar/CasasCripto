@@ -1,8 +1,13 @@
+import { notFound } from "next/navigation";
 import { categories, articles } from "../../_assets/content";
 import CardArticle from "../../_assets/components/CardArticle";
 import CardCategory from "../../_assets/components/CardCategory";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
+
+export async function generateStaticParams() {
+  return categories.map((category) => ({ categoryId: category.slug }));
+}
 
 export async function generateMetadata({ params }) {
   const { categoryId } = await params;
@@ -10,8 +15,16 @@ export async function generateMetadata({ params }) {
     (category) => category.slug === categoryId
   );
 
+  if (!category) {
+    return getSEOTags({
+      title: `Categoría no encontrada | Blog de ${config.appName}`,
+      description: `Explora el blog de ${config.appName} sobre real estate y criptomonedas.`,
+      canonicalUrlRelative: "/blog",
+    });
+  }
+
   return getSEOTags({
-    title: `${category.title} | Blog by ${config.appName}`,
+    title: `${category.title} | Blog de ${config.appName}`,
     description: category.description,
     canonicalUrlRelative: `/blog/category/${category.slug}`,
   });
@@ -22,12 +35,16 @@ export default async function Category({ params }) {
   const category = categories.find(
     (category) => category.slug === categoryId
   );
+
+  if (!category) {
+    notFound();
+  }
+
   const articlesInCategory = articles
     .filter((article) =>
       article.categories.map((c) => c.slug).includes(category.slug)
     )
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
-    .slice(0, 3);
+    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
   return (
     <>
@@ -42,7 +59,7 @@ export default async function Category({ params }) {
 
       <section className="mb-24">
         <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-center mb-8 md:mb-12">
-          Most recent articles in {category.title}
+          Artículos sobre {category.titleShort.toLowerCase()}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -59,7 +76,7 @@ export default async function Category({ params }) {
 
       <section>
         <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-center mb-8 md:mb-12">
-          Other categories you might like
+          Otras categorías que te pueden interesar
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

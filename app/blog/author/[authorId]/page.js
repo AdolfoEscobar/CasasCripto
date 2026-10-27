@@ -1,16 +1,29 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { authors, articles } from "../../_assets/content";
 import CardArticle from "../../_assets/components/CardArticle";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
 
+export async function generateStaticParams() {
+  return authors.map((author) => ({ authorId: author.slug }));
+}
+
 export async function generateMetadata({ params }) {
   const { authorId } = await params;
   const author = authors.find((author) => author.slug === authorId);
 
+  if (!author) {
+    return getSEOTags({
+      title: `Autor no encontrado | Blog de ${config.appName}`,
+      description: `Explora el blog de ${config.appName} sobre real estate y criptomonedas.`,
+      canonicalUrlRelative: "/blog",
+    });
+  }
+
   return getSEOTags({
-    title: `${author.name}, Author at ${config.appName}'s Blog`,
-    description: `${author.name}, Author at ${config.appName}'s Blog`,
+    title: `${author.name} | Blog de ${config.appName}`,
+    description: author.description,
     canonicalUrlRelative: `/blog/author/${author.slug}`,
   });
 }
@@ -18,6 +31,11 @@ export async function generateMetadata({ params }) {
 export default async function Author({ params }) {
   const { authorId } = await params;
   const author = authors.find((author) => author.slug === authorId);
+
+  if (!author) {
+    notFound();
+  }
+
   const articlesByAuthor = articles
     .filter((article) => article.author.slug === author.slug)
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
@@ -27,7 +45,7 @@ export default async function Author({ params }) {
       <section className="max-w-3xl mx-auto flex flex-col md:flex-row gap-8 mt-12 mb-24 md:mb-32">
         <div>
           <p className="text-xs uppercase tracking-wide text-base-content/80 mb-2">
-            Authors
+            Autores
           </p>
           <h1 className="font-extrabold text-3xl lg:text-5xl tracking-tight mb-2">
             {author.name}
@@ -39,14 +57,23 @@ export default async function Author({ params }) {
         </div>
 
         <div className="max-md:order-first flex md:flex-col gap-4 shrink-0">
-          <Image
-            src={author.avatar}
-            width={256}
-            height={256}
-            alt={author.name}
-            priority={true}
-            className="rounded-box w-[12rem] md:w-[16rem] "
-          />
+          {author.avatar ? (
+            <Image
+              src={author.avatar}
+              width={256}
+              height={256}
+              alt={author.name}
+              priority={true}
+              className="rounded-box w-[12rem] md:w-[16rem] "
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="rounded-box w-[12rem] md:w-[16rem] aspect-square flex items-center justify-center bg-primary text-primary-content text-7xl font-extrabold"
+            >
+              {author.initials || author.name.charAt(0)}
+            </div>
+          )}
 
           {author.socials?.length > 0 && (
             <div className="flex flex-col md:flex-row gap-4">
@@ -55,8 +82,7 @@ export default async function Author({ params }) {
                   key={social.name}
                   href={social.url}
                   className="btn btn-square"
-                  // Using a dark theme? -> className="btn btn-square btn-neutral"
-                  title={`Go to ${author.name} profile on ${social.name}`}
+                  title={`Ver perfil de ${author.name} en ${social.name}`}
                   target="_blank"
                 >
                   {social.icon}
@@ -69,7 +95,7 @@ export default async function Author({ params }) {
 
       <section>
         <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-center mb-8 md:mb-12">
-          Most recent articles by {author.name}
+          Artículos recientes de {author.name}
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
