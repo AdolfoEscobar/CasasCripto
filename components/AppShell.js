@@ -4,31 +4,27 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { Playfair_Display } from "next/font/google";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import ScrollToTop from "./ScrollToTop";
 import logo from "@/app/icon.png";
 import config from "@/config";
 
+// Misma tipografía "VIP" del logo en desktop (Playfair Display itálica +
+// degradado dorado vía `text-gradient-gold`) para que el branding no cambie
+// entre mobile y desktop. Ver <Sidebar/>.
+const accentFont = Playfair_Display({
+  subsets: ["latin"],
+  style: ["italic"],
+  weight: ["600", "700"],
+});
+
 // Barra superior compacta, SOLO visible en mobile/tablet (<lg). Sustituye al
 // antiguo burger del Header flotante: aquí solo abre/cierra el drawer que
 // contiene el <Sidebar/>.
 const MobileTopbar = () => (
-  <div className="sticky top-0 z-30 lg:hidden flex items-center justify-between gap-3 px-4 py-3 glass-card border-b border-primary/15">
-    <Link href="/" title={`${config.appName} homepage`} className="flex items-center gap-2">
-      <span className="relative flex items-center justify-center w-9 h-9 shrink-0 rounded-full ring-1 ring-primary/30 bg-base-100/60 overflow-hidden">
-        <Image
-          src={logo}
-          alt={`${config.appName} logo`}
-          className="w-full h-full object-cover"
-          priority
-          width={36}
-          height={36}
-        />
-      </span>
-      <span className="font-extrabold text-base">{config.appName}</span>
-    </Link>
-
+  <div className="sticky top-0 z-30 lg:hidden flex items-center justify-start gap-3 px-4 py-3 glass-card border-b border-primary/15">
     <label
       htmlFor="app-sidebar"
       aria-label="Abrir menú"
@@ -40,23 +36,40 @@ const MobileTopbar = () => (
           document.getElementById("app-sidebar")?.click();
         }
       }}
-      className="btn btn-ghost btn-sm btn-circle min-w-[40px] min-h-[40px]"
+      className="btn btn-ghost btn-sm btn-circle shrink-0 min-w-[40px] min-h-[40px] ring-1 ring-primary/30 text-primary"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
+        strokeWidth={2}
         stroke="currentColor"
         className="w-6 h-6"
       >
         <path
           strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+          d="M4 7.5h16M4 12h9.5M4 16.5h13"
         />
       </svg>
     </label>
+
+    <Link href="/" title={`${config.appName} homepage`} className="flex items-center gap-2">
+      <span className="relative flex items-center justify-center w-9 h-9 shrink-0 rounded-full ring-1 ring-primary/30 bg-base-100/60 overflow-hidden">
+        <Image
+          src={logo}
+          alt={`${config.appName} logo`}
+          className="w-full h-full object-cover"
+          priority
+          width={36}
+          height={36}
+        />
+      </span>
+      <span
+        className={`${accentFont.className} italic text-lg tracking-wide text-gradient-gold leading-tight whitespace-nowrap pb-1`}
+      >
+        {config.appName}
+      </span>
+    </Link>
   </div>
 );
 

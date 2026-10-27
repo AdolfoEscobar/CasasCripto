@@ -39,7 +39,11 @@ export default function SignInPage() {
           className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-secondary/15 blur-3xl"
         />
 
-        <Link href="/" className="relative z-10 flex items-center gap-2">
+        <Link
+          href="/"
+          title={`${config.appName} homepage`}
+          className="relative z-10 flex items-center"
+        >
           <Image
             src={logo}
             alt={`${config.appName} logo`}
@@ -48,7 +52,6 @@ export default function SignInPage() {
             height={40}
             priority
           />
-          <span className="font-extrabold text-lg">{config.appName}</span>
         </Link>
 
         <div className="relative z-10 max-w-md">
@@ -94,23 +97,10 @@ export default function SignInPage() {
         </p>
       </div>
 
-      {/* Right: sign-in card */}
+      {/* Right: sign-in card. Sin logo propio en mobile: el <MobileTopbar/>
+          global (AppShell) ya muestra logo + marca arriba, y un logo absoluto
+          aquí quedaría tapado detrás de esa barra sticky. */}
       <div className="flex items-center justify-center p-6 sm:p-12">
-        {/* Logo on mobile, where the left panel is hidden */}
-        <div className="absolute top-6 left-6 lg:hidden">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src={logo}
-              alt={`${config.appName} logo`}
-              className="w-9"
-              width={36}
-              height={36}
-              priority
-            />
-            <span className="font-extrabold">{config.appName}</span>
-          </Link>
-        </div>
-
         <Suspense fallback={null}>
           <SignInCard />
         </Suspense>
