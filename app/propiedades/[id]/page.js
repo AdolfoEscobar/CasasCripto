@@ -111,7 +111,7 @@ export default async function PropertyDetailPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {renderBreadcrumbSchema(breadcrumbItems)}
-      <main className="bg-base-100 min-h-screen">
+      <main className="min-h-screen">
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-12 md:py-16">
           <div className="text-sm breadcrumbs mb-6 opacity-70">
             <ul>

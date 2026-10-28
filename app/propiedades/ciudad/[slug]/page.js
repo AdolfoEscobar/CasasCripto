@@ -70,7 +70,7 @@ export default async function CiudadPage({ params }) {
   return (
     <>
       {renderBreadcrumbSchema(breadcrumbItems)}
-      <main className="bg-base-100 min-h-screen">
+      <main className="min-h-screen">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-24">
           <div className="text-sm breadcrumbs mb-6 opacity-70 justify-center">
             <ul>

@@ -27,7 +27,7 @@ export default async function Dashboard() {
   const plan = paidPlan || freePlan;
 
   return (
-    <main className="min-h-screen p-6 sm:p-8 pb-24 bg-base-100">
+    <main className="min-h-screen p-6 sm:p-8 pb-24">
       <section className="max-w-3xl mx-auto space-y-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold">

@@ -60,7 +60,7 @@ export default async function PropiedadesPage() {
 
   return (
     <>
-      <main className="bg-base-100 min-h-screen">
+      <main className="min-h-screen">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-24">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="font-medium text-primary mb-3">Marketplace</p>

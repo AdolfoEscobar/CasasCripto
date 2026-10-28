@@ -119,9 +119,9 @@ const Sidebar = () => {
         href="/"
         onClick={closeDrawer}
         title={`${config.appName} homepage`}
-        className="flex items-center gap-2.5 px-5 py-5 shrink-0 group"
+        className="flex items-center gap-2.5 px-5 py-5 shrink-0"
       >
-        <span className="relative flex items-center justify-center w-10 h-10 shrink-0 rounded-full ring-1 ring-primary/30 bg-base-100/60 overflow-hidden transition-transform duration-300 group-hover:scale-105 group-hover:ring-primary/60">
+        <span className="relative flex items-center justify-center w-10 h-10 shrink-0 rounded-full ring-1 ring-primary/30 bg-base-100/60 overflow-hidden">
           <Image
             src={logo}
             alt={`${config.appName} logo`}

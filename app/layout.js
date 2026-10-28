@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import { getSEOTags, renderSchemaTags } from "@/libs/seo";
 import ClientLayout from "@/components/LayoutClient";
+import AmbientBackground from "@/components/AmbientBackground";
 import AppShell from "@/components/AppShell";
 import config from "@/config";
 import "./globals.css";
@@ -32,6 +33,9 @@ export default function RootLayout({ children }) {
 				{/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
 				{/* AppShell renders the global left sidebar navigation (replaces the
 				    old floating Header) on every single page of the site. */}
+				{/* AmbientBackground is the single site-wide backdrop (grid + brand
+				    glows): it paints behind AppShell on every page automatically. */}
+				<AmbientBackground />
 				<ClientLayout>
 					<AppShell>{children}</AppShell>
 				</ClientLayout>

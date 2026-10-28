@@ -22,7 +22,7 @@ const trustPoints = [
 // NextAuth UI — see libs/auth.js (pages.signIn: "/signin").
 export default function SignInPage() {
   return (
-    <main className="min-h-screen grid lg:grid-cols-2 bg-base-100">
+    <main className="min-h-screen grid lg:grid-cols-2">
       {/* Left: brand / pitch panel */}
       <div className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-base-200 p-12">
         {/* decorative grid pattern — isolated so its fade mask doesn't dim the content on top */}

@@ -89,7 +89,9 @@ export default function AppShell({ children }) {
   }, [pathname]);
 
   return (
-    <div className="drawer lg:drawer-open">
+    // `relative z-10`: pinta toda la app (barras, sidebar, contenido) por
+    // encima del <AmbientBackground/> global (fondo `fixed` sin z-index).
+    <div className="drawer lg:drawer-open relative z-10">
       <ScrollToTop />
       <input id="app-sidebar" type="checkbox" className="drawer-toggle" />
 
