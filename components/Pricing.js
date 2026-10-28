@@ -77,7 +77,7 @@ const Pricing = () => {
                   </p>
                   <div className="flex flex-col justify-end mb-[4px] max-w-[70px] sm:max-w-none">
                     <p className="text-xs text-base-content/60 uppercase font-semibold leading-tight">
-                      {plan.isFree ? "Para siempre" : "USD / mes"}
+                      {plan.isFree ? "Para siempre" : "MXN / mes"}
                     </p>
                   </div>
                 </div>

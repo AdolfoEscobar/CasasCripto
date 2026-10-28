@@ -58,7 +58,7 @@ Los planes "Básico" y "Premium" son suscripciones de producto que dan acceso a 
 
 3. Donaciones
 
-Las donaciones realizadas a través del Sitio (en USD vía Stripe o directamente en criptomonedas a las direcciones publicadas) son aportes voluntarios para apoyar el desarrollo del producto. No constituyen una compra de bienes o servicios, no son reembolsables salvo error de procesamiento, y no otorgan participación societaria, derechos de inversión ni expectativa de retorno.
+Las donaciones realizadas a través del Sitio (en MXN vía Stripe o directamente en criptomonedas a las direcciones publicadas) son aportes voluntarios para apoyar el desarrollo del producto. No constituyen una compra de bienes o servicios, no son reembolsables salvo error de procesamiento, y no otorgan participación societaria, derechos de inversión ni expectativa de retorno.
 
 4. Ronda de inversión y token ${config.token.ticker}
 

@@ -741,7 +741,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                     >
                       {featuring === property.id
                         ? "Redirigiendo..."
-                        : `⭐ Destacar ($${featuredListing?.price ?? 15})`}
+                        : `⭐ Destacar ($${featuredListing?.price ?? 149})`}
                     </button>
                   )}
                   <button

@@ -39,7 +39,7 @@ export async function POST(req) {
 
     const url = await createDonationCheckout({
       amount: numericAmount,
-      currency: config.donations?.currency || "usd",
+      currency: config.donations?.currency || "mxn",
       successUrl,
       cancelUrl,
       email,

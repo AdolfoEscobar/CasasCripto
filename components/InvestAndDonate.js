@@ -75,7 +75,7 @@ const InvestAndDonate = () => {
             </p>
 
             <p className="text-xs font-semibold uppercase tracking-wide opacity-50">
-              En USD (tarjeta, vía Stripe)
+              En MXN (tarjeta, vía Stripe)
             </p>
             <DonateButton />
 

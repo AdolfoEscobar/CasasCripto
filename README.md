@@ -29,9 +29,9 @@
 - Panel admin: usuarios (`app/api/admin/*`) y **revisión de propiedades** (`/admin/dashboard/properties`).
 - Geo estandarizado: `/api/geo/countries`, `/states`, `/cities` (mercados LatAm + ES + US priorizados en el select de país).
 - Inversión (`#invertir`): captura de leads (`<ButtonLead source="investor" />` → modelo `Lead`).
-- Donaciones: USD vía Stripe (`<DonateButton />`) y cripto (`<CopyWalletAddress />`, direcciones **placeholder**).
-- Destacados: pago único (`config.featuredListing`, p. ej. $15 / 7 días) vía `/api/stripe/create-featured-listing`; el webhook marca `featured` + `featuredUntil`.
-- Planes en `config.stripe.plans`: **Básico gratis** (hasta 20 propiedades, sin tarjeta) y **Premium** ($99/mes, hasta 100, `hasAccess` vía Stripe). La tarjeta "Elite / Inversionistas" es CTA de contacto, no un Price de Stripe.
+- Donaciones: MXN vía Stripe (`<DonateButton />`) y cripto (`<CopyWalletAddress />`, direcciones **placeholder**).
+- Destacados: pago único (`config.featuredListing`, p. ej. $149 MXN / 7 días) vía `/api/stripe/create-featured-listing`; el webhook marca `featured` + `featuredUntil`.
+- Planes en `config.stripe.plans`: **Básico gratis** (hasta 20 propiedades, sin tarjeta) y **Premium** ($299 MXN/mes, hasta 100, `hasAccess` vía Stripe). La tarjeta "Elite / Inversionistas" es CTA de contacto, no un Price de Stripe.
 - Auth (Google + Email) con roles (`user`, `admin`, `editor`, `moderator`). Rutas privadas protegidas en `layout.js` (no hay `middleware.js`).
 - Blog (`app/blog`) — 8 artículos propios en español (comprar/vender con cripto, legalidad e impuestos, stablecoins, seguridad, inversión LatAm, tokenización, tutorial de publicación), 5 categorías, sitemap del blog y JSON-LD (BlogPosting + FAQ + breadcrumbs).
 - Legales (`/tos`, `/privacy-policy`) reescritos — **placeholder, no asesoría legal**.

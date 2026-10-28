@@ -9,7 +9,7 @@ import config from "@/config";
 // support the development of Casas Cripto. Uses /api/stripe/create-donation,
 // which builds the Stripe price on the fly — no pre-created priceId needed.
 const DonateButton = ({ extraStyle }) => {
-  const suggested = config.donations?.suggestedAmounts || [10, 25, 50, 100];
+  const suggested = config.donations?.suggestedAmounts || [50, 100, 200, 500];
   const [selected, setSelected] = useState(suggested[1] ?? suggested[0]);
   const [customAmount, setCustomAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,7 @@ const DonateButton = ({ extraStyle }) => {
   const handleDonate = async () => {
     if (!amount || amount < (config.donations?.minAmount || 1)) {
       toast.error(
-        `El monto mínimo es $${config.donations?.minAmount || 1} USD`
+        `El monto mínimo es $${config.donations?.minAmount || 1} MXN`
       );
       return;
     }
@@ -68,7 +68,7 @@ const DonateButton = ({ extraStyle }) => {
         <input
           type="number"
           min={config.donations?.minAmount || 1}
-          placeholder="Otro monto (USD)"
+          placeholder="Otro monto (MXN)"
           className="grow"
           value={customAmount}
           onChange={(e) => setCustomAmount(e.target.value)}
@@ -83,7 +83,7 @@ const DonateButton = ({ extraStyle }) => {
         {isLoading ? (
           <span className="loading loading-spinner loading-xs"></span>
         ) : (
-          <>Donar ${amount || 0} USD</>
+          <>Donar ${amount || 0} MXN</>
         )}
       </button>
 

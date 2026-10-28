@@ -77,8 +77,8 @@ export const createCustomerPortal = async ({ customerId, returnUrl }) => {
 // amount (within config.donations limits) without extra Stripe dashboard setup.
 // Triggered by the <DonateButton /> component via /api/stripe/create-donation.
 export const createDonationCheckout = async ({
-  amount, // amount in the smallest currency unit's major unit (e.g. 25 = $25.00)
-  currency = "usd",
+  amount, // amount in the smallest currency unit's major unit (e.g. 100 = $100 MXN)
+  currency = "mxn",
   successUrl,
   cancelUrl,
   email,
@@ -121,7 +121,7 @@ export const createFeaturedListingCheckout = async ({
   propertyTitle,
   amount,
   days,
-  currency = "usd",
+  currency = "mxn",
   successUrl,
   cancelUrl,
   email,

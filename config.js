@@ -15,18 +15,17 @@ const config = {
     onlyShowOnRoutes: ["/"],
   },
   stripe: {
-    // ⚠️ TODO ANTES DE VENDER (Premium): todavía no existe ninguna
-    // cuenta/producto de Stripe real conectado. El priceId de abajo es un
-    // placeholder del template original (dev) o literalmente "price_456"
-    // (prod). Pasos: 1) crea un producto recurrente "Premium $99/mes" en tu
-    // Stripe Dashboard, 2) copia el Price ID real aquí, 3) pon
-    // STRIPE_PUBLIC_KEY / STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET en las
-    // env vars de Vercel (producción) y en tu .env.local (dev/test), 4)
-    // registra el webhook https://TU-DOMINIO/api/webhook/stripe en Stripe
-    // escuchando: checkout.session.completed, checkout.session.expired,
+    // Premium ($299 MXN/mes, "precio fundador de lanzamiento" con ancla
+    // $599): el priceId de dev es un Price real (modo test). Para prod
+    // falta: 1) crear el producto recurrente "Premium $299 MXN/mes" en el
+    // Stripe Dashboard (modo live), 2) copiar el Price ID real abajo, 3)
+    // poner STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET en las env vars de
+    // Vercel (producción) y en tu .env.local (dev/test), 4) registrar el
+    // webhook https://TU-DOMINIO/api/webhook/stripe en Stripe escuchando:
+    // checkout.session.completed, checkout.session.expired,
     // customer.subscription.updated, customer.subscription.deleted,
-    // invoice.paid, invoice.payment_failed. 5) activa el Customer Portal en
-    // Stripe (Settings → Billing → Customer portal).
+    // invoice.paid, invoice.payment_failed. 5) activar el Customer Portal
+    // en Stripe (Settings → Billing → Customer portal).
     plans: [
       {
         // Plan gratuito SIEMPRE disponible (no solo "de lanzamiento"):
@@ -64,26 +63,19 @@ const config = {
       {
         // This plan will look different on the pricing page, it will be highlighted. You can only have one plan with isFeatured: true
         isFeatured: true,
-        // ⚠️ TODO ANTES DE VENDER: todavía no existe ninguna cuenta/producto
-        // de Stripe real conectado para este plan. Pasos: 1) crea un
-        // producto recurrente "Premium $99/mes" en tu Stripe Dashboard, 2)
-        // copia el Price ID real aquí (dev = modo test, prod = modo live),
-        // 3) pon STRIPE_PUBLIC_KEY / STRIPE_SECRET_KEY /
-        // STRIPE_WEBHOOK_SECRET en Vercel y en tu .env.local, 4) registra el
-        // webhook https://TU-DOMINIO/api/webhook/stripe escuchando:
-        // checkout.session.completed, checkout.session.expired,
-        // customer.subscription.updated, customer.subscription.deleted,
-        // invoice.paid, invoice.payment_failed. 5) activa el Customer
-        // Portal en Stripe (Settings → Billing → Customer portal).
+        // Precio fundador de lanzamiento: $299 MXN/mes (ancla $599). El
+        // priceId de dev es un Price real (modo test). ⚠️ TODO antes de
+        // vender en prod: crea el producto recurrente "Premium $299 MXN/mes"
+        // en el Stripe Dashboard (modo live) y copia el Price ID real abajo.
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1O5KtcAxyNprDp7iftKnrrpw" // TODO: reemplaza por tu Price ID real (modo test) de "Premium"
+            ? "price_1UVeQMPL3F83hITMaCRDrHi4" // Price real (modo test) de "Premium $299 MXN/mes"
             : "price_456", // TODO: reemplaza por tu Price ID real (modo live) de "Premium"
         name: "Premium",
         description:
           "Para agentes y portafolios grandes que quieren escalar y destacar",
-        price: 99,
-        priceAnchor: 149,
+        price: 299,
+        priceAnchor: 599,
         // REQUIRED — límite real de propiedades que este plan permite crear.
         // Muy por encima del límite gratuito (20): Premium es para
         // portafolios grandes, no la barrera de entrada para publicar.
@@ -107,16 +99,16 @@ const config = {
   // "destacado"), en vez de cobrar solo por el derecho a publicar.
   // Ver libs/stripe.js → createFeaturedListingCheckout.
   featuredListing: {
-    price: 15,
-    currency: "usd",
+    price: 149,
+    currency: "mxn",
     days: 7,
   },
   // Donaciones puntuales (pagos únicos vía Stripe, sin necesidad de un priceId
   // preconfigurado — ver libs/stripe.js → createDonationCheckout)
   donations: {
-    currency: "usd",
-    suggestedAmounts: [10, 25, 50, 100, 250],
-    minAmount: 5,
+    currency: "mxn",
+    suggestedAmounts: [50, 100, 200, 500, 1000],
+    minAmount: 50,
     description:
       "Apoya el desarrollo de Casas Cripto. Las donaciones financian producto, cumplimiento regulatorio y expansión del marketplace.",
   },
