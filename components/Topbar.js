@@ -14,7 +14,7 @@ const quickLinks = [
   { href: "/propiedades", label: "Propiedades" },
   { href: "/demo-ai", label: "Demo Meta AI" },
   { href: "/blog", label: "Blog" },
-  { href: "/#pricing", label: "Precios" },
+  { href: "/#pricing", label: "Planes" },
   { href: "/#invertir", label: "Invierte" },
 ];
 

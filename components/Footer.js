@@ -102,7 +102,7 @@ const Footer = () => {
                   Características
                 </Link>
                 <Link href="/#pricing" className="link link-hover">
-                  Precios
+                  Planes
                 </Link>
                 <Link href="/blog" className="link link-hover">
                   Blog

@@ -51,7 +51,7 @@ const mainLinks = [
 // home primero).
 const landingLinks = [
   { href: "/#features", label: "Características", icon: SparklesIcon },
-  { href: "/#pricing", label: "Precios", icon: CurrencyDollarIcon },
+  { href: "/#pricing", label: "Planes", icon: CurrencyDollarIcon },
   { href: "/#token", label: "Token $CASA", icon: CircleStackIcon },
   { href: "/#invertir", label: "Invierte", icon: ChartBarIcon },
   { href: "/#faq", label: "FAQ", icon: QuestionMarkCircleIcon },
