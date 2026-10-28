@@ -28,6 +28,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               },
             },
             from: config.resend.fromNoReply,
+            // Usa la plantilla corporativa de libs/resend.js en vez del
+            // correo genérico "Sign in" por defecto de NextAuth. Import
+            // dinámico para no cambiar el comportamiento de importación
+            // de este módulo (resend.js exige RESEND_API_KEY al cargar).
+            async sendVerificationRequest({ identifier, url }) {
+              const { sendMagicLinkEmail } = await import("./resend");
+              await sendMagicLinkEmail({ to: identifier, url });
+            },
           }),
           GoogleProvider({
             // Follow the "Login with Google" tutorial to get your credentials
