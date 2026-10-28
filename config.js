@@ -16,16 +16,16 @@ const config = {
   },
   stripe: {
     // Premium ($299 MXN/mes, "precio fundador de lanzamiento" con ancla
-    // $599): el priceId de dev es un Price real (modo test). Para prod
-    // falta: 1) crear el producto recurrente "Premium $299 MXN/mes" en el
-    // Stripe Dashboard (modo live), 2) copiar el Price ID real abajo, 3)
-    // poner STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET en las env vars de
-    // Vercel (producción) y en tu .env.local (dev/test), 4) registrar el
-    // webhook https://TU-DOMINIO/api/webhook/stripe en Stripe escuchando:
+    // $599): priceIds reales en ambos modos (test en dev, live en prod —
+    // el switch es automático por NODE_ENV, ver priceId abajo). Claves: en
+    // .env.local van las de test (sk_test_... + whsec_... del `stripe
+    // listen`); en Vercel (producción) las live (sk_live_... + whsec_... del
+    // destino https://casascripto.com/api/webhook/stripe, escuchando:
     // checkout.session.completed, checkout.session.expired,
     // customer.subscription.updated, customer.subscription.deleted,
-    // invoice.paid, invoice.payment_failed. 5) activar el Customer Portal
-    // en Stripe (Settings → Billing → Customer portal).
+    // invoice.paid, invoice.payment_failed). Nunca mezcles modos: precio
+    // test + key live (o viceversa) devuelve "No such price". También activa
+    // el Customer Portal en Stripe (Settings → Billing → Customer portal).
     plans: [
       {
         // Plan gratuito SIEMPRE disponible (no solo "de lanzamiento"):
@@ -63,14 +63,13 @@ const config = {
       {
         // This plan will look different on the pricing page, it will be highlighted. You can only have one plan with isFeatured: true
         isFeatured: true,
-        // Precio fundador de lanzamiento: $299 MXN/mes (ancla $599). El
-        // priceId de dev es un Price real (modo test). ⚠️ TODO antes de
-        // vender en prod: crea el producto recurrente "Premium $299 MXN/mes"
-        // en el Stripe Dashboard (modo live) y copia el Price ID real abajo.
+        // Precio fundador de lanzamiento: $299 MXN/mes (ancla $599). Ambos
+        // priceIds son Prices reales: test en dev, live en prod (verifica
+        // que los dos sean recurrentes mensuales por $299 MXN).
         priceId:
           process.env.NODE_ENV === "development"
             ? "price_1UVeQMPL3F83hITMaCRDrHi4" // Price real (modo test) de "Premium $299 MXN/mes"
-            : "price_456", // TODO: reemplaza por tu Price ID real (modo live) de "Premium"
+            : "price_1UVfv4PL3F83hITMvnGFxSyq", // Price real (modo live) de "Premium $299 MXN/mes"
         name: "Premium",
         description:
           "Para agentes y portafolios grandes que quieren escalar y destacar",

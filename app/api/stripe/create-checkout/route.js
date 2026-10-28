@@ -6,7 +6,9 @@ import User from "@/models/User";
 
 // This function is used to create a Stripe Checkout Session (one-time payment or subscription)
 // It's called by the <ButtonCheckout /> component
-// By default, it doesn't force users to be authenticated. But if they are, it will prefill the Checkout data with their email and/or credit card
+// It requires users to be authenticated: subscriptions are account-bound
+// (hasAccess/premium limits live on the User), and the webhook links the
+// payment via clientReferenceId. Checkout also prefills with their email.
 export async function POST(req) {
   const body = await req.json();
 
@@ -33,9 +35,19 @@ export async function POST(req) {
   try {
     const session = await auth();
 
+    // Premium is account-bound: guest checkout would leave the payment
+    // unattributed (or force email-guessing in the webhook). Unauthenticated
+    // callers get 401 (see libs/api.js + ButtonCheckout for the sign-in flow).
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Debes iniciar sesión para suscribirte" },
+        { status: 401 }
+      );
+    }
+
     await connectMongo();
 
-    const user = await User.findById(session?.user?.id);
+    const user = await User.findById(session.user.id);
 
     const { priceId, mode, successUrl, cancelUrl } = body;
 

@@ -1,17 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import apiClient from "@/libs/api";
 import config from "@/config";
 
 // This component is used to create Stripe Checkout Sessions
 // It calls the /api/stripe/create-checkout route with the priceId, successUrl and cancelUrl
-// By default, it doesn't force users to be authenticated. But if they are, it will prefill the Checkout data with their email and/or credit card. You can change that in the API route
+// Checkout requires authentication (enforced server-side with 401): subscriptions
+// are account-bound. Guests are sent to sign-in first, returning here afterwards.
 // You can also change the mode to "subscription" if you want to create a subscription instead of a one-time payment
 const ButtonCheckout = ({ priceId, mode = "payment", label }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { status } = useSession();
 
   const handlePayment = async () => {
+    // If we already know there's no session, go straight to sign-in and come
+    // back here afterwards (preserves purchase intent). While status is
+    // "loading" we still try the POST and let the API's 401 decide.
+    if (status === "unauthenticated") {
+      return signIn(undefined, { callbackUrl: window.location.href });
+    }
+
     setIsLoading(true);
 
     try {
