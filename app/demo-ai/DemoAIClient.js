@@ -100,11 +100,11 @@ export default function DemoAIClient() {
       <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 md:py-20 space-y-12">
         {/* Encabezado */}
         <div className="text-center space-y-4">
-          <p className="font-medium text-primary">
+          <p className="text-sm font-semibold text-primary">
             Meta Global AI Developer Hackathon
           </p>
-          <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-gradient-gold">
-            Meta AI dentro de Casas Cripto
+          <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight">
+            Meta AI dentro de <span className="text-primary">Casas Cripto</span>
           </h1>
           <p className="opacity-70 leading-relaxed max-w-2xl mx-auto">
             Prueba en vivo, sin crear cuenta, cómo usamos <strong>Muse Spark</strong>,{" "}
@@ -118,7 +118,7 @@ export default function DemoAIClient() {
         {/* 1. Muse Spark */}
         <section className="glass-card rounded-2xl p-6 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2">
-            ✨ Redactar listado
+            Redactar listado
             <SectionBadge color="secondary">Muse Spark</SectionBadge>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -161,7 +161,7 @@ export default function DemoAIClient() {
             {copyLoading ? (
               <span className="loading loading-spinner loading-xs" />
             ) : (
-              "✨ Generar título y descripción"
+              "Generar título y descripción"
             )}
           </button>
           {copyResult && (
@@ -180,7 +180,7 @@ export default function DemoAIClient() {
         {/* 2. Muse Image */}
         <section className="glass-card rounded-2xl p-6 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2">
-            🎨 Generar imagen
+            Generar imagen
             <SectionBadge color="accent">Muse Image</SectionBadge>
           </h2>
           <div className="flex flex-col sm:flex-row gap-2">
@@ -197,7 +197,7 @@ export default function DemoAIClient() {
               {imageLoading ? (
                 <span className="loading loading-spinner loading-xs" />
               ) : (
-                "🎨 Generar"
+                "Generar imagen"
               )}
             </button>
           </div>
@@ -224,13 +224,13 @@ export default function DemoAIClient() {
         {/* 3. SAM 3.1 */}
         <section className="glass-card rounded-2xl p-6 space-y-4">
           <h2 className="font-bold text-lg flex items-center gap-2">
-            🛡️ Revisar privacidad
+            Revisar privacidad
             <SectionBadge color="accent">SAM 3.1</SectionBadge>
           </h2>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               className="input input-bordered input-sm w-full"
-              placeholder="URL de una foto"
+              placeholder="https://…/foto.jpg (URL pública directa)"
               value={scanUrl}
               onChange={(e) => setScanUrl(e.target.value)}
             />
@@ -242,7 +242,7 @@ export default function DemoAIClient() {
               {scanLoading ? (
                 <span className="loading loading-spinner loading-xs" />
               ) : (
-                "🛡️ Escanear"
+                "Escanear imagen"
               )}
             </button>
           </div>
@@ -259,8 +259,8 @@ export default function DemoAIClient() {
               {scanResult.mock
                 ? scanResult.note
                 : scanResult.hasSensitiveContent
-                  ? `⚠️ Se detectó: ${scanResult.findings.map((f) => f.label).join(", ")}`
-                  : "✅ Sin contenido sensible visible"}
+                  ? `Se detectó: ${scanResult.findings.map((f) => f.label).join(", ")}`
+                  : "Sin contenido sensible visible"}
             </p>
           )}
         </section>

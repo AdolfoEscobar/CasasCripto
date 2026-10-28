@@ -6,14 +6,15 @@ import config from "@/config";
 // <FAQ> es una lista de <Item>. Agrega o edita preguntas aquí.
 const faqList = [
   {
-    question: "¿Casas Cripto ya tiene propiedades reales listadas?",
+    question: "¿Ya puedo publicar o buscar propiedades?",
     answer: (
       <p>
-        Hoy estamos en fase MVP: la plataforma de autenticación, suscripciones
-        y panel administrativo ya funciona, pero el marketplace de
-        propiedades (publicar, buscar y comprar un inmueble) está en
-        construcción activa. Únete a la lista de espera para ser de los
-        primeros en usarlo.
+        Sí. El directorio está en vivo: puedes{" "}
+        <a href="/propiedades" className="link link-primary">
+          buscar propiedades
+        </a>{" "}
+        y publicar la tuya gratis desde tu panel. Cada ficha pasa por
+        revisión manual antes de publicarse.
       </p>
     ),
   },
@@ -21,10 +22,11 @@ const faqList = [
     question: "¿Cómo funciona el pago en criptomonedas?",
     answer: (
       <p>
-        El checkout acepta USDC, USDT, BTC y ETH. Hoy el procesamiento de
-        pagos de suscripción y donaciones corre sobre Stripe; la integración
-        de wallets on-chain para el cierre completo de operaciones
-        inmobiliarias forma parte de nuestro roadmap de producto.
+        Cada ficha indica qué criptomonedas acepta el propietario (USDC,
+        USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el
+        cierre; los pagos de suscripción y donaciones se procesan con
+        Stripe. La liquidación on-chain automatizada forma parte del
+        roadmap.
       </p>
     ),
   },
@@ -76,10 +78,11 @@ const faqList = [
     question: "¿Cómo protegen mis fondos y mis datos?",
     answer: (
       <p>
-        La autenticación corre sobre NextAuth con proveedores verificados
-        (Google / magic link), los pagos sobre Stripe (PCI-DSS) y los datos en
-        MongoDB con acceso restringido por roles. La custodia on-chain con
-        contratos inteligentes y escrow forma parte del roadmap de seguridad.
+        La autenticación usa proveedores verificados (Google / magic link),
+        los pagos corren sobre Stripe (PCI-DSS) y los datos tienen acceso
+        restringido por roles. En el MVP no custodiamos fondos: el cierre en
+        cripto se acompaña caso por caso, y la custodia on-chain con
+        contratos auditados forma parte del roadmap.
       </p>
     ),
   },
@@ -147,17 +150,29 @@ const Item = ({ item }) => {
 
 const FAQ = () => {
   return (
-    // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section id="faq" className="scroll-mt-20">
-      <div className="py-24 px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
+    // Sin bg propio: toma el fondo ambiental único de la landing.
+    <section id="faq" className="scroll-mt-20 border-t border-base-content/10">
+      <div className="py-20 md:py-28 px-5 sm:px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-10 md:gap-12">
         <div className="flex flex-col text-left basis-1/2">
-          <p className="inline-block font-semibold text-primary mb-4">FAQ</p>
-          <p className="sm:text-4xl text-3xl font-extrabold text-base-content">
+          <p className="inline-block text-sm font-semibold text-primary mb-3">
+            FAQ
+          </p>
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-base-content tracking-tight">
             Preguntas frecuentes
+          </h2>
+          <p className="opacity-70 leading-relaxed mt-4 max-w-md">
+            ¿Otra duda? Escríbenos a{" "}
+            <a
+              href={`mailto:${config.resend.supportEmail}`}
+              className="link link-primary"
+            >
+              {config.resend.supportEmail}
+            </a>
+            .
           </p>
         </div>
 
-        <ul className="basis-1/2">
+        <ul className="basis-1/2 border-b border-base-content/10">
           {faqList.map((item, i) => (
             <Item key={i} item={item} />
           ))}

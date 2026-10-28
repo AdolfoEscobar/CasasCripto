@@ -17,11 +17,11 @@ const Pricing = () => {
     // (app/page.js). La tarjeta usa `glass-card` (en vez de un bg-base-100
     // sólido) para seguir distinguiéndose del fondo sin crear un bloque de
     // color aparte.
-    <section className="overflow-hidden border-y border-base-content/10 scroll-mt-20" id="pricing">
-      <div className="py-20 sm:py-24 px-5 sm:px-8 max-w-6xl mx-auto">
-        <div className="flex flex-col text-center w-full mb-12 sm:mb-16">
-          <p className="font-medium text-primary mb-3">Premium</p>
-          <h2 className="font-bold text-3xl lg:text-5xl tracking-tight">
+    <section className="overflow-hidden border-t border-base-content/10 scroll-mt-20" id="pricing">
+      <div className="py-20 md:py-28 px-5 sm:px-8 max-w-6xl mx-auto">
+        <div className="flex flex-col text-center w-full mb-12 md:mb-14">
+          <p className="text-sm font-semibold text-primary mb-3">Premium</p>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight">
             Lista tu propiedad, acepta cripto hoy
           </h2>
           <p className="opacity-70 mt-4 max-w-xl mx-auto">
@@ -32,7 +32,7 @@ const Pricing = () => {
 
         <div className="flex justify-center">
           <div className="relative w-full max-w-lg">
-            <div className="relative flex flex-col h-full gap-5 lg:gap-8 z-10 glass-card p-6 sm:p-8 rounded-lg">
+            <div className="relative flex flex-col h-full gap-5 lg:gap-8 z-10 glass-card p-6 sm:p-8 rounded-2xl">
               <div>
                 <p className="text-lg lg:text-xl font-bold">{premium.name}</p>
                 {premium.description && (

@@ -15,6 +15,19 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Validación primero (gratis): un request malformado no debe consumir
+    // cuota — ver app/api/ai/public/privacy-scan/route.js.
+    const body = await req.json();
+    const { rawNotes, city, state, country, price, currency, cryptoAccepted } =
+      body;
+
+    if (!city || !country || price === undefined || price === null || price === "") {
+      return NextResponse.json(
+        { error: "Ciudad, país y precio son necesarios para generar el copy" },
+        { status: 400 }
+      );
+    }
+
     // Protege el saldo compartido del hackathon ($150) de un dueño dándole
     // clic sin parar — ver libs/aiRateLimit.js.
     const { allowed, remaining } = await checkAiRateLimit({
@@ -26,17 +39,6 @@ export async function POST(req) {
       return NextResponse.json(
         { error: "Alcanzaste el límite diario de generaciones con IA. Intenta mañana." },
         { status: 429 }
-      );
-    }
-
-    const body = await req.json();
-    const { rawNotes, city, state, country, price, currency, cryptoAccepted } =
-      body;
-
-    if (!city || !country || price === undefined || price === null || price === "") {
-      return NextResponse.json(
-        { error: "Ciudad, país y precio son necesarios para generar el copy" },
-        { status: 400 }
       );
     }
 

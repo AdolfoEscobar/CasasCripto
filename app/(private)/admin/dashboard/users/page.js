@@ -81,9 +81,9 @@ export default function Dashboard() {
           <div className="card-body">
             <div className="flex justify-between items-center pb-4">
               <div>
-                <h1 className="text-3xl font-bold">User Management 👥</h1>
-                <p className="text-gray-600">
-                  View and manage all registered users
+                <h1 className="text-3xl font-bold">Usuarios</h1>
+                <p className="text-base-content/60">
+                  Ver y gestionar todos los usuarios registrados
                 </p>
               </div>
               <div className="flex gap-4">
@@ -96,7 +96,7 @@ export default function Dashboard() {
                   href="/admin/dashboard/users/new"
                   className="btn btn-primary"
                 >
-                  Add User
+                  Agregar usuario
                 </Link>
               </div>
             </div>
@@ -114,19 +114,19 @@ export default function Dashboard() {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Registration Date</th>
-                      <th>Last Login</th>
-                      <th>Actions</th>
+                      <th>Nombre</th>
+                      <th>Correo</th>
+                      <th>Rol</th>
+                      <th>Registro</th>
+                      <th>Último acceso</th>
+                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.length === 0 ? (
                       <tr>
                         <td colSpan="6" className="text-center py-4">
-                          No registered users
+                          Sin usuarios registrados
                         </td>
                       </tr>
                     ) : (
@@ -146,7 +146,7 @@ export default function Dashboard() {
                               href={`/admin/dashboard/users/edit/${user._id}`}
                               className="btn btn-sm btn-ghost"
                             >
-                              Edit
+                              Editar
                             </Link>
                           </td>
                         </tr>
@@ -167,8 +167,8 @@ export default function Dashboard() {
             )}
 
             {/* Total Users Count */}
-            <div className="mt-4 text-sm text-gray-600">
-              Total users: {pagination.total}
+            <div className="mt-4 text-sm text-base-content/60">
+              Total de usuarios: {pagination.total}
             </div>
           </div>
         </div>

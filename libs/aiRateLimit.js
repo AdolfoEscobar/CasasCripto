@@ -31,6 +31,19 @@ export async function checkAiRateLimit({ key, action, limit }) {
   return { allowed, remaining: Math.max(0, limit - usage.count) };
 }
 
+// Devuelve 1 unidad de cuota cuando el intento falló ANTES de que la IA
+// hiciera trabajo real (ej. la imagen no era descargable y ni siquiera se
+// llamó a Meta, o Meta rechazó la URL). Sin esto, 3 URLs malas agotarían la
+// demo pública del día sin haber gastado un solo crédito.
+export async function refundAiRateLimit({ key, action }) {
+  await connectMongo();
+  const day = new Date().toISOString().slice(0, 10);
+  await AiUsage.findOneAndUpdate(
+    { key, action, day, count: { $gt: 0 } },
+    { $inc: { count: -1 } }
+  );
+}
+
 // Límites por acción. Las rutas autenticadas del dashboard (dueños reales
 // armando SU propio listado) son más generosas; la demo pública sin login
 // (/demo-ai, pensada para jueces y redes sociales) es más estricta porque

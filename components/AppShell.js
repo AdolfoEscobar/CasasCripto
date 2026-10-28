@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Playfair_Display } from "next/font/google";
+import { useSession } from "next-auth/react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import ScrollToTop from "./ScrollToTop";
+import ButtonSignin from "./ButtonSignin";
 import logo from "@/app/icon.png";
 import config from "@/config";
 
@@ -22,9 +24,13 @@ const accentFont = Playfair_Display({
 
 // Barra superior compacta, SOLO visible en mobile/tablet (<lg). Sustituye al
 // antiguo burger del Header flotante: aquí solo abre/cierra el drawer que
-// contiene el <Sidebar/>.
-const MobileTopbar = () => (
-  <div className="sticky top-0 z-30 lg:hidden flex items-center justify-start gap-3 px-4 py-3 glass-card border-b border-primary/15">
+// contiene el <Sidebar/>. Fondo sólido translúcido (no `glass-card`: esa
+// clase pinta un borde completo que chocaba con el `border-b`).
+const MobileTopbar = () => {
+  const { data: session, status } = useSession();
+
+  return (
+  <div className="sticky top-0 z-30 lg:hidden flex items-center gap-3 px-4 py-2.5 bg-base-100/85 backdrop-blur-xl border-b border-base-content/10">
     <label
       htmlFor="app-sidebar"
       aria-label="Abrir menú"
@@ -53,7 +59,7 @@ const MobileTopbar = () => (
       </svg>
     </label>
 
-    <Link href="/" title={`${config.appName} homepage`} className="flex items-center gap-2">
+    <Link href="/" title={`${config.appName} homepage`} className="flex items-center gap-2 min-w-0">
       <span className="relative flex items-center justify-center w-9 h-9 shrink-0 rounded-full ring-1 ring-primary/30 bg-base-100/60 overflow-hidden">
         <Image
           src={logo}
@@ -65,13 +71,43 @@ const MobileTopbar = () => (
         />
       </span>
       <span
-        className={`${accentFont.className} italic text-lg tracking-wide text-gradient-gold leading-tight whitespace-nowrap pb-1`}
+        className={`${accentFont.className} italic text-lg tracking-wide text-gradient-gold leading-tight whitespace-nowrap pb-1 truncate`}
       >
         {config.appName}
       </span>
     </Link>
+
+    {/* Acceso a cuenta siempre visible (en desktop vive en el Topbar) */}
+    <span className="ml-auto shrink-0">
+      {status === "authenticated" ? (
+        <Link
+          href={config.auth.callbackUrl}
+          title="Mi panel"
+          aria-label="Mi panel"
+          className="flex items-center justify-center w-10 h-10 rounded-full ring-1 ring-primary/30 bg-base-200 overflow-hidden font-bold"
+        >
+          {session?.user?.image ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.name || "Mi panel"}
+              className="w-full h-full object-cover"
+              width={40}
+              height={40}
+            />
+          ) : (
+            (session?.user?.name || session?.user?.email || "?").charAt(0)
+          )}
+        </Link>
+      ) : (
+        <ButtonSignin
+          extraStyle="btn-primary btn-sm rounded-full min-h-[40px]"
+          text="Entrar"
+        />
+      )}
+    </span>
   </div>
-);
+  );
+};
 
 // Shell global de navegación: sidebar fijo a la izquierda en desktop
 // (siempre visible, vía `lg:drawer-open`) + header superior clásico

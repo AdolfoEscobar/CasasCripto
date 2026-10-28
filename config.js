@@ -6,8 +6,10 @@ const config = {
     "Casas Cripto es la plataforma inmobiliaria elite que conecta propietarios crypto-friendly con compradores e inversionistas globales. Lista, invierte o dona para construir el futuro del real estate en criptomonedas.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
   domainName: "casascripto.com",
-  // Tagline corto usado en Hero, SEO y redes sociales
-  tagline: "El real estate elite que ya opera en criptomonedas.",
+  // Tagline corto usado en Footer y plantilla de emails. Alineado con el
+  // posicionamiento MVP: directorio + intermediación, sin prometer
+  // operación on-chain que aún no existe.
+  tagline: "El directorio de propiedades que aceptan cripto.",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
     id: "",

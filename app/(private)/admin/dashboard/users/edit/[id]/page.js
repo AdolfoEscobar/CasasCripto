@@ -88,8 +88,10 @@ export default function EditUserPage({ params }) {
           <div className="card-body">
             <div className="flex justify-between items-center pb-4">
               <div>
-                <h1 className="text-3xl font-bold">Edit User ✏️</h1>
-                <p className="text-gray-600">Modify user information</p>
+                <h1 className="text-3xl font-bold">Editar usuario</h1>
+                <p className="text-base-content/60">
+                  Modificar la información del usuario
+                </p>
               </div>
             </div>
 

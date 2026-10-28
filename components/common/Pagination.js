@@ -45,87 +45,67 @@ export default function Pagination({ paginationData, setPage }) {
   };
 
   return (
-    <div className="mt-4 w-full border-t border-gray-200 px-4 py-3 sm:px-6">
+    <div className="mt-4 w-full border-t border-base-content/10 px-4 py-3 sm:px-6">
       {/* Mobile version */}
       <div className="flex w-full justify-between sm:hidden">
         <button
-          className={`${
-            page === 1
-              ? "cursor-not-allowed bg-gray-200 text-gray-800"
-              : "bg-gray-600 text-gray-100"
-          } relative inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium`}
+          className="btn btn-sm btn-outline"
           disabled={page === 1}
           onClick={() => setPage(page - 1)}
         >
-          Previous
+          Anterior
         </button>
         <button
-          className={`${
-            page === totalPages
-              ? "cursor-not-allowed bg-gray-200 text-gray-800"
-              : "bg-gray-600 text-gray-100"
-          } relative ml-3 inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium`}
+          className="btn btn-sm btn-outline"
           disabled={page === totalPages}
           onClick={() => setPage(page + 1)}
         >
-          Next
+          Siguiente
         </button>
       </div>
 
       {/* Desktop version */}
-      <div className="wrapper flex w-full items-center justify-center">
-        <div className="hidden md:flex md:flex-col md:items-center md:justify-center">
-          <p className="text-sm text-gray-700">
-            Page <span className="font-medium">{page}</span> of{" "}
-            <span className="font-medium">{totalPages}</span>
-          </p>
-          <div className="mt-2">
-            <nav
-              className="relative z-0 inline-flex -space-x-px rounded-md shadow-sm"
-              aria-label="Pagination"
-            >
-              <button
-                className={`${
-                  page === 1 && "cursor-not-allowed"
-                } relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50`}
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
-                <span className="sr-only">Previous</span>
-                <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
+      <div className="hidden sm:flex sm:flex-col sm:items-center sm:justify-center">
+        <p className="text-sm text-base-content/60">
+          Página <span className="font-medium">{page}</span> de{" "}
+          <span className="font-medium">{totalPages}</span>
+        </p>
+        <div className="join mt-2" aria-label="Paginación">
+          <button
+            className="join-item btn btn-sm"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >
+            <span className="sr-only">Anterior</span>
+            <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
 
-              {renderPageNumbers().map((pageNumber, index) => (
-                <button
-                  key={index}
-                  className={`${
-                    page === pageNumber
-                      ? "bg-gray-600 text-gray-100"
-                      : "bg-white text-gray-500 hover:bg-gray-50"
-                  } relative inline-flex items-center border border-gray-300 px-4 py-2 text-sm font-medium`}
-                  onClick={() => {
-                    if (typeof pageNumber === "number") {
-                      setPage(pageNumber);
-                    }
-                  }}
-                  disabled={typeof pageNumber !== "number"}
-                >
-                  {pageNumber}
-                </button>
-              ))}
-
+          {renderPageNumbers().map((pageNumber, index) =>
+            typeof pageNumber === "number" ? (
               <button
-                className={`${
-                  page === totalPages && "cursor-not-allowed"
-                } relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50`}
-                disabled={page === totalPages}
-                onClick={() => setPage(page + 1)}
+                key={index}
+                className={`join-item btn btn-sm ${
+                  page === pageNumber ? "btn-primary" : ""
+                }`}
+                onClick={() => setPage(pageNumber)}
               >
-                <span className="sr-only">Next</span>
-                <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                {pageNumber}
               </button>
-            </nav>
-          </div>
+            ) : (
+              <span key={index} className="join-item btn btn-sm btn-disabled">
+                …
+              </span>
+            )
+          )}
+
+          <button
+            className="join-item btn btn-sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            <span className="sr-only">Siguiente</span>
+            <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </div>

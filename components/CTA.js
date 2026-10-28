@@ -6,13 +6,13 @@ import config from "@/config";
 // no se vea como un bloque de color distinto justo antes del Footer.
 const CTA = () => {
   return (
-    <section className="relative border-y border-base-content/10">
+    <section className="relative border-t border-base-content/10">
       <div className="hero">
-        <div className="hero-content text-center px-4 sm:px-8 py-20 md:py-28">
+        <div className="hero-content text-center px-5 sm:px-8 py-20 md:py-28">
           <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
-            <h2 className="font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight mb-4 md:mb-6">
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight mb-4 md:mb-6">
               El futuro del real estate ya acepta{" "}
-              <span className="text-gradient-gold">cripto</span>
+              <span className="text-primary">cripto</span>
             </h2>
             <p className="text-base sm:text-lg text-base-content/80 mb-8 md:mb-10 max-w-xl">
               Elige tu camino: lista tu propiedad, súmate como inversionista a

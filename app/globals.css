@@ -195,3 +195,21 @@ progress::-webkit-progress-value {
   background: color-mix(in oklab, var(--color-primary) 12%, transparent);
   color: var(--color-primary);
 }
+
+/* Display font para titulares (h1/h2) — ver layout.js */
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Sistema tipográfico unificado para TODO el sitio:
+   - h1/h2 → Sora (display, fintech). Esta regla por elemento cubre todas
+     las páginas (homepage, propiedades, blog, demo-ai, dashboard, admin,
+     legales) sin depender de que cada archivo repita la clase.
+   - h3+ y cuerpo → Inter (legibilidad).
+   - Logo → Playfair itálica (acento de marca, solo en logos).
+   `text-wrap: balance` evita huérfanas de una palabra en titulares. */
+h1,
+h2 {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  text-wrap: balance;
+}

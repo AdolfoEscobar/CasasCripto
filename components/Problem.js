@@ -1,63 +1,104 @@
-const Arrow = ({ extraStyle }) => {
-  return (
-    <svg
-      className={`shrink-0 w-12 fill-neutral-content opacity-70 ${extraStyle}`}
-      viewBox="0 0 138 138"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <g>
+const frictions = [
+  {
+    title: "Vendes en cripto, nadie te encuentra",
+    description:
+      "Los portales tradicionales no hablan el idioma crypto: tu propiedad queda invisible para el comprador global.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-6 h-6"
+      >
         <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M72.9644 5.31431C98.8774 43.8211 83.3812 88.048 54.9567 120.735C54.4696 121.298 54.5274 122.151 55.0896 122.639C55.6518 123.126 56.5051 123.068 56.9922 122.506C86.2147 88.9044 101.84 43.3918 75.2003 3.80657C74.7866 3.18904 73.9486 3.02602 73.3287 3.44222C72.7113 3.85613 72.5484 4.69426 72.9644 5.31431Z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
         />
+      </svg>
+    ),
+  },
+  {
+    title: "El banco frena la operación",
+    description:
+      "Fondos en cripto retenidos, semanas de compliance y papeleo que enfrían al comprador hasta matarlo.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-6 h-6"
+      >
         <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M56.5084 121.007C56.9835 118.685 57.6119 115.777 57.6736 115.445C59.3456 106.446 59.5323 97.67 58.4433 88.5628C58.3558 87.8236 57.6824 87.2948 56.9433 87.3824C56.2042 87.4699 55.6756 88.1435 55.7631 88.8828C56.8219 97.7138 56.6432 106.225 55.0203 114.954C54.926 115.463 53.5093 121.999 53.3221 123.342C53.2427 123.893 53.3688 124.229 53.4061 124.305C53.5887 124.719 53.8782 124.911 54.1287 125.015C54.4123 125.13 54.9267 125.205 55.5376 124.926C56.1758 124.631 57.3434 123.699 57.6571 123.487C62.3995 120.309 67.4155 116.348 72.791 113.634C77.9171 111.045 83.3769 109.588 89.255 111.269C89.9704 111.475 90.7181 111.057 90.9235 110.342C91.1288 109.626 90.7117 108.878 89.9963 108.673C83.424 106.794 77.3049 108.33 71.5763 111.223C66.2328 113.922 61.2322 117.814 56.5084 121.007Z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
         />
-      </g>
-    </svg>
-  );
-};
-const Step = ({ emoji, text }) => {
-  return (
-    <div className="w-full md:w-56 flex flex-col gap-2 items-center justify-center">
-      <span className="text-4xl">{emoji}</span>
-      <h3 className="font-bold">{text}</h3>
-    </div>
-  );
-};
+      </svg>
+    ),
+  },
+  {
+    title: "El deal se cae por el camino",
+    description:
+      "Sin un punto de encuentro claro, vendedor y comprador se pierden entre intermediarios que no entienden cripto.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-6 h-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    ),
+  },
+];
 
-// Problem Agitation: explica qué pasa hoy cuando alguien quiere comprar o
-// vender una propiedad usando criptomonedas, sin mencionar Casas Cripto.
+// Problem Agitation: qué pasa hoy cuando alguien quiere comprar o vender
+// una propiedad usando criptomonedas, sin mencionar Casas Cripto.
 const Problem = () => {
   return (
-    // Sin bg propio: toma el fondo ambiental único de la landing
-    // (app/page.js). Un borde sutil arriba/abajo basta para separarla visualmente.
-    <section className="border-y border-base-content/10">
-      <div className="max-w-7xl mx-auto px-8 py-16 md:py-32 text-center">
-        <h2 className="max-w-3xl mx-auto font-extrabold text-4xl md:text-5xl tracking-tight mb-6 md:mb-8">
-          Comprar o vender real estate con cripto hoy es lento y lleno de
-          fricción
+    // Separador superior hairline (igual que el resto de secciones).
+    <section className="border-t border-base-content/10">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 md:py-28 text-center">
+        <h2 className="font-display max-w-3xl mx-auto font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight">
+          Vender real estate en cripto hoy es lento y lleno de fricción
         </h2>
-        <p className="max-w-xl mx-auto text-lg opacity-90 leading-relaxed mb-12 md:mb-20">
-          Bancos que rechazan fondos en cripto, contratos manuales, cero
-          verificación y meses de espera. El dinero digital avanza, pero el
-          real estate sigue atrapado en el papeleo del siglo pasado.
+        <p className="max-w-xl mx-auto text-base sm:text-lg opacity-70 leading-relaxed mt-5 mb-12 md:mb-16">
+          El dinero digital avanza, pero el real estate sigue atrapado en el
+          papeleo del siglo pasado.
         </p>
 
-        <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-6">
-          <Step emoji="💸" text="Vendedor cripto-friendly sin visibilidad global" />
-
-          <Arrow extraStyle="max-md:-scale-x-100 md:-rotate-90" />
-
-          <Step emoji="🏦" text="Banco rechaza o retrasa fondos en cripto" />
-
-          <Arrow extraStyle="md:-scale-x-100 md:-rotate-90" />
-
-          <Step emoji="😤" text="Comprador pierde la propiedad y la confianza" />
+        <div className="grid md:grid-cols-3 gap-8 md:gap-0 md:divide-x md:divide-base-content/10 text-left">
+          {frictions.map((f, i) => (
+            <div
+              key={f.title}
+              className="border-t border-base-content/10 pt-6 md:border-t-0 md:pt-0 md:px-8 md:first:pl-0 md:last:pr-0"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex items-center justify-center w-11 h-11 rounded-full border border-base-content/15 text-primary shrink-0">
+                  {f.icon}
+                </span>
+                <span className="font-mono text-sm font-semibold text-base-content/40">
+                  0{i + 1}
+                </span>
+              </div>
+              <h3 className="font-bold text-lg mt-4">{f.title}</h3>
+              <p className="text-sm opacity-70 leading-relaxed mt-2">
+                {f.description}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

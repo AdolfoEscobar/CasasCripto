@@ -9,6 +9,19 @@ import { checkAiRateLimit, AI_LIMITS, getClientIp } from "@/libs/aiRateLimit";
 // un tope mucho más bajo que la versión autenticada — ver libs/aiRateLimit.js.
 export async function POST(req) {
   try {
+    // Validación primero (gratis): un request malformado no debe consumir
+    // cuota de IA — ver app/api/ai/public/privacy-scan/route.js.
+    const body = await req.json();
+    const { rawNotes, city, state, country, price, currency, cryptoAccepted } =
+      body;
+
+    if (!city || !country || price === undefined || price === null || price === "") {
+      return NextResponse.json(
+        { error: "Ciudad, país y precio son necesarios para generar el copy" },
+        { status: 400 }
+      );
+    }
+
     const ip = getClientIp(req);
     const { allowed, remaining } = await checkAiRateLimit({
       key: `ip:${ip}`,
@@ -22,17 +35,6 @@ export async function POST(req) {
             "Límite de la demo pública alcanzado por hoy. Crea una cuenta gratis para seguir probando desde tu dashboard.",
         },
         { status: 429 }
-      );
-    }
-
-    const body = await req.json();
-    const { rawNotes, city, state, country, price, currency, cryptoAccepted } =
-      body;
-
-    if (!city || !country || price === undefined || price === null || price === "") {
-      return NextResponse.json(
-        { error: "Ciudad, país y precio son necesarios para generar el copy" },
-        { status: 400 }
       );
     }
 

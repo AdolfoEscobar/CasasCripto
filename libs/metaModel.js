@@ -19,14 +19,27 @@ const META_MODEL_API_KEY = process.env.MODEL_API_KEY;
 export const isMetaModelConfigured = () => Boolean(META_MODEL_API_KEY);
 
 async function metaFetch(path, options = {}) {
-  const res = await fetch(`${META_MODEL_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${META_MODEL_API_KEY}`,
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
+  let res;
+  try {
+    res = await fetch(`${META_MODEL_BASE_URL}${path}`, {
+      ...options,
+      // Las generaciones de imagen reales tardan ~13s; 90s deja colchón de
+      // sobra sin colgar la request eternamente si Meta se queda pegado.
+      signal: options.signal || AbortSignal.timeout(90000),
+      headers: {
+        Authorization: `Bearer ${META_MODEL_API_KEY}`,
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
+  } catch (e) {
+    if (e?.name === "TimeoutError" || e?.name === "AbortError") {
+      const err = new Error(`Meta Model API ${path} → timeout`);
+      err.code = "meta_timeout";
+      throw err;
+    }
+    throw e;
+  }
 
   if (!res.ok) {
     const bodyText = await res.text().catch(() => "");

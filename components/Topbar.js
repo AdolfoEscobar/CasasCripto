@@ -23,7 +23,7 @@ const Topbar = () => {
   const { status } = useSession();
 
   return (
-    <div className="sticky top-0 z-30 hidden lg:flex items-center justify-between gap-4 px-6 py-3 glass-card border-b border-primary/15">
+    <div className="sticky top-0 z-30 hidden lg:flex items-center justify-between gap-4 px-6 py-3 bg-base-100/85 backdrop-blur-xl border-b border-base-content/10">
       <nav className="flex items-center gap-1 text-sm font-medium">
         {quickLinks.map((link) => {
           const isActive =

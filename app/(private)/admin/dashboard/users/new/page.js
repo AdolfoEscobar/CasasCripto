@@ -33,8 +33,8 @@ export default function NewUserPage() {
           <div className="card-body">
             <div className="flex justify-between items-center pb-4">
               <div>
-                <h1 className="text-3xl font-bold">Agregar Usuario 👤</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl font-bold">Agregar usuario</h1>
+                <p className="text-base-content/60">
                   Crear una nueva cuenta de usuario
                 </p>
               </div>

@@ -1,257 +1,143 @@
-"use client";
-
-import { useState, useRef } from "react";
+import Link from "next/link";
 import Image from "next/image";
+import config from "@/config";
 
-// Características reales de Casas Cripto. Las marcadas con "(roadmap)" en la
-// descripción todavía no están construidas — ver claude-instructions.md /
-// .cursorrules para el estado exacto de implementación de cada una.
-const features = [
+const steps = [
   {
-    title: "Pagos en criptomonedas",
+    number: "01",
+    title: "Lista tu propiedad gratis",
     description:
-      "Acepta USDC, USDT, BTC y ETH directamente en el checkout, con conversión opcional a fiat y liquidación en menos de 48 horas (vía Stripe hoy; wallets on-chain en roadmap).",
-    type: "image",
-    path: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=1200&q=80",
-    alt: "Pagos en criptomonedas",
-    svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"
-        />
-      </svg>
-    ),
+      "Publica en minutos e indica qué aceptas: USDC, USDT, BTC o ETH. Revisamos cada ficha a mano antes de publicarla. Sin tarjeta, sin letra chica.",
   },
   {
-    title: "Marketplace global de propiedades",
+    number: "02",
+    title: "Recibe compradores que ya tienen cripto",
     description:
-      "Publica y descubre propiedades filtrando por país, moneda aceptada y tipo de inmueble. Pensado para compradores que invierten desde cualquier parte del mundo.",
-    type: "image",
-    path: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
-    alt: "Marketplace global de propiedades",
-    svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 21a9 9 0 100-18 9 9 0 000 18zM3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 000 18M12.5 3a17 17 0 010 18"
-        />
-      </svg>
-    ),
+      "Filtros por país, ciudad y moneda. El inversionista global encuentra tu propiedad sin bancos que bloqueen o retrasen sus fondos.",
   },
   {
-    title: "Verificación y cumplimiento",
+    number: "03",
+    title: "Nosotros intermediamos el cierre",
     description:
-      "Autenticación segura (Google / magic link), roles y permisos (usuario, agente, admin) y preparación para flujos de KYC/AML antes de cerrar una operación.",
-    svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Panel para propietarios, agentes y admins",
-    description:
-      "Gestiona listados, suscripción y leads desde un dashboard; el equipo de Casas Cripto administra usuarios y roles desde un panel admin con control de acceso (RBAC).",
-    svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Custodia & smart contracts",
-    description:
-      "(Roadmap) Depósitos en garantía (escrow) respaldados por contratos inteligentes auditados, para proteger a comprador y vendedor hasta que la operación se cierra.",
-    svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 1.5c-3.6 2.1-6 2.1-7.5 2.1v8.1c0 5.1 3.6 8.4 7.5 10.8 3.9-2.4 7.5-5.7 7.5-10.8V3.6c-1.5 0-3.9 0-7.5-2.1z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Token $CASA",
-    description:
-      "(Roadmap) Utilidad futura dentro del ecosistema: descuentos en comisiones, gobernanza y recompensas. Su lanzamiento depende de validación legal — ver sección Token.",
-    svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
+      "Calificamos el lead, conectamos a ambas partes y acompañamos la negociación. Humano y simple en el MVP; la automatización vendrá después.",
   },
 ];
 
-// Accordion accesible y SEO-friendly con el título y descripción (al abrir).
-const Item = ({ feature, isOpen, setFeatureSelected }) => {
-  const accordion = useRef(null);
-  const { title, description, svg } = feature;
-
-  return (
-    <li>
-      <button
-        className="relative flex gap-2 items-center w-full py-5 text-base font-medium text-left md:text-lg"
-        onClick={(e) => {
-          e.preventDefault();
-          setFeatureSelected();
-        }}
-        aria-expanded={isOpen}
-      >
-        <span className={`duration-100 ${isOpen ? "text-primary" : ""}`}>
-          {svg}
-        </span>
-        <span
-          className={`flex-1 text-base-content ${
-            isOpen ? "text-primary font-semibold" : ""
-          }`}
-        >
-          <h3 className="inline">{title}</h3>
-        </span>
-      </button>
-
-      <div
-        ref={accordion}
-        className={`transition-all duration-300 ease-in-out text-base-content-secondary overflow-hidden`}
-        style={
-          isOpen
-            ? { maxHeight: accordion?.current?.scrollHeight, opacity: 1 }
-            : { maxHeight: 0, opacity: 0 }
-        }
-      >
-        <div className="pb-5 leading-relaxed">{description}</div>
-      </div>
-    </li>
-  );
-};
-
-// Muestra la imagen de la característica seleccionada (si tiene).
-const Media = ({ feature }) => {
-  const { type, path, alt } = feature;
-  const style = "rounded-2xl aspect-square w-full sm:w-[26rem]";
-  const size = {
-    width: 500,
-    height: 500,
-  };
-
-  if (type === "image") {
-    return (
-      <Image
-        src={path}
-        alt={alt}
-        className={`${style} object-cover object-center glow-primary`}
-        width={size.width}
-        height={size.height}
-      />
-    );
-  } else {
-    return (
-      <div
-        className={`${style} glass-card flex items-center justify-center text-5xl`}
-      >
-        {feature.title === "Custodia & smart contracts"
-          ? "🔐"
-          : feature.title === "Token $CASA"
-          ? "🪙"
-          : feature.title.includes("Verificación")
-          ? "✅"
-          : "📊"}
-      </div>
-    );
-  }
-};
-
-// Acordeón de 2 a 6 características. Por defecto, la primera está abierta.
+// Sección "cómo funciona" del landing. Posicionamiento deliberado para el
+// MVP: Casas Cripto es un directorio Web3 de propiedades + intermediación
+// humana, no un banco, un exchange ni una plataforma de custodia. El copy
+// evita prometer escrow, KYC automático o el token $CASA (todo roadmap).
 const FeaturesAccordion = () => {
-  const [featureSelected, setFeatureSelected] = useState(0);
-
   return (
-    // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section
-      className="py-24 md:py-32 space-y-24 md:space-y-32 max-w-7xl mx-auto scroll-mt-20"
-      id="features"
-    >
-      <div className="px-8">
-        <h2 className="font-extrabold text-3xl sm:text-4xl lg:text-6xl tracking-tight mb-12 md:mb-24">
-          Todo lo que necesitas para operar{" "}
-          <span className="inline bg-neutral text-neutral-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed box-decoration-break-clone">
-            real estate con cripto
-          </span>
-        </h2>
-        <div className=" flex flex-col md:flex-row gap-12 md:gap-24">
-          <div className="grid grid-cols-1 items-stretch gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
-            <ul className="w-full">
-              {features.map((feature, i) => (
-                <Item
-                  key={feature.title}
-                  index={i}
-                  feature={feature}
-                  isOpen={featureSelected === i}
-                  setFeatureSelected={() => setFeatureSelected(i)}
-                />
-              ))}
-            </ul>
+    <section id="features" className="scroll-mt-20 border-t border-base-content/10">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 md:py-28">
+        <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-16 items-start">
+          {/* Intro editorial */}
+          <div>
+            <span className="badge badge-elite font-medium text-xs sm:text-sm">
+              MVP en vivo · Directorio Web3
+            </span>
 
-            <Media feature={features[featureSelected]} key={featureSelected} />
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-[2.75rem] tracking-tight leading-[1.1] mt-5">
+              El directorio donde el real estate se encuentra con{" "}
+              <span className="text-primary">cripto</span>
+            </h2>
+
+            <p className="text-base sm:text-lg opacity-70 leading-relaxed mt-5 max-w-xl">
+              No somos un banco ni un exchange. Somos el punto de encuentro:
+              propiedades verificadas que aceptan criptomonedas y un equipo
+              que intermedia para que el deal se cierre.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-8">
+              <Link
+                href="/propiedades"
+                className="btn btn-primary sm:btn-wide"
+              >
+                Explorar propiedades
+              </Link>
+              <Link
+                href={config.auth.callbackUrl}
+                className="btn btn-outline sm:btn-wide border-base-content/20"
+              >
+                Publicar gratis
+              </Link>
+            </div>
+
+            <p className="text-sm opacity-70 leading-relaxed mt-8 pt-6 border-t border-base-content/10 max-w-xl">
+              <span className="font-semibold text-base-content">
+                Para inversionistas:{" "}
+              </span>
+              ingresos desde el día uno con Premium y destacados, comisión
+              por cierre en roadmap. Cada listado es una página que atrae
+              tráfico orgánico gratis.
+            </p>
           </div>
+
+          {/* Visual: una ficha del directorio, sin mockups de producto falso */}
+          <figure className="lg:sticky lg:top-24">
+            <div className="relative overflow-hidden rounded-xl border border-base-content/10">
+              <Image
+                src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1400&q=80"
+                alt="Ejemplo de propiedad listada en el directorio de Casas Cripto"
+                className="w-full aspect-[4/3] object-cover"
+                width={700}
+                height={525}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-base-100/95 via-base-100/20 to-transparent" />
+              <span className="absolute top-4 left-4 badge badge-sm font-semibold bg-base-100/90 border-base-content/15">
+                Verificada
+              </span>
+              <figcaption className="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between gap-4">
+                <div>
+                  <p className="font-bold text-lg leading-tight">
+                    Villa frente al mar
+                  </p>
+                  <p className="text-sm opacity-70">Tulum, México</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-extrabold text-primary">US$ 480,000</p>
+                  <p className="text-xs opacity-70 mt-0.5">
+                    Acepta USDC · BTC
+                  </p>
+                </div>
+              </figcaption>
+            </div>
+            <p className="text-xs opacity-50 mt-3">
+              Ficha ilustrativa del directorio — fotografía de referencia.
+            </p>
+          </figure>
         </div>
+
+        {/* 3 pasos en lista editorial con divisores, sin tarjetas */}
+        <ol className="mt-16 md:mt-20 grid md:grid-cols-3 gap-8 md:gap-0 md:divide-x md:divide-base-content/10">
+          {steps.map((step) => (
+            <li
+              key={step.number}
+              className="border-t border-base-content/10 pt-6 md:border-t-0 md:pt-0 md:px-8 md:first:pl-0 md:last:pr-0"
+            >
+              <span className="font-mono text-sm font-semibold text-primary">
+                {step.number}
+              </span>
+              <h3 className="font-bold text-lg mt-2">{step.title}</h3>
+              <p className="text-sm opacity-70 leading-relaxed mt-2">
+                {step.description}
+              </p>
+              <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-success">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-success" />
+                Disponible hoy
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-12 text-sm opacity-60 max-w-2xl leading-relaxed">
+          Sin custodia, sin token, sin humo — todavía. Primero el directorio
+          que funciona, después la infraestructura.{" "}
+          <a href="#token" className="link link-primary">
+            Ver roadmap
+          </a>
+        </p>
       </div>
     </section>
   );

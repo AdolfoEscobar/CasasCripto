@@ -12,9 +12,9 @@ export const metadata = getSEOTags({
 });
 
 const trustPoints = [
-  "Propiedades verificadas por nuestro equipo",
-  "Pagos en USDC, USDT, BTC y ETH",
-  "Panel para gestionar listados e inversiones",
+  "Directorio de propiedades verificadas",
+  "Fichas que aceptan USDC, USDT, BTC y ETH",
+  "Publica gratis y recibe compradores globales",
 ];
 
 // Split-screen, "elite fintech" login: brand/pitch panel on the left (hidden
@@ -58,9 +58,9 @@ export default function SignInPage() {
           <p className="badge badge-elite mb-4">
             Ronda {config.investors.stage}
           </p>
-          <h2 className="text-3xl font-extrabold leading-tight">
-            El real estate elite que ya opera en{" "}
-            <span className="text-gradient-crypto">criptomonedas</span>.
+          <h2 className="text-3xl font-extrabold leading-tight tracking-tight">
+            El directorio de propiedades que aceptan{" "}
+            <span className="text-primary">cripto</span>.
           </h2>
           <p className="mt-5 text-base text-base-content/75">
             Conecta con propietarios crypto-friendly, compradores e

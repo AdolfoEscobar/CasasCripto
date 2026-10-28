@@ -13,145 +13,114 @@ const accentFont = Playfair_Display({
   weight: ["600", "700"],
 });
 
-// Add the Footer to the bottom of your landing page and more.
-// The support link is connected to the config.js file. If there's no config.resend.supportEmail, the link won't be displayed.
+const columns = [
+  {
+    title: "Links",
+    links: [
+      ...(config.resend.supportEmail
+        ? [
+            {
+              label: "Soporte",
+              href: `mailto:${config.resend.supportEmail}`,
+              external: true,
+            },
+          ]
+        : []),
+      { label: "Características", href: "/#features" },
+      { label: "Planes", href: "/#pricing" },
+      { label: "Blog", href: "/blog" },
+    ],
+  },
+  {
+    title: "Compañía",
+    links: [
+      { label: "Invertir", href: "/#invertir" },
+      { label: "Token $CASA", href: "/#token" },
+      {
+        label: "Contacto inversionistas",
+        href: `mailto:${config.investors.contactEmail}`,
+        external: true,
+      },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Términos de servicio", href: "/tos" },
+      { label: "Política de privacidad", href: "/privacy-policy" },
+    ],
+  },
+];
 
+// Footer apilado (marca → columnas → legal): en desktop el sidebar come
+// 288px, así que marca + 3 columnas lado a lado quedaba apretado (~139px
+// por columna a 1024px). Apilado respira igual en móvil, tablet y desktop.
 const Footer = () => {
   return (
-    // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
+    // Sin bg propio: toma el fondo ambiental único del sitio.
     <footer className="border-t border-base-content/10">
-      <div className="max-w-7xl mx-auto px-8 py-24">
-        <div className=" flex lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col">
-          <div className="w-64 flex-shrink-0 md:mx-0 mx-auto text-center md:text-left">
-            <Link
-              href="/#"
-              aria-current="page"
-              className="flex gap-2 justify-center md:justify-start items-center"
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20 flex flex-col gap-10 md:gap-12">
+        <div className="text-center sm:text-left">
+          <Link
+            href="/"
+            title={`${config.appName} homepage`}
+            className="inline-flex gap-2 items-center"
+          >
+            <Image
+              src={logo}
+              alt={`${config.appName} logo`}
+              className="w-6 h-6"
+              width={24}
+              height={24}
+            />
+            <strong
+              className={`${accentFont.className} italic tracking-wide text-gradient-gold leading-tight text-lg`}
             >
-              <Image
-                src={logo}
-                alt={`${config.appName} logo`}
-                priority={true}
-                className="w-6 h-6"
-                width={24}
-                height={24}
-              />
-              <strong
-                className={`${accentFont.className} italic tracking-wide text-gradient-gold leading-tight text-base md:text-lg`}
-              >
-                {config.appName}
-              </strong>
-            </Link>
+              {config.appName}
+            </strong>
+          </Link>
 
-            <p className="mt-3 text-sm text-base-content/80">
-              {config.tagline}
-            </p>
-            <p className="mt-3 text-sm text-base-content/60">
-              Copyright © {new Date().getFullYear()} - Todos los derechos
-              reservados
-            </p>
+          <p className="mt-3 text-sm text-base-content/80">{config.tagline}</p>
+          <p className="mt-2 text-sm text-base-content/60">
+            Copyright © {new Date().getFullYear()} - Todos los derechos
+            reservados
+          </p>
+        </div>
 
-            <div className="mt-4 flex gap-3 justify-center md:justify-start">
-              <a
-                href="#"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="X (Twitter)"
-                className="btn btn-circle btn-sm btn-ghost"
-              >
-                𝕏
-              </a>
-              <a
-                href="#"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="LinkedIn"
-                className="btn btn-circle btn-sm btn-ghost"
-              >
-                in
-              </a>
-              <a
-                href="#"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Telegram"
-                className="btn btn-circle btn-sm btn-ghost"
-              >
-                ✈
-              </a>
-            </div>
-          </div>
-          <div className="flex-grow flex flex-wrap justify-center -mb-10 md:mt-0 mt-10 text-center">
-            <div className="lg:w-1/3 md:w-1/2 w-full px-4">
-              <div className="footer-title font-semibold text-base-content tracking-widest text-sm md:text-left mb-3">
-                LINKS
-              </div>
-
-              <div className="flex flex-col justify-center items-center md:items-start gap-2 mb-10 text-sm">
-                {config.resend.supportEmail && (
-                  <a
-                    href={`mailto:${config.resend.supportEmail}`}
-                    target="_blank"
-                    className="link link-hover"
-                    aria-label="Contact Support"
-                  >
-                    Soporte
-                  </a>
+        <nav
+          aria-label="Footer"
+          className="grid grid-cols-2 sm:grid-cols-3 gap-8"
+        >
+          {columns.map((col) => (
+            <div key={col.title}>
+              <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">
+                {col.title}
+              </p>
+              <ul className="flex flex-col items-start gap-2 text-sm">
+                {col.links.map((link) =>
+                  link.external ? (
+                    <li key={link.label}>
+                      <a href={link.href} className="link link-hover">
+                        {link.label}
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={link.label}>
+                      <Link href={link.href} className="link link-hover">
+                        {link.label}
+                      </Link>
+                    </li>
+                  )
                 )}
-                <Link href="/#features" className="link link-hover">
-                  Características
-                </Link>
-                <Link href="/#pricing" className="link link-hover">
-                  Planes
-                </Link>
-                <Link href="/blog" className="link link-hover">
-                  Blog
-                </Link>
-              </div>
+              </ul>
             </div>
+          ))}
+        </nav>
 
-            <div className="lg:w-1/3 md:w-1/2 w-full px-4">
-              <div className="footer-title font-semibold text-base-content tracking-widest text-sm md:text-left mb-3">
-                COMPAÑÍA
-              </div>
-
-              <div className="flex flex-col justify-center items-center md:items-start gap-2 mb-10 text-sm">
-                <Link href="/#invertir" className="link link-hover">
-                  Invertir
-                </Link>
-                <Link href="/#token" className="link link-hover">
-                  Token $CASA
-                </Link>
-                <a
-                  href={`mailto:${config.investors.contactEmail}`}
-                  className="link link-hover"
-                >
-                  Contacto inversionistas
-                </a>
-              </div>
-            </div>
-
-            <div className="lg:w-1/3 md:w-1/2 w-full px-4">
-              <div className="footer-title font-semibold text-base-content tracking-widest text-sm md:text-left mb-3">
-                LEGAL
-              </div>
-
-              <div className="flex flex-col justify-center items-center md:items-start gap-2 mb-10 text-sm">
-                <Link href="/tos" className="link link-hover">
-                  Términos de servicio
-                </Link>
-                <Link href="/privacy-policy" className="link link-hover">
-                  Política de privacidad
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-base-content/10 pt-8 mt-4">
-            <p className="text-xs text-base-content/50 leading-relaxed max-w-4xl">
-              ⚠️ {config.legal.disclaimer}
-            </p>
-          </div>
+        <div className="border-t border-base-content/10 pt-6">
+          <p className="text-xs text-base-content/50 leading-relaxed max-w-4xl">
+            {config.legal.disclaimer}
+          </p>
         </div>
       </div>
     </footer>

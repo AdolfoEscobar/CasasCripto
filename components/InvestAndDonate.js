@@ -15,13 +15,15 @@ const InvestAndDonate = () => {
 
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section className="border-y border-base-content/10 scroll-mt-20" id="invertir">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-20 sm:py-24 md:py-32">
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-          <p className="font-medium text-primary mb-3">Para inversionistas</p>
-          <h2 className="font-extrabold text-3xl md:text-5xl tracking-tight mb-4">
-            Únete a la ronda <span className="text-gradient-gold">{stage}</span>{" "}
-            de {config.appName}
+    <section className="border-t border-base-content/10 scroll-mt-20" id="invertir">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-20 md:py-28">
+        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-14">
+          <p className="text-sm font-semibold text-primary mb-3">
+            Para inversionistas
+          </p>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">
+            Únete a la ronda <span className="text-primary">{stage}</span> de{" "}
+            {config.appName}
           </h2>
           <p className="opacity-80 leading-relaxed">
             Buscamos inversionistas ángeles y fondos early-stage que quieran
@@ -30,7 +32,7 @@ const InvestAndDonate = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 md:mb-12">
           {highlights.map((h) => (
             <div key={h.label} className="glass-card rounded-2xl p-5">
               <p className="text-xs uppercase tracking-wide opacity-60 mb-1">

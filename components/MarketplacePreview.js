@@ -3,18 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import ButtonLead from "./ButtonLead";
+import config from "@/config";
 import VerifiedBadge from "./VerifiedBadge";
 
-// Casas Cripto todavía no tiene un modelo Property/Listing ni inventario real
-// (ver .cursorrules). Esta sección NO pretende mostrar propiedades reales —
-// es una vista previa / mockup de cómo lucirá el marketplace (Fase 2 del
-// roadmap, ver <TokenRoadmap/>). El diseño está inspirado deliberadamente en
-// marketplaces Web3 ya establecidos y de confianza (OpenSea y similares:
-// banner destacado + grid de tendencias + ticker + badges verificados) para
-// que el producto se sienta tan real y confiable como esas plataformas,
-// pero cada dato sigue etiquetado como "Vista previa" / "Mockup" / "Ilustrativo"
-// para no implicar tracción, inventario o feeds en vivo que no existen.
+// El directorio real vive en /propiedades (modelo Property + APIs ya
+// implementados). Esta sección muestra el DISEÑO de una ficha con datos de
+// ejemplo — banner destacado + tendencias + ticker estilo marketplace Web3
+// (OpenSea y similares) — etiquetados como "Vista previa" / "Ilustrativo"
+// para no implicar que son propiedades reales ni cotizaciones en vivo.
 const mockProperties = [
   {
     title: "Villa frente al mar",
@@ -256,29 +252,26 @@ const MarketplacePreview = () => {
       : mockProperties.filter((p) => p.type === activeCategory);
 
   return (
-    // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section id="marketplace-preview" className="scroll-mt-20">
+    // Sin bg propio: toma el fondo ambiental único de la landing.
+    <section id="marketplace-preview" className="scroll-mt-20 border-t border-base-content/10">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-4">
-          <p className="font-medium text-primary mb-3">Próximamente</p>
-          <h2 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">
-            Así se verá tu propiedad en el marketplace
+          <p className="text-sm font-semibold text-primary mb-3">
+            El directorio
+          </p>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">
+            Así se ve tu propiedad en el directorio
           </h2>
           <p className="opacity-70 leading-relaxed">
-            El marketplace de búsqueda y publicación está en construcción
-            (Fase 2 de nuestro{" "}
-            <a href="#token" className="link link-primary">
-              roadmap
-            </a>
-            ). Todo lo que ves aquí —banner, tendencias, precios y el ticker
-            de cryptos— es un mockup ilustrativo del producto, no propiedades
-            reales, inventario ni cotizaciones en vivo.
+            Fichas claras con precio, ubicación y criptos aceptadas. Lo de
+            abajo son ejemplos ilustrativos del diseño — el directorio real
+            ya está en vivo y puedes publicar gratis.
           </p>
           <Link
             href="/propiedades"
             className="link link-primary text-sm font-medium inline-block mt-3"
           >
-            Ver propiedades publicadas →
+            Explorar el directorio en vivo →
           </Link>
         </div>
 
@@ -326,7 +319,7 @@ const MarketplacePreview = () => {
         </div>
 
         {/* ticker de cryptos aceptadas, estilo "tokens en tendencia" */}
-        <div className="glass-card rounded-2xl p-4 sm:p-5 mb-14">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 mb-10">
           <p className="font-semibold text-sm uppercase tracking-wider opacity-60 mb-3">
             Cryptos que aceptará el marketplace
           </p>
@@ -361,22 +354,30 @@ const MarketplacePreview = () => {
           </p>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 justify-between max-w-4xl mx-auto">
+        <div className="rounded-2xl border border-base-content/10 bg-base-200/50 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 justify-between max-w-4xl mx-auto">
           <div className="text-center sm:text-left">
             <p className="font-bold text-lg mb-1">
-              ¿Quieres ser de los primeros en publicar?
+              ¿Tienes una propiedad crypto-friendly?
             </p>
             <p className="text-sm opacity-70">
-              Únete a la lista de espera y te avisamos en cuanto el
-              marketplace esté listo para recibir propiedades.
+              Publícala gratis en minutos y empieza a recibir compradores
+              globales. Sin tarjeta, con revisión manual.
             </p>
           </div>
-          <ButtonLead
-            source="marketplace_waitlist"
-            extraStyle="sm:max-w-xs shrink-0"
-            buttonLabel="Avísenme"
-            successMessage="¡Listo! Te avisaremos en cuanto el marketplace esté disponible."
-          />
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
+            <Link
+              href={config.auth.callbackUrl}
+              className="btn btn-primary w-full sm:w-auto"
+            >
+              Publicar gratis
+            </Link>
+            <Link
+              href="/propiedades"
+              className="btn btn-outline border-base-content/20 w-full sm:w-auto"
+            >
+              Ver directorio
+            </Link>
+          </div>
         </div>
       </div>
     </section>

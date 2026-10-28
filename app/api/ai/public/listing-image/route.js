@@ -7,6 +7,16 @@ import { checkAiRateLimit, AI_LIMITS, getClientIp } from "@/libs/aiRateLimit";
 // porque generar imágenes es el uso más costoso de los tres.
 export async function POST(req) {
   try {
+    // Validación primero (gratis): un request malformado no debe consumir
+    // cuota de IA — ver app/api/ai/public/privacy-scan/route.js.
+    const { prompt } = await req.json();
+    if (!prompt || prompt.trim().length < 5) {
+      return NextResponse.json(
+        { error: "Describe la imagen que quieres generar" },
+        { status: 400 }
+      );
+    }
+
     const ip = getClientIp(req);
     const { allowed, remaining } = await checkAiRateLimit({
       key: `ip:${ip}`,
@@ -20,14 +30,6 @@ export async function POST(req) {
             "Límite de la demo pública alcanzado por hoy. Crea una cuenta gratis para seguir probando desde tu dashboard.",
         },
         { status: 429 }
-      );
-    }
-
-    const { prompt } = await req.json();
-    if (!prompt || prompt.trim().length < 5) {
-      return NextResponse.json(
-        { error: "Describe la imagen que quieres generar" },
-        { status: 400 }
       );
     }
 

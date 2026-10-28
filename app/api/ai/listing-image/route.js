@@ -15,6 +15,16 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Validación primero (gratis): un request malformado no debe consumir
+    // cuota — ver app/api/ai/public/privacy-scan/route.js.
+    const { prompt } = await req.json();
+    if (!prompt || prompt.trim().length < 5) {
+      return NextResponse.json(
+        { error: "Describe la imagen que quieres generar" },
+        { status: 400 }
+      );
+    }
+
     const { allowed } = await checkAiRateLimit({
       key: `user:${session.user.id}`,
       action: "listing-image",
@@ -24,14 +34,6 @@ export async function POST(req) {
       return NextResponse.json(
         { error: "Alcanzaste el límite diario de imágenes con IA. Intenta mañana." },
         { status: 429 }
-      );
-    }
-
-    const { prompt } = await req.json();
-    if (!prompt || prompt.trim().length < 5) {
-      return NextResponse.json(
-        { error: "Describe la imagen que quieres generar" },
-        { status: 400 }
       );
     }
 

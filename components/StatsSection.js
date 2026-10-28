@@ -1,23 +1,23 @@
 const stats = [
   {
-    value: "100%",
-    label: "MVP funcional",
-    detail: "Auth, suscripciones, panel admin y pagos ya construidos",
+    value: "Hoy",
+    label: "Directorio en vivo",
+    detail: "Publicación, búsqueda y leads funcionando",
   },
   {
     value: "4",
-    label: "Criptomonedas soportadas",
-    detail: "USDC, USDT, BTC y ETH en el checkout",
+    label: "Criptos por ficha",
+    detail: "USDC, USDT, BTC y ETH en cada propiedad",
   },
   {
-    value: "<48h",
-    label: "Liquidación objetivo",
-    detail: "vs. 30-60 días del sistema bancario tradicional",
+    value: "$299",
+    label: "Premium para agentes",
+    detail: "MXN/mes: destaca y escala tu portafolio",
   },
   {
-    value: "2",
-    label: "Modelos de monetización activos",
-    detail: "Suscripción SaaS + donaciones; comisión por cierre en roadmap",
+    value: "1.5%",
+    label: "Comisión por cierre",
+    detail: "En roadmap sobre operaciones intermediadas",
   },
 ];
 
@@ -27,23 +27,25 @@ const stats = [
 // la credibilidad frente a cualquier due diligence.
 const StatsSection = () => {
   return (
-    // Sin bg propio: toma el fondo ambiental único de la landing (app/page.js).
-    <section className="border-y border-base-content/10">
-      <div className="max-w-7xl mx-auto px-8 py-16 md:py-20">
-        <div className="text-center mb-12 max-w-2xl mx-auto">
-          <p className="font-medium text-primary mb-3">Por qué ahora</p>
-          <h2 className="font-bold text-3xl md:text-4xl tracking-tight">
-            Construimos la infraestructura antes de pedir el cheque
+    // Sin bg propio: toma el fondo ambiental único de la landing.
+    <section className="border-t border-base-content/10">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20">
+        <div className="text-center mb-10 md:mb-12 max-w-2xl mx-auto">
+          <p className="text-sm font-semibold text-primary mb-3">
+            Tracción real, sin humo
+          </p>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
+            Construimos el producto antes de pedir el cheque
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {stats.map((s) => (
             <div
               key={s.label}
-              className="glass-card rounded-2xl p-6 text-center flex flex-col gap-1"
+              className="rounded-2xl border border-base-content/10 bg-base-200/50 p-6 text-center flex flex-col gap-1"
             >
-              <span className="text-3xl md:text-4xl font-extrabold text-gradient-gold">
+              <span className="font-display text-3xl md:text-4xl font-extrabold text-primary">
                 {s.value}
               </span>
               <span className="font-semibold text-sm md:text-base">

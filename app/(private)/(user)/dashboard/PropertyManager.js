@@ -358,9 +358,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       });
       setAiPrivacyResult(res.data);
       if (res.data.mock) {
-        toast("Vista previa — conecta MODEL_API_KEY para analizar con SAM 3.1", {
-          icon: "🛡️",
-        });
+        toast("Vista previa — conecta MODEL_API_KEY para analizar con SAM 3.1");
       } else if (res.data.hasSensitiveContent) {
         toast.error("SAM 3.1 detectó contenido sensible en la foto");
       } else {
@@ -411,7 +409,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
               El resultado siempre queda editable antes de enviar. */}
           <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 space-y-2">
             <p className="text-sm font-semibold flex items-center gap-2">
-              ✨ Redactar con Meta AI
+              Redactar con Meta AI
               <span className="badge badge-xs badge-secondary badge-outline">
                 Muse Spark
               </span>
@@ -432,7 +430,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
               {aiCopyLoading ? (
                 <span className="loading loading-spinner loading-xs" />
               ) : (
-                "✨ Generar título y descripción"
+                "Generar título y descripción"
               )}
             </button>
           </div>
@@ -579,7 +577,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
           <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-3">
             <div className="space-y-2">
               <p className="text-sm font-semibold flex items-center gap-2">
-                🎨 Generar imagen con Meta AI
+                Generar imagen con Meta AI
                 <span className="badge badge-xs badge-accent badge-outline">
                   Muse Image
                 </span>
@@ -601,7 +599,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                   {aiImageLoading ? (
                     <span className="loading loading-spinner loading-xs" />
                   ) : (
-                    "🎨 Generar"
+                    "Generar imagen"
                   )}
                 </button>
               </div>
@@ -609,7 +607,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
 
             <div className="space-y-2 pt-1 border-t border-accent/20">
               <p className="text-sm font-semibold flex items-center gap-2">
-                🛡️ Revisar privacidad de la primera foto
+                Revisar privacidad de la primera foto
                 <span className="badge badge-xs badge-accent badge-outline">
                   SAM 3.1
                 </span>
@@ -623,7 +621,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                 {aiPrivacyLoading ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : (
-                  "🛡️ Escanear"
+                  "Escanear imagen"
                 )}
               </button>
               {aiPrivacyResult && (
@@ -639,10 +637,10 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                   {aiPrivacyResult.mock
                     ? aiPrivacyResult.note
                     : aiPrivacyResult.hasSensitiveContent
-                      ? `⚠️ Se detectó: ${aiPrivacyResult.findings
+                      ? `Se detectó: ${aiPrivacyResult.findings
                           .map((f) => f.label)
                           .join(", ")}`
-                      : "✅ Sin contenido sensible visible"}
+                      : "Sin contenido sensible visible"}
                 </p>
               )}
             </div>
@@ -715,7 +713,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                       property.featuredUntil &&
                       new Date(property.featuredUntil) > new Date() && (
                         <span className="badge badge-sm badge-warning">
-                          ⭐ Destacada hasta{" "}
+                          Destacada hasta{" "}
                           {new Date(property.featuredUntil).toLocaleDateString()}
                         </span>
                       )}
@@ -741,7 +739,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                     >
                       {featuring === property.id
                         ? "Redirigiendo..."
-                        : `⭐ Destacar ($${featuredListing?.price ?? 149})`}
+                        : `Destacar ($${featuredListing?.price ?? 149})`}
                     </button>
                   )}
                   <button
