@@ -2,6 +2,7 @@
 // Global AI Developer Hackathon. API compatible con OpenAI — HTTP + Bearer
 // token, sin SDK adicional (usamos `fetch` nativo de Next.js). Docs:
 // https://dev.meta.ai/docs/overview · https://dev.meta.ai/docs/api-reference
+import { fetchImageAsDataUrl } from "./imageUrl";
 //
 // MODO MOCK: los $150 de crédito del hackathon tardan hasta 2 días hábiles
 // en reflejarse después de reclamarlos en el form, y `MODEL_API_KEY` puede
@@ -43,9 +44,19 @@ async function metaFetch(path, options = {}) {
 
   if (!res.ok) {
     const bodyText = await res.text().catch(() => "");
-    throw new Error(
+    const err = new Error(
       `Meta Model API ${path} → ${res.status}: ${bodyText.slice(0, 300)}`
     );
+    // Propaga el `code` de Meta (ej. `model_not_found`,
+    // `media_url_not_fetchable`) para que las rutas lo mapeen a mensajes
+    // amables sin parsear strings.
+    try {
+      err.code = JSON.parse(bodyText)?.error?.code || undefined;
+    } catch {
+      // Cuerpo no-JSON: se mapea solo por status/timeout.
+    }
+    err.status = res.status;
+    throw err;
   }
 
   return res.json();
@@ -64,7 +75,17 @@ function safeParseJSON(text) {
 // ---------------------------------------------------------------------------
 // Muse Spark — redacta título + descripción del listado en español
 // ---------------------------------------------------------------------------
-const LISTING_COPY_MODEL = "muse-spark-1.3";
+// El cookbook oficial marca `muse-spark-1.3` como default, pero algunas
+// keys/cuentas (ej. las del hackathon) solo tienen habilitado `1.1` y
+// responden 404 `model_not_found`. Por eso se intenta en orden y se usa el
+// primero que acepte la cuenta. `MUSE_SPARK_MODEL` permite fijar uno a mano
+// (ver qué trae `GET /v1/models` con tu key) y siempre va primero.
+const LISTING_COPY_MODELS = [
+  process.env.MUSE_SPARK_MODEL,
+  "muse-spark-1.3",
+  "muse-spark-1.1",
+  "muse-spark",
+].filter(Boolean);
 
 export async function generateListingCopy({
   rawNotes,
@@ -99,21 +120,40 @@ formato exacto:
 - description: 3 a 5 frases en español neutro; menciona la ubicación y el
   pago en cripto si aplica. No inventes amenidades que no estén en las notas.`;
 
-  const data = await metaFetch("/chat/completions", {
-    method: "POST",
-    body: JSON.stringify({
-      model: LISTING_COPY_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      // Muse Spark 1.3 razona antes de responder y ese "pensamiento" también
-      // consume max_tokens — "minimal" lo reduce (sigue gastando algunos
-      // tokens) y max_tokens trae colchón de sobra para no cortar el JSON de
-      // salida (confirmado con una llamada real: sin esto, el content llega
-      // null por finish_reason "length").
-      reasoning_effort: "minimal",
-      max_tokens: 900,
-    }),
-  });
+  // Intenta cada modelo candidato hasta que uno responda. Solo
+  // `model_not_found` amerita probar el siguiente; cualquier otro error
+  // (auth, rate limit, timeout, 500) se propaga de inmediato.
+  let data = null;
+  let usedModel = null;
+  let lastNotFound = null;
+  for (const model of LISTING_COPY_MODELS) {
+    try {
+      data = await metaFetch("/chat/completions", {
+        method: "POST",
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          // Muse Spark razona antes de responder y ese "pensamiento" también
+          // consume max_tokens — "minimal" lo reduce (sigue gastando algunos
+          // tokens) y max_tokens trae colchón de sobra para no cortar el JSON
+          // de salida (confirmado con una llamada real: sin esto, el content
+          // llega null por finish_reason "length").
+          reasoning_effort: "minimal",
+          max_tokens: 900,
+        }),
+      });
+      usedModel = model;
+      break;
+    } catch (e) {
+      if (e?.code === "model_not_found") {
+        lastNotFound = e;
+        continue;
+      }
+      throw e;
+    }
+  }
+  if (!data) throw lastNotFound;
 
   const raw = data?.choices?.[0]?.message?.content || "{}";
   const parsed = safeParseJSON(raw);
@@ -122,6 +162,7 @@ formato exacto:
     title: (parsed.title || rawNotes || "Propiedad crypto-friendly").slice(0, 70),
     description: parsed.description || rawNotes || "",
     mock: false,
+    model: usedModel,
   };
 }
 
@@ -194,6 +235,11 @@ export async function scanImagePrivacy({ imageUrl }) {
     return mockPrivacyScan();
   }
 
+  // La imagen viaja embebida en base64: el fetcher de Meta rechaza URLs que
+  // nuestro servidor sí descarga (400 `media_url_not_fetchable` aun con URLs
+  // públicas). Una sola descarga para las 3 consultas de abajo.
+  const imageRef = await fetchImageAsDataUrl(imageUrl);
+
   const findings = [];
 
   for (const label of SENSITIVE_PROMPTS) {
@@ -206,7 +252,7 @@ export async function scanImagePrivacy({ imageUrl }) {
             role: "user",
             content: [
               { type: "input_text", text: label },
-              { type: "input_image", image_url: imageUrl },
+              { type: "input_image", image_url: imageRef },
             ],
           },
         ],

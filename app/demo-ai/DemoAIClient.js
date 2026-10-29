@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import Footer from "@/components/Footer";
 
-// Cliente ligero y sin sesión — a propósito NO usa libs/api.js (su
-// interceptor redirige a /signin en cualquier 401, lo cual no aplica aquí:
-// esta página es pública por diseño). Usa `fetch` directo contra las rutas
-// /api/ai/public/* (limitadas por IP, ver libs/aiRateLimit.js).
-async function callPublicAi(path, body) {
-  const res = await fetch(`/api/ai/public/${path}`, {
+// Cliente ligero — a propósito NO usa libs/api.js (su interceptor redirige
+// a /signin en cualquier 401, lo cual no aplica aquí: esta página es
+// pública por diseño). Usa `fetch` directo. Consciente de sesión: si hay
+// usuario autenticado llama a /api/ai/* (cuota generosa por usuario); si
+// no, a /api/ai/public/* (cuota estricta por IP). Sin esto, un logueado
+// agotaría la mini-cuota pública y encima le diría "crea una cuenta".
+async function callAi(base, path, body) {
+  const res = await fetch(`/api/${base}/${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -29,6 +32,10 @@ const SectionBadge = ({ children, color = "secondary" }) => (
 );
 
 export default function DemoAIClient() {
+  const { status } = useSession();
+  const authed = status === "authenticated";
+  const base = authed ? "ai" : "ai/public";
+
   // --- Muse Spark: redactar título + descripción ---
   const [copyForm, setCopyForm] = useState({
     city: "Tulum",
@@ -43,7 +50,7 @@ export default function DemoAIClient() {
     setCopyLoading(true);
     setCopyResult(null);
     try {
-      const data = await callPublicAi("listing-copy", {
+      const data = await callAi(base, "listing-copy", {
         ...copyForm,
         cryptoAccepted: ["USDC", "BTC"],
       });
@@ -66,7 +73,7 @@ export default function DemoAIClient() {
     setImageLoading(true);
     setImageResult(null);
     try {
-      const data = await callPublicAi("listing-image", { prompt: imagePrompt });
+      const data = await callAi(base, "listing-image", { prompt: imagePrompt });
       setImageResult(data);
     } catch (e) {
       toast.error(e.message);
@@ -86,7 +93,7 @@ export default function DemoAIClient() {
     setScanLoading(true);
     setScanResult(null);
     try {
-      const data = await callPublicAi("privacy-scan", { imageUrl: scanUrl });
+      const data = await callAi(base, "privacy-scan", { imageUrl: scanUrl });
       setScanResult(data);
     } catch (e) {
       toast.error(e.message);
@@ -107,11 +114,12 @@ export default function DemoAIClient() {
             Meta AI dentro de <span className="text-primary">Casas Cripto</span>
           </h1>
           <p className="opacity-70 leading-relaxed max-w-2xl mx-auto">
-            Prueba en vivo, sin crear cuenta, cómo usamos <strong>Muse Spark</strong>,{" "}
+            Prueba en vivo cómo usamos <strong>Muse Spark</strong>,{" "}
             <strong>Muse Image</strong> y <strong>SAM 3.1</strong> (Meta Model
-            API) dentro del flujo real de publicar una propiedad. Límite de
-            usos por día para cuidar el crédito compartido del hackathon —
-            para uso sin límite, crea una cuenta gratis.
+            API) dentro del flujo real de publicar una propiedad.{" "}
+            {authed
+              ? "Tienes sesión iniciada, así que esta demo usa los límites generosos de tu cuenta."
+              : "Sin cuenta tienes unos pocos usos por día para cuidar el crédito compartido del hackathon — crea una cuenta gratis para límites más altos."}
           </p>
         </div>
 

@@ -49,15 +49,17 @@ export async function POST(req) {
       const result = await scanImagePrivacy({ imageUrl });
       return NextResponse.json({ data: result });
     } catch (error) {
-      if (error?.message?.includes("media_url_not_fetchable")) {
+      if (
+        error?.code === "media_url_not_fetchable" ||
+        error?.message?.includes("media_url_not_fetchable")
+      ) {
         await refundAiRateLimit({ key, action });
-        return NextResponse.json(
-          {
-            error:
-              "Los servidores de Meta no pudieron descargar esa imagen. Prueba con otra URL pública directa (que termine en .jpg, .png o similar).",
-          },
-          { status: 422 }
-        );
+        // Nuestros errores de descarga ya traen mensaje amable; los de Meta
+        // traen el crudo "Meta Model API /responses → 400: ..." y se traducen.
+        const friendly = error.message.startsWith("Meta Model API")
+          ? "Los servidores de Meta no pudieron procesar esa imagen. Prueba con otra URL pública directa (que termine en .jpg, .png o similar)."
+          : error.message;
+        return NextResponse.json({ error: friendly }, { status: 422 });
       }
       if (error?.code === "meta_timeout") {
         return NextResponse.json(

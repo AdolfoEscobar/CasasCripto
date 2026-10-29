@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/libs/auth";
 import { generateListingCopy } from "@/libs/metaModel";
-import { checkAiRateLimit, AI_LIMITS } from "@/libs/aiRateLimit";
+import { checkAiRateLimit, refundAiRateLimit, AI_LIMITS } from "@/libs/aiRateLimit";
 
 // POST /api/ai/listing-copy
 // Redacta título + descripción con Meta Muse Spark a partir de notas crudas
@@ -30,10 +30,12 @@ export async function POST(req) {
 
     // Protege el saldo compartido del hackathon ($150) de un dueño dándole
     // clic sin parar — ver libs/aiRateLimit.js.
+    const key = `user:${session.user.id}`;
+    const action = "listing-copy";
     const { allowed, remaining } = await checkAiRateLimit({
-      key: `user:${session.user.id}`,
-      action: "listing-copy",
-      limit: AI_LIMITS.authenticated["listing-copy"],
+      key,
+      action,
+      limit: AI_LIMITS.authenticated[action],
     });
     if (!allowed) {
       return NextResponse.json(
@@ -42,17 +44,39 @@ export async function POST(req) {
       );
     }
 
-    const result = await generateListingCopy({
-      rawNotes,
-      city,
-      state,
-      country,
-      price,
-      currency,
-      cryptoAccepted,
-    });
+    try {
+      const result = await generateListingCopy({
+        rawNotes,
+        city,
+        state,
+        country,
+        price,
+        currency,
+        cryptoAccepted,
+      });
 
-    return NextResponse.json({ data: { ...result, remaining } });
+      return NextResponse.json({ data: { ...result, remaining } });
+    } catch (error) {
+      // Ningún modelo candidato aceptó la key: la IA no hizo trabajo real,
+      // así que se devuelve la cuota en vez de un 500 opaco.
+      if (error?.code === "model_not_found") {
+        await refundAiRateLimit({ key, action });
+        return NextResponse.json(
+          {
+            error:
+              "El modelo de redacción de Meta no está habilitado para esta cuenta en este momento. Intenta de nuevo más tarde.",
+          },
+          { status: 503 }
+        );
+      }
+      if (error?.code === "meta_timeout") {
+        return NextResponse.json(
+          { error: "El servicio de IA tardó demasiado. Intenta de nuevo." },
+          { status: 504 }
+        );
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("❌ Error generating listing copy:", error);
     return NextResponse.json(

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateListingCopy } from "@/libs/metaModel";
-import { checkAiRateLimit, AI_LIMITS, getClientIp } from "@/libs/aiRateLimit";
+import {
+  checkAiRateLimit,
+  refundAiRateLimit,
+  AI_LIMITS,
+  getClientIp,
+} from "@/libs/aiRateLimit";
 
 // POST /api/ai/public/listing-copy
 // Versión SIN login de /api/ai/listing-copy, para la demo pública en
@@ -22,11 +27,12 @@ export async function POST(req) {
       );
     }
 
-    const ip = getClientIp(req);
+    const key = `ip:${getClientIp(req)}`;
+    const action = "listing-copy";
     const { allowed, remaining } = await checkAiRateLimit({
-      key: `ip:${ip}`,
-      action: "listing-copy",
-      limit: AI_LIMITS.public["listing-copy"],
+      key,
+      action,
+      limit: AI_LIMITS.public[action],
     });
     if (!allowed) {
       return NextResponse.json(
@@ -38,17 +44,39 @@ export async function POST(req) {
       );
     }
 
-    const result = await generateListingCopy({
-      rawNotes,
-      city,
-      state,
-      country,
-      price,
-      currency,
-      cryptoAccepted,
-    });
+    try {
+      const result = await generateListingCopy({
+        rawNotes,
+        city,
+        state,
+        country,
+        price,
+        currency,
+        cryptoAccepted,
+      });
 
-    return NextResponse.json({ data: { ...result, remaining } });
+      return NextResponse.json({ data: { ...result, remaining } });
+    } catch (error) {
+      // Ningún modelo candidato aceptó la key: la IA no hizo trabajo real,
+      // así que se devuelve la cuota en vez de un 500 opaco.
+      if (error?.code === "model_not_found") {
+        await refundAiRateLimit({ key, action });
+        return NextResponse.json(
+          {
+            error:
+              "El modelo de redacción de Meta no está disponible en este momento. Intenta de nuevo más tarde.",
+          },
+          { status: 503 }
+        );
+      }
+      if (error?.code === "meta_timeout") {
+        return NextResponse.json(
+          { error: "El servicio de IA tardó demasiado. Intenta de nuevo." },
+          { status: 504 }
+        );
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("❌ Error in public listing-copy demo:", error);
     return NextResponse.json(
