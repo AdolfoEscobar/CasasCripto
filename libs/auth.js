@@ -41,6 +41,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             // Follow the "Login with Google" tutorial to get your credentials
             clientId: process.env.GOOGLE_ID,
             clientSecret: process.env.GOOGLE_SECRET,
+            // Force Google to always show the account chooser, so users with
+            // several Google accounts can pick one instead of being silently
+            // signed in with the active Google session.
+            authorization: {
+              params: {
+                prompt: "select_account",
+              },
+            },
             async profile(profile) {
               return {
                 id: profile.sub,
