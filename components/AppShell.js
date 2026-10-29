@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import ScrollToTop from "./ScrollToTop";
+import BackToTopButton from "./BackToTopButton";
 import ButtonSignin from "./ButtonSignin";
 import ButtonAccount from "./ButtonAccount";
 import logo from "@/app/icon.png";
@@ -114,6 +115,7 @@ export default function AppShell({ children }) {
     // encima del <AmbientBackground/> global (fondo `fixed` sin z-index).
     <div className="drawer lg:drawer-open relative z-10">
       <ScrollToTop />
+      <BackToTopButton />
       <input id="app-sidebar" type="checkbox" className="drawer-toggle" />
 
       <div className="drawer-content flex flex-col min-h-screen min-w-0">
