@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import config from "@/config";
@@ -84,9 +84,35 @@ const AgencyAvatar = ({ name, className = "w-6 h-6 text-[10px]" }) => (
 
 // Banner destacado grande (estilo "colección destacada" de OpenSea): foto a
 // toda altura, overlay con gradiente, info superpuesta + mini-stats + flechas
-// para recorrer las 3 propiedades mockup.
-const FeaturedBanner = ({ property, index, total, onPrev, onNext }) => (
-  <div className="relative rounded-3xl overflow-hidden glass-card group">
+// para recorrer las 3 propiedades mockup. Con swipe táctil: en móvil el
+// gesto natural es deslizar el dedo, no buscar las flechas laterales.
+// `touch-pan-y` deja que el navegador maneje el scroll vertical de la página
+// mientras nosotros capturamos el desplazamiento horizontal.
+const FeaturedBanner = ({ property, index, total, onPrev, onNext, onSelect }) => {
+  const touchStartX = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0) {
+      onNext();
+    } else {
+      onPrev();
+    }
+  };
+
+  return (
+  <div
+    className="relative rounded-3xl overflow-hidden glass-card group touch-pan-y select-none"
+    onTouchStart={handleTouchStart}
+    onTouchEnd={handleTouchEnd}
+  >
     <div className="relative aspect-[16/10] sm:aspect-[16/8] lg:aspect-[16/6.5]">
       <Image
         src={property.image}
@@ -184,11 +210,14 @@ const FeaturedBanner = ({ property, index, total, onPrev, onNext }) => (
       </div>
     </div>
 
-    {/* dots indicador */}
+    {/* dots indicador tocables */}
     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 sm:hidden">
       {Array.from({ length: total }).map((_, i) => (
-        <span
+        <button
           key={i}
+          type="button"
+          onClick={() => onSelect(i)}
+          aria-label={`Ver propiedad ${i + 1}`}
           className={`h-1.5 rounded-full transition-all ${
             i === index ? "w-5 bg-primary" : "w-1.5 bg-base-content/30"
           }`}
@@ -196,7 +225,8 @@ const FeaturedBanner = ({ property, index, total, onPrev, onNext }) => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 // Tarjeta pequeña de la grid de "tendencias", estilo tokens/colecciones en
 // tendencia de un marketplace Web3.
@@ -300,6 +330,7 @@ const MarketplacePreview = () => {
           total={mockProperties.length}
           onPrev={goPrev}
           onNext={goNext}
+          onSelect={setIndex}
         />
 
         {/* grid de tendencias */}
