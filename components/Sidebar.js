@@ -19,8 +19,6 @@ import {
 } from "@heroicons/react/24/outline";
 import logo from "@/app/icon.png";
 import config from "@/config";
-import ButtonSignin from "./ButtonSignin";
-import ButtonAccount from "./ButtonAccount";
 
 // Misma tipografía "VIP" (Playfair Display itálica + degradado dorado) que
 // usaba el Header flotante anterior, para que el rebranding del logo no
@@ -102,7 +100,7 @@ function NavLink({ href, label, icon: Icon, isActive, onNavigate }) {
 // absolutamente todas las páginas vía <AppShell/> en app/layout.js.
 const Sidebar = () => {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const isAdminArea = pathname.startsWith("/admin");
 
   // Cierra el drawer en mobile al navegar. En desktop (lg:drawer-open) el
@@ -188,11 +186,10 @@ const Sidebar = () => {
         )}
       </nav>
 
-      {/* CTA + cuenta, siempre anclados abajo. Los controles de cuenta
-          son solo-mobile (`lg:hidden`): en desktop viven en el <Topbar/>
-          superior. El menú abre hacia arriba (`direction="up"`) porque el
-          botón está al fondo del viewport. */}
-      <div className="p-4 border-t border-base-content/10 space-y-2.5 shrink-0">
+      {/* CTA siempre anclado abajo. La cuenta vive en las barras
+          superiores (Topbar en desktop, MobileTopbar en móvil), no aquí —
+          un solo lugar para abrir el menú en todos los tamaños. */}
+      <div className="p-4 border-t border-base-content/10 shrink-0">
         <Link
           href="/#invertir"
           onClick={closeDrawer}
@@ -200,18 +197,6 @@ const Sidebar = () => {
         >
           Invertir
         </Link>
-        <div className="lg:hidden">
-          {status === "authenticated" ? (
-            <div className="w-full [&>div>button]:w-full [&>div>button]:justify-between">
-              <ButtonAccount direction="up" />
-            </div>
-          ) : (
-            <ButtonSignin
-              extraStyle="btn-primary btn-sm rounded-full glow-primary w-full min-h-[40px]"
-              text="Entrar"
-            />
-          )}
-        </div>
       </div>
     </div>
   );

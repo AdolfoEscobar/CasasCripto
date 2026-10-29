@@ -50,9 +50,10 @@ const MenuLink = ({ href, isActive, children }) => {
 // See more at https://shipfa.st/docs/components/buttonAccount
 // `direction`: hacia dónde abre el menú — "down" (default) para botones en
 // la parte superior (Topbar, dashboard) y "up" para botones al fondo del
-// viewport (footer del sidebar), donde abrir hacia abajo quedaría fuera de
-// la pantalla.
-const ButtonAccount = ({ direction = "down" }) => {
+// viewport, donde abrir hacia abajo quedaría fuera de la pantalla.
+// `compact`: disparador solo-avatar (circular, 40px) para barras angostas
+// como el topbar móvil. El panel del menú es idéntico en ambas variantes.
+const ButtonAccount = ({ direction = "down", compact = false }) => {
 	const { data: session, status } = useSession();
 	const pathname = usePathname();
 	const [isLoading, setIsLoading] = useState(false);
@@ -87,46 +88,64 @@ const ButtonAccount = ({ direction = "down" }) => {
 	// Don't show anything if not authenticated (we don't have any info about the user)
 	if (status === "unauthenticated") return null;
 
+	const avatar = session?.user?.image ? (
+		<img
+			src={session?.user?.image}
+			alt={session?.user?.name || "Account"}
+			className={compact ? "w-full h-full object-cover" : "w-6 h-6 rounded-full shrink-0"}
+			referrerPolicy="no-referrer"
+			width={compact ? 40 : 24}
+			height={compact ? 40 : 24}
+		/>
+	) : (
+		<span
+			className={
+				compact
+					? "w-full h-full bg-base-300 flex justify-center items-center font-bold"
+					: "w-6 h-6 bg-base-300 flex justify-center items-center rounded-full shrink-0"
+			}
+		>
+			{session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0)}
+		</span>
+	);
+
 	return (
 		<Popover className="relative z-50">
 			{({ open }) => (
 				<>
-					<Popover.Button className="btn">
-						{session?.user?.image ? (
-							<img
-								src={session?.user?.image}
-								alt={session?.user?.name || "Account"}
-								className="w-6 h-6 rounded-full shrink-0"
-								referrerPolicy="no-referrer"
-								width={24}
-								height={24}
-							/>
-						) : (
-							<span className="w-6 h-6 bg-base-300 flex justify-center items-center rounded-full shrink-0">
-								{session?.user?.name?.charAt(0) ||
-									session?.user?.email?.charAt(0)}
-							</span>
-						)}
+					<Popover.Button
+						className={
+							compact
+								? "flex items-center justify-center w-10 h-10 rounded-full ring-1 ring-primary/30 bg-base-200 overflow-hidden hover:ring-primary/60 transition-shadow"
+								: "btn"
+						}
+						aria-label="Abrir menú de cuenta"
+					>
+						{avatar}
 
-						{session?.user?.name || "Account"}
+						{!compact && (
+							<>
+								{session?.user?.name || "Account"}
 
-						{isLoading ? (
-							<span className="loading loading-spinner loading-xs"></span>
-						) : (
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-								className={`w-5 h-5 duration-200 opacity-50 ${
-									open ? "transform rotate-180 " : ""
-								}`}
-							>
-								<path
-									fillRule="evenodd"
-									d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-									clipRule="evenodd"
-								/>
-							</svg>
+								{isLoading ? (
+									<span className="loading loading-spinner loading-xs"></span>
+								) : (
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										className={`w-5 h-5 duration-200 opacity-50 ${
+											open ? "transform rotate-180 " : ""
+										}`}
+									>
+										<path
+											fillRule="evenodd"
+											d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+											clipRule="evenodd"
+										/>
+									</svg>
+								)}
+							</>
 						)}
 					</Popover.Button>
 					<Transition
@@ -213,7 +232,7 @@ const ButtonAccount = ({ direction = "down" }) => {
 												clipRule="evenodd"
 											/>
 										</svg>
-										Billing
+										Facturación
 									</button>
 
 									{/* Admin Panel link - only show if user is admin */}
@@ -256,7 +275,7 @@ const ButtonAccount = ({ direction = "down" }) => {
 												clipRule="evenodd"
 											/>
 										</svg>
-										Logout
+										Cerrar sesión
 									</button>
 								</div>
 							</div>

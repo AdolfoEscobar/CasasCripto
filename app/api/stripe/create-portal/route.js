@@ -21,13 +21,13 @@ export async function POST(req) {
         return NextResponse.json(
           {
             error:
-              "You don't have a billing account yet. Make a purchase first.",
+              "Aún no tienes cuenta de facturación: primero suscríbete a Premium o destaca un listado.",
           },
           { status: 400 }
         );
       } else if (!body.returnUrl) {
         return NextResponse.json(
-          { error: "Return URL is required" },
+          { error: "Falta la URL de retorno" },
           { status: 400 }
         );
       }
@@ -36,6 +36,18 @@ export async function POST(req) {
         customerId: user.customerId,
         returnUrl: body.returnUrl,
       });
+
+      // createCustomerPortal devuelve null si Stripe falla — sin este chequeo
+      // el front redirigiría a la URL literal "null".
+      if (!stripePortalUrl) {
+        return NextResponse.json(
+          {
+            error:
+              "No pudimos abrir el portal de facturación. Intenta de nuevo.",
+          },
+          { status: 502 }
+        );
+      }
 
       return NextResponse.json({
         url: stripePortalUrl,

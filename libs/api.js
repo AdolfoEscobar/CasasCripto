@@ -18,12 +18,12 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401) {
       // User not auth, ask to re login
-      toast.error("Please login");
+      toast.error("Inicia sesión para continuar");
       // automatically redirect to /dashboard page after login
       return signIn(undefined, { callbackUrl: config.auth.callbackUrl });
     } else if (error.response?.status === 403) {
       // User not authorized, must subscribe/purchase/pick a plan
-      message = "Pick a plan to use this feature";
+      message = "Elige un plan para usar esta función";
     } else {
       message =
         error?.response?.data?.error || error.message || error.toString();
@@ -32,13 +32,21 @@ apiClient.interceptors.response.use(
     error.message =
       typeof message === "string" ? message : JSON.stringify(message);
 
-    console.error(error.message);
+    // Solo los fallos inesperados (500s o sin respuesta del servidor) van a
+    // console.error: Next 16 convierte cada uno en un "issue" del dev
+    // overlay. Los errores de negocio esperados (400/403/404/409/422/429)
+    // ya se informan con el toast — registrarlos como error solo entierra
+    // los bugs reales entre ruido.
+    const status = error.response?.status;
+    if (!error.response || status >= 500) {
+      console.error(error.message);
+    }
 
     // Automatically display errors to the user
     if (error.message) {
-      toast.error(error.message);
+      toast.error(error.message, { duration: 4500 });
     } else {
-      toast.error("something went wrong...");
+      toast.error("Algo salió mal...", { duration: 4500 });
     }
     return Promise.reject(error);
   }

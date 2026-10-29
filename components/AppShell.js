@@ -10,6 +10,7 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import ScrollToTop from "./ScrollToTop";
 import ButtonSignin from "./ButtonSignin";
+import ButtonAccount from "./ButtonAccount";
 import logo from "@/app/icon.png";
 import config from "@/config";
 
@@ -27,7 +28,7 @@ const accentFont = Playfair_Display({
 // contiene el <Sidebar/>. Fondo sólido translúcido (no `glass-card`: esa
 // clase pinta un borde completo que chocaba con el `border-b`).
 const MobileTopbar = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   return (
   <div className="sticky top-0 z-30 lg:hidden flex items-center gap-3 px-4 py-2.5 bg-base-100/85 backdrop-blur-xl border-b border-base-content/10">
@@ -77,27 +78,11 @@ const MobileTopbar = () => {
       </span>
     </Link>
 
-    {/* Acceso a cuenta siempre visible (en desktop vive en el Topbar) */}
+    {/* Cuenta arriba a la derecha, igual que en desktop: avatar compacto
+        que abre el mismo menú (Mi panel, Facturación, Admin, Salir). */}
     <span className="ml-auto shrink-0">
       {status === "authenticated" ? (
-        <Link
-          href={config.auth.callbackUrl}
-          title="Mi panel"
-          aria-label="Mi panel"
-          className="flex items-center justify-center w-10 h-10 rounded-full ring-1 ring-primary/30 bg-base-200 overflow-hidden font-bold"
-        >
-          {session?.user?.image ? (
-            <Image
-              src={session.user.image}
-              alt={session.user.name || "Mi panel"}
-              className="w-full h-full object-cover"
-              width={40}
-              height={40}
-            />
-          ) : (
-            (session?.user?.name || session?.user?.email || "?").charAt(0)
-          )}
-        </Link>
+        <ButtonAccount compact />
       ) : (
         <ButtonSignin
           extraStyle="btn-primary btn-sm rounded-full min-h-[40px]"
