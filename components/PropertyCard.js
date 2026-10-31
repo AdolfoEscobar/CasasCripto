@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import PropertyImage from "./PropertyImage";
 
 // Tarjeta de propiedad reutilizada en /propiedades y en
 // /propiedades/ciudad/[slug]. Cada tarjeta enlaza a la página de detalle
@@ -32,12 +32,10 @@ const PropertyCard = ({ property }) => (
         </span>
       )}
       {property.images?.[0] ? (
-        <Image
-          src={property.images[0]}
+        <PropertyImage
+          image={property.images[0]}
           alt={property.title}
           className="w-full aspect-[4/3] object-cover"
-          width={600}
-          height={450}
           sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
         />
       ) : (

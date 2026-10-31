@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import apiClient from "@/libs/api";
 import { toast } from "react-hot-toast";
+import { MAX_PROPERTY_IMAGES, imageSrc, normalizeImage } from "@/libs/propertyImages";
+import { prepareImageForUpload } from "@/libs/clientImage";
 
 const CRYPTO_OPTIONS = ["USDC", "USDT", "BTC", "ETH"];
 
@@ -16,7 +18,9 @@ const emptyForm = {
   price: "",
   currency: "USD",
   cryptoAccepted: [],
-  images: "",
+  // Array de fotos: objetos { src, srcSet, width, height } del uploader propio
+  // o strings con URLs externas (legado + imágenes generadas con IA).
+  images: [],
   contactEmail: "",
   contactPhone: "",
 };
@@ -69,6 +73,13 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
   // devuelven una respuesta "mock" claramente marcada (ver `data.mock`), así
   // que este panel funciona igual antes y después de que lleguen los
   // créditos del hackathon.
+  // Número de fotos subiéndose en este momento (el envío del formulario se
+  // bloquea hasta que llegue a 0 para no guardar el listado sin sus fotos).
+  const [uploading, setUploading] = useState(0);
+  // Campo chico para agregar una foto por URL externa (no ocupa upload).
+  const [urlInput, setUrlInput] = useState("");
+  const fileInputRef = useRef(null);
+
   const [aiNotes, setAiNotes] = useState("");
   const [aiCopyLoading, setAiCopyLoading] = useState(false);
   const [aiImagePrompt, setAiImagePrompt] = useState("");
@@ -172,6 +183,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
     setStateCode("");
     setCityOptions([]);
     setPendingEditState("");
+    setUrlInput("");
   };
 
   const startEdit = (property) => {
@@ -185,7 +197,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       price: property.price ?? "",
       currency: property.currency || "USD",
       cryptoAccepted: property.cryptoAccepted || [],
-      images: (property.images || []).join(", "),
+      images: Array.isArray(property.images) ? property.images : [],
       contactEmail: property.contactEmail || "",
       contactPhone: property.contactPhone || "",
     });
@@ -210,6 +222,110 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
     }));
   };
 
+  // Sube fotos a Vercel Blob (POST /api/uploads), de una en una y directo al
+  // elegirlas — NO al enviar el formulario. Cada archivo se pre-comprime en
+  // el navegador (ver libs/clientImage.js) para no rebasar el límite de 4.5MB
+  // por request de las serverless functions. Los fallos se reportan por foto
+  // y no tumban el resto del lote.
+  const handleFiles = async (e) => {
+    const files = [...(e.target.files || [])];
+    e.target.value = "";
+    if (files.length === 0) return;
+
+    const room = MAX_PROPERTY_IMAGES - form.images.length;
+    if (room <= 0) {
+      toast.error(`Máximo ${MAX_PROPERTY_IMAGES} fotos por propiedad`);
+      return;
+    }
+    const batch = files.slice(0, room);
+    if (files.length > room) {
+      toast.error(
+        `Solo se tomaron ${room} de ${files.length}: máximo ${MAX_PROPERTY_IMAGES} fotos`
+      );
+    }
+
+    setUploading((n) => n + batch.length);
+    try {
+      for (const file of batch) {
+        try {
+          const prepared = await prepareImageForUpload(file);
+          const data = new FormData();
+          data.append("file", prepared);
+          const res = await apiClient.post("/uploads", data);
+          setForm((f) =>
+            f.images.length >= MAX_PROPERTY_IMAGES
+              ? f
+              : { ...f, images: [...f.images, res.data] }
+          );
+        } catch (err) {
+          // Errores del API (4xx/5xx) ya los muestra apiClient con toast;
+          // aquí solo cubrimos los errores locales de pre-compresión.
+          if (!err?.response) {
+            toast.error(err?.message || "No pudimos leer esa imagen");
+          }
+        }
+      }
+    } finally {
+      setUploading((n) => n - batch.length);
+    }
+  };
+
+  const removeImage = (index) => {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  };
+
+  // Reordenar fotos: la primera del array es la portada en todas partes
+  // (tarjeta, detalle, OpenGraph — ver components/PropertyCard.js), así que
+  // mover una foto al primer lugar ES cambiar la foto principal.
+  const moveImage = (from, to) => {
+    if (from === to || from == null || to == null) return;
+    setForm((f) => {
+      if (
+        from < 0 ||
+        to < 0 ||
+        from >= f.images.length ||
+        to >= f.images.length
+      ) {
+        return f;
+      }
+      const images = [...f.images];
+      const [moved] = images.splice(from, 1);
+      images.splice(to, 0, moved);
+      return { ...f, images };
+    });
+  };
+
+  const makeCover = (index) => {
+    if (index === 0) return;
+    moveImage(index, 0);
+  };
+
+  // Arrastre nativo HTML5 (sin librerías): el índice arrastrado vive en un
+  // ref (no pinta nada) y el destino en estado (resalta dónde se soltará).
+  // `lastDragEnd` evita que un arrastre soltado sobre la misma foto dispare
+  // además el clic de "poner de portada".
+  const dragIndexRef = useRef(null);
+  const lastDragEndRef = useRef(0);
+  const [dropTarget, setDropTarget] = useState(null);
+
+  // Agrega una foto por URL externa (sin subir nada): útil para imágenes
+  // generadas con IA en otro lado o fotos ya publicadas. No genera variantes
+  // responsive — para eso está el uploader de arriba.
+  const addImageUrl = () => {
+    const url = urlInput.trim();
+    if (!url) return;
+    if (!/^https?:\/\/.+/.test(url)) {
+      toast.error("Pega una URL válida (https://...)");
+      return;
+    }
+    if (form.images.length >= MAX_PROPERTY_IMAGES) {
+      toast.error(`Máximo ${MAX_PROPERTY_IMAGES} fotos por propiedad`);
+      return;
+    }
+    setForm((f) => ({ ...f, images: [...f.images, url] }));
+    setUrlInput("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (
@@ -227,6 +343,11 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       return;
     }
 
+    if (uploading > 0) {
+      toast.error("Espera a que terminen de subirse las fotos");
+      return;
+    }
+
     setSaving(true);
     const payload = {
       ...form,
@@ -236,10 +357,9 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       state: form.state.trim(),
       country: form.country.trim(),
       price: Number(form.price),
-      images: form.images
-        .split(",")
-        .map((url) => url.trim())
-        .filter(Boolean),
+      // El array de fotos ya viene armado (uploader + URLs); el servidor lo
+      // sanea y lo recorta al máximo (ver libs/propertyImages.js).
+      images: form.images,
     };
 
     try {
@@ -314,11 +434,15 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
   };
 
   // Muse Image: genera una foto del listado a partir de un prompt y la
-  // agrega al campo de URLs de fotos (el dueño puede borrarla si no le
-  // gusta, igual que cualquier otra URL).
+  // agrega como URL externa (el dueño puede quitarla si no le gusta, igual
+  // que cualquier otra foto).
   const handleGenerateImage = async () => {
     if (aiImagePrompt.trim().length < 5) {
       toast.error("Describe la imagen que quieres generar");
+      return;
+    }
+    if (form.images.length >= MAX_PROPERTY_IMAGES) {
+      toast.error(`Máximo ${MAX_PROPERTY_IMAGES} fotos por propiedad`);
       return;
     }
     setAiImageLoading(true);
@@ -328,7 +452,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       });
       setForm((f) => ({
         ...f,
-        images: f.images ? `${f.images}, ${res.data.imageUrl}` : res.data.imageUrl,
+        images: [...f.images, res.data.imageUrl],
       }));
       toast.success(
         res.data.mock
@@ -342,12 +466,12 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
     }
   };
 
-  // SAM 3.1: revisa la primera foto pegada en busca de personas, rostros o
+  // SAM 3.1: revisa la primera foto en busca de personas, rostros o
   // placas visibles — informativo, no bloquea el envío a revisión.
   const handleScanPrivacy = async () => {
-    const firstImage = form.images.split(",").map((u) => u.trim()).filter(Boolean)[0];
+    const firstImage = imageSrc(form.images[0]);
     if (!firstImage) {
-      toast.error("Agrega al menos una URL de foto para revisarla");
+      toast.error("Agrega al menos una foto para revisarla");
       return;
     }
     setAiPrivacyLoading(true);
@@ -562,18 +686,159 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             onChange={(e) => setForm({ ...form, location: e.target.value })}
           />
 
-          <input
-            type="text"
-            placeholder="URLs de fotos separadas por coma"
-            className="input input-bordered w-full"
-            value={form.images}
-            onChange={(e) => setForm({ ...form, images: e.target.value })}
-          />
+          {/* Fotos: uploader propio a Vercel Blob (recomendado: genera
+              variantes responsive) + opción de pegar una URL externa. La
+              primera foto es la portada del listado. */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-sm font-medium">
+                Fotos ({form.images.length}/{MAX_PROPERTY_IMAGES})
+              </p>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                disabled={uploading > 0}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploading > 0 ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs" />
+                    Subiendo {uploading}...
+                  </>
+                ) : (
+                  "+ Subir fotos"
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                multiple
+                className="hidden"
+                onChange={handleFiles}
+              />
+            </div>
+
+            {form.images.length > 1 && (
+              <p className="text-xs opacity-60">
+                Arrastra para reordenar · haz clic en una foto para ponerla de
+                portada
+              </p>
+            )}
+
+            {form.images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {form.images.map((img, i) => {
+                  const src = normalizeImage(img)?.src;
+                  if (!src) return null;
+                  return (
+                    <div
+                      key={`${src}-${i}`}
+                      className="relative group select-none"
+                      draggable
+                      onDragStart={(e) => {
+                        dragIndexRef.current = i;
+                        e.dataTransfer.effectAllowed = "move";
+                        // Firefox exige setData para iniciar el arrastre.
+                        e.dataTransfer.setData("text/plain", String(i));
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        if (dropTarget !== i) setDropTarget(i);
+                      }}
+                      onDragLeave={() => {
+                        setDropTarget((t) => (t === i ? null : t));
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const raw =
+                          dragIndexRef.current ??
+                          e.dataTransfer.getData("text/plain");
+                        dragIndexRef.current = null;
+                        setDropTarget(null);
+                        const from =
+                          typeof raw === "number"
+                            ? raw
+                            : Number.parseInt(raw, 10);
+                        // parseInt("") es NaN: ignora arrastres ajenos (ej.
+                        // soltar un archivo del sistema sobre una miniatura).
+                        if (Number.isInteger(from)) moveImage(from, i);
+                      }}
+                      onDragEnd={() => {
+                        dragIndexRef.current = null;
+                        lastDragEndRef.current = Date.now();
+                        setDropTarget(null);
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={`Foto ${i + 1}${i === 0 ? " (portada)" : ""}`}
+                        title={
+                          i === 0
+                            ? "Portada actual"
+                            : "Clic para poner de portada · arrastra para reordenar"
+                        }
+                        onClick={() => {
+                          // Un arrastre soltado sobre la misma foto puede
+                          // disparar clic al soltar: ignorar esos ~150ms.
+                          if (Date.now() - lastDragEndRef.current < 150) return;
+                          makeCover(i);
+                        }}
+                        className={`w-full aspect-[4/3] object-cover rounded-lg border border-base-content/10 cursor-pointer ${
+                          dropTarget === i
+                            ? "ring-2 ring-primary ring-offset-1"
+                            : ""
+                        }`}
+                      />
+                      {i === 0 && (
+                        <span className="absolute top-1 left-1 badge badge-xs badge-primary">
+                          Portada
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        aria-label={`Quitar foto ${i + 1}`}
+                        className="btn btn-xs btn-circle btn-error absolute top-1 right-1 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                        onClick={() => removeImage(i)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                placeholder="...o pega una URL de foto (https://...)"
+                className="input input-bordered input-sm w-full"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addImageUrl();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm whitespace-nowrap"
+                onClick={addImageUrl}
+              >
+                Agregar URL
+              </button>
+            </div>
+          </div>
 
           {/* Meta AI — Muse Image genera una foto a partir de un prompt; SAM
-              3.1 revisa la primera foto pegada en busca de personas, rostros
-              o placas visibles antes de publicar. Ambos son informativos: no
-              bloquean el envío a revisión. */}
+              3.1 revisa la primera foto en busca de personas, rostros o placas
+              visibles antes de publicar. Ambos son informativos: no bloquean
+              el envío a revisión. */}
           <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-3">
             <div className="space-y-2">
               <p className="text-sm font-semibold flex items-center gap-2">
@@ -670,7 +935,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={saving}
+              disabled={saving || uploading > 0}
             >
               {saving ? (
                 <span className="loading loading-spinner loading-xs" />

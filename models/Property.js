@@ -82,9 +82,14 @@ const propertySchema = mongoose.Schema(
       type: [String],
       default: [],
     },
-    // URLs de imágenes (por ahora, enlaces externos — no hay upload propio).
+    // Fotos del listado. Acepta dos formas (ver libs/propertyImages.js):
+    // - string: URL externa legada, pegada a mano antes del uploader propio.
+    // - objeto { src, srcSet, width, height }: foto subida a Vercel Blob con
+    //   variantes responsive pre-generadas (ver app/api/uploads/route.js).
+    // Mixed a propósito: los documentos viejos con strings siguen leyéndose
+    // igual, sin migración.
     images: {
-      type: [String],
+      type: [mongoose.Schema.Types.Mixed],
       default: [],
     },
     contactEmail: {

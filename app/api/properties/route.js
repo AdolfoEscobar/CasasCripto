@@ -5,6 +5,7 @@ import Property from "@/models/Property";
 import User from "@/models/User";
 import config from "@/config";
 import { leanArrayToJSON } from "@/libs/leanToJSON";
+import { MAX_PROPERTY_IMAGES, sanitizeImages } from "@/libs/propertyImages";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +120,16 @@ export async function POST(req) {
       );
     }
 
+    if (
+      images !== undefined &&
+      (!Array.isArray(images) || images.length > MAX_PROPERTY_IMAGES)
+    ) {
+      return NextResponse.json(
+        { error: `Máximo ${MAX_PROPERTY_IMAGES} fotos por propiedad` },
+        { status: 400 }
+      );
+    }
+
     const property = await Property.create({
       owner: dbUser._id,
       title,
@@ -130,7 +141,7 @@ export async function POST(req) {
       price,
       currency: currency || "USD",
       cryptoAccepted: Array.isArray(cryptoAccepted) ? cryptoAccepted : [],
-      images: Array.isArray(images) ? images : [],
+      images: sanitizeImages(images),
       contactEmail: contactEmail || dbUser.email,
       contactPhone,
       status: "pending",

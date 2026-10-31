@@ -1,12 +1,13 @@
 import Link from "next/link";
-import Image from "next/image";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
+import PropertyImage from "@/components/PropertyImage";
 import connectMongo from "@/libs/mongoose";
 import Property from "@/models/Property";
 import { getSEOTags, renderBreadcrumbSchema } from "@/libs/seo";
 import { leanToJSON } from "@/libs/leanToJSON";
+import { imageSrc, imageSrcList } from "@/libs/propertyImages";
 import config from "@/config";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,8 @@ export async function generateMetadata({ params }) {
       property.country ? `, ${property.country}` : ""
     } que acepta ${(property.cryptoAccepted || []).join(", ") || "criptomonedas"}. Precio: $${property.price?.toLocaleString()} ${property.currency}.`;
 
+  const ogImage = imageSrc(property.images?.[0]);
+
   return getSEOTags({
     title,
     description,
@@ -52,7 +55,7 @@ export async function generateMetadata({ params }) {
         title,
         description,
         url: `/propiedades/${id}`,
-        images: property.images?.[0] ? [{ url: property.images[0] }] : undefined,
+        images: ogImage ? [{ url: ogImage }] : undefined,
       },
     },
   });
@@ -73,7 +76,7 @@ export default async function PropertyDetailPage({ params }) {
     description: property.description || property.title,
     url: `https://${config.domainName}/propiedades/${property.id}`,
     datePosted: property.createdAt,
-    ...(property.images?.length && { image: property.images }),
+    ...(property.images?.length && { image: imageSrcList(property.images) }),
     address: {
       "@type": "PostalAddress",
       addressLocality: property.city,
@@ -136,13 +139,12 @@ export default async function PropertyDetailPage({ params }) {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div className="lg:col-span-3">
               {property.images?.[0] ? (
-                <Image
-                  src={property.images[0]}
+                <PropertyImage
+                  image={property.images[0]}
                   alt={property.title}
-                  width={1200}
-                  height={900}
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   className="w-full aspect-[4/3] object-cover rounded-2xl"
+                  eager
                 />
               ) : (
                 <div className="w-full aspect-[4/3] bg-base-300 rounded-2xl flex items-center justify-center text-base-content/30">
@@ -166,12 +168,11 @@ export default async function PropertyDetailPage({ params }) {
               {property.images?.length > 1 && (
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {property.images.slice(1, 4).map((img, i) => (
-                    <Image
+                    <PropertyImage
                       key={i}
-                      src={img}
+                      image={img}
                       alt={`${property.title} - foto ${i + 2}`}
-                      width={300}
-                      height={200}
+                      sizes="(max-width: 1024px) 33vw, 20vw"
                       className="w-full aspect-[4/3] object-cover rounded-lg"
                     />
                   ))}

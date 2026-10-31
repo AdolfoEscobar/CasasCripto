@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
+import { del } from "@vercel/blob";
 import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import Property from "@/models/Property";
+import {
+  MAX_PROPERTY_IMAGES,
+  collectBlobUrls,
+  removedBlobUrls,
+  sanitizeImages,
+} from "@/libs/propertyImages";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +58,25 @@ export async function PATCH(req, { params }) {
 
     const body = await req.json();
 
+    if (
+      body.images !== undefined &&
+      (!Array.isArray(body.images) || body.images.length > MAX_PROPERTY_IMAGES)
+    ) {
+      return NextResponse.json(
+        { error: `Máximo ${MAX_PROPERTY_IMAGES} fotos por propiedad` },
+        { status: 400 }
+      );
+    }
+    if (body.images !== undefined) {
+      body.images = sanitizeImages(body.images);
+    }
+
+    // Fotos antes de editar, para borrar del Blob Store las que se quitaron.
+    const imagesBefore =
+      body.images !== undefined && Array.isArray(property.images)
+        ? JSON.parse(JSON.stringify(property.images))
+        : null;
+
     if (isAdmin) {
       const { status, rejectionReason, ...rest } = body;
       if (status) {
@@ -88,6 +114,20 @@ export async function PATCH(req, { params }) {
 
     await property.save();
 
+    // Limpieza best-effort de las fotos que se quitaron editando: solo URLs
+    // de nuestro Blob Store (ver removedBlobUrls), nunca externas. Si falla,
+    // la propiedad ya quedó guardada — se registra y no se tumba el request.
+    if (imagesBefore) {
+      const orphans = removedBlobUrls(imagesBefore, property.images);
+      if (orphans.length > 0) {
+        try {
+          await del(orphans);
+        } catch (blobError) {
+          console.error("⚠️ No se pudieron borrar blobs huérfanos:", blobError);
+        }
+      }
+    }
+
     return NextResponse.json({ data: property });
   } catch (error) {
     console.error("❌ Error updating property:", error);
@@ -122,7 +162,19 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Fotos de nuestro Blob Store para borrarlas junto con el listado (las
+    // URLs externas pegadas a mano no se tocan — no son nuestras).
+    const blobUrls = collectBlobUrls(property.images);
+
     await property.deleteOne();
+
+    if (blobUrls.length > 0) {
+      try {
+        await del(blobUrls);
+      } catch (blobError) {
+        console.error("⚠️ No se pudieron borrar los blobs:", blobError);
+      }
+    }
 
     return NextResponse.json({ data: { id } });
   } catch (error) {
