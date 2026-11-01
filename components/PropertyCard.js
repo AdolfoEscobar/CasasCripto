@@ -1,10 +1,11 @@
 import Link from "next/link";
 import PropertyImage from "./PropertyImage";
+import { propertyUrl } from "@/libs/propertyUrls.mjs";
+import { PROPERTY_TYPES, LISTING_TYPES, capFirst } from "@/libs/geoSeo.mjs";
 
-// Tarjeta de propiedad reutilizada en /propiedades y en
-// /propiedades/ciudad/[slug]. Cada tarjeta enlaza a la página de detalle
-// propia de la propiedad (/propiedades/[id]), que es la que realmente le
-// aporta SEO al sitio (título, meta y datos estructurados únicos).
+// Tarjeta de propiedad reutilizada en /propiedades y en las páginas geo
+// (/propiedades/[estado], /propiedades/[estado]/[ciudad]). Cada tarjeta
+// enlaza a la URL canónica con keywords (ver libs/propertyUrls.mjs).
 export const isCurrentlyFeatured = (property) =>
   property.featured &&
   property.featuredUntil &&
@@ -12,7 +13,7 @@ export const isCurrentlyFeatured = (property) =>
 
 const PropertyCard = ({ property }) => (
   <Link
-    href={`/propiedades/${property.id}`}
+    href={propertyUrl(property)}
     className={`glass-card rounded-2xl overflow-hidden flex flex-col hover:ring-2 hover:ring-primary/50 transition-shadow ${
       isCurrentlyFeatured(property) ? "ring-2 ring-warning" : ""
     }`}
@@ -34,7 +35,7 @@ const PropertyCard = ({ property }) => (
       {property.images?.[0] ? (
         <PropertyImage
           image={property.images[0]}
-          alt={property.title}
+          alt={`${property.title} en ${property.city}${property.state ? `, ${property.state}` : ""}`}
           className="w-full aspect-[4/3] object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
         />
@@ -64,6 +65,16 @@ const PropertyCard = ({ property }) => (
         {property.country ? `, ${property.country}` : ""}
         {property.location ? ` · ${property.location}` : ""}
       </p>
+      {(PROPERTY_TYPES[property.propertyType]?.singular ||
+        LISTING_TYPES[property.listingType]) && (
+        <p className="text-xs font-medium text-primary">
+          {capFirst(
+            [PROPERTY_TYPES[property.propertyType]?.singular, LISTING_TYPES[property.listingType]]
+              .filter(Boolean)
+              .join(" ")
+          )}
+        </p>
+      )}
       {property.description && (
         <p className="text-sm opacity-70 line-clamp-2">{property.description}</p>
       )}

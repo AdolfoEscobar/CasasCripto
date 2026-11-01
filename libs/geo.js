@@ -91,7 +91,7 @@ const MAX_CITIES = 3000;
 // una propiedad: es una lista CERRADA a propósito — no se permite texto
 // libre — para que "CDMX", "cdmx" y "Ciudad de Mexico" nunca terminen
 // siendo 3 valores distintos en la base de datos (eso rompería los
-// filtros por ciudad y la generación de URLs /propiedades/ciudad/[slug]).
+// filtros por ciudad y la generación de URLs /propiedades/[estado]/[ciudad]).
 // Países grandes (México, EE. UU., Brasil...) tienen miles de ciudades a
 // nivel país, por eso el formulario EXIGE elegir primero un estado/
 // provincia (cuando el país tiene) antes de poder elegir ciudad — así la

@@ -13,13 +13,15 @@ export const dynamic = "force-dynamic";
 // Público por defecto: devuelve solo propiedades "published".
 // ?status=pending|rejected requiere sesión de admin (usado por el panel de
 // revisión en /admin/dashboard/properties).
-// ?citySlug=tulum-mexico filtra por ciudad (ver models/Property citySlug),
-// usado por /propiedades?ciudad=... y las páginas SEO por ciudad.
+// Filtros geo opcionales: ?stateSlug=chihuahua&citySlug=delicias&tipo=casa&operacion=venta.
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") || "published";
+    const stateSlug = searchParams.get("stateSlug");
     const citySlug = searchParams.get("citySlug");
+    const propertyType = searchParams.get("tipo");
+    const listingType = searchParams.get("operacion");
     const limit = Math.min(parseInt(searchParams.get("limit")) || 50, 100);
 
     if (status !== "published") {
@@ -31,7 +33,13 @@ export async function GET(req) {
 
     await connectMongo();
 
-    const query = { status, ...(citySlug && { citySlug }) };
+    const query = {
+      status,
+      ...(stateSlug && { stateSlug }),
+      ...(citySlug && { citySlug }),
+      ...(propertyType && { propertyType }),
+      ...(listingType && { listingType }),
+    };
 
     const properties = await Property.find(query)
       .populate("owner", "name email")
@@ -104,6 +112,8 @@ export async function POST(req) {
       city,
       state,
       country,
+      propertyType,
+      listingType,
       location,
       price,
       currency,
@@ -118,6 +128,18 @@ export async function POST(req) {
         { error: "Título, ciudad, país y precio son obligatorios" },
         { status: 400 }
       );
+    }
+
+    // Tipo/operación alimentan el SEO long-tail ("casas en venta en X"): se
+    // validan contra los enums del modelo para que nunca entre basura que
+    // rompa los filtros ni el copy de las páginas geo.
+    const VALID_TYPES = ["casa", "departamento", "terreno", "local", "oficina", "rancho", "edificio"];
+    const VALID_LISTINGS = ["venta", "renta"];
+    if (propertyType && !VALID_TYPES.includes(propertyType)) {
+      return NextResponse.json({ error: "Tipo de propiedad inválido" }, { status: 400 });
+    }
+    if (listingType && !VALID_LISTINGS.includes(listingType)) {
+      return NextResponse.json({ error: "Operación inválida" }, { status: 400 });
     }
 
     if (
@@ -137,6 +159,8 @@ export async function POST(req) {
       city,
       state,
       country,
+      propertyType: propertyType || undefined,
+      listingType: listingType || "venta",
       location,
       price,
       currency: currency || "USD",

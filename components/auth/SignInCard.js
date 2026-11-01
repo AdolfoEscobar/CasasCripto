@@ -129,7 +129,11 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
 
   return (
     <div className="w-full">
-      <div className="glass-card glow-primary rounded-box p-6 sm:p-10 relative">
+      {/* Tarjeta sólida en móvil y glass solo en sm+: el desenfoque
+          dentro del modal sumado al overlay congela iOS WebKit (ver
+          AuthModal). En sm+ estos utilities replican .glass-card exacto:
+          fondo base-200 al 55% + desenfoque de 18px + borde primary/18. */}
+      <div className="glow-primary rounded-box p-6 sm:p-10 relative bg-base-200 border border-primary/18 sm:bg-base-200/55 sm:backdrop-blur-[18px]">
         <button
           type="button"
           aria-label="Cerrar"

@@ -1,6 +1,6 @@
 // Convierte "Ciudad de México" -> "ciudad-de-mexico", "Tulum, México" ->
-// "tulum-mexico". Usado para generar URLs limpias e indexables por ciudad
-// (ver models/Property.js `citySlug` y app/propiedades/ciudad/[slug]).
+// "tulum-mexico". Usado para generar URLs limpias e indexables por
+// estado/ciudad/propiedad (ver models/Property.js y libs/propertyUrls.mjs).
 export function slugify(text) {
   return (text || "")
     .toString()

@@ -1,17 +1,15 @@
 import connectMongo from "@/libs/mongoose";
 import Property from "@/models/Property";
 import config from "@/config";
+import { propertyUrl } from "@/libs/propertyUrls.mjs";
 import { articles, categories, authors } from "./blog/_assets/content";
 
 export const dynamic = "force-dynamic";
 
-// Sitemap dinámico: páginas estáticas + todo el blog (índice, artículos,
-// categorías, autores) + una URL por cada propiedad publicada + una URL por
-// cada ciudad con al menos una propiedad publicada (ver
-// app/propiedades/ciudad/[slug]). Las páginas de ciudad SIN ningún listado
-// también existen y son visitables, pero a propósito no se incluyen aquí
-// hasta tener contenido real — evita mandarle a Google páginas vacías que
-// podría marcar como thin content.
+// Sitemap dinámico: páginas estáticas + blog + TODA la jerarquía geo con
+// contenido real (estados, ciudades estado/ciudad, detalles con keywords).
+// Solo entran URLs con al menos un listado: las páginas vacías existen (con
+// CTA + noindex) pero no se le anuncian a Google hasta tener contenido.
 export default async function sitemap() {
   const baseUrl = `https://${config.domainName}`;
 
@@ -27,9 +25,6 @@ export default async function sitemap() {
     },
   ];
 
-  // Blog: cada artículo es una URL indexable con su fecha de actualización
-  // (lastModified ayuda a Google a priorizar el re-crawl). Las categorías y
-  // autores tienen menor prioridad porque son páginas de archivo.
   const blogRoutes = [
     ...articles.map((article) => ({
       url: `${baseUrl}/blog/${article.slug}`,
@@ -49,33 +44,54 @@ export default async function sitemap() {
     })),
   ];
 
-  let propertyRoutes = [];
+  let stateRoutes = [];
   let cityRoutes = [];
+  let propertyRoutes = [];
 
   try {
     await connectMongo();
     const properties = await Property.find({ status: "published" })
-      .select("_id citySlug updatedAt")
+      .select("stateSlug citySlug propertySlug updatedAt")
       .lean();
 
-    propertyRoutes = properties.map((p) => ({
-      url: `${baseUrl}/propiedades/${p._id}`,
+    // Solo listados con la tríada completa de slugs (docs migrados). Los que
+    // aún no migran quedan fuera del sitemap hasta que se migren — evita
+    // anunciarle a Google URLs legacy por id.
+    const migrated = properties.filter(
+      (p) => p.stateSlug && p.citySlug && p.propertySlug
+    );
+
+    const stateSlugs = [...new Set(migrated.map((p) => p.stateSlug))];
+    stateRoutes = stateSlugs.map((slug) => ({
+      url: `${baseUrl}/propiedades/${slug}`,
+      changeFrequency: "daily",
+      priority: 0.85,
+    }));
+
+    const cityKeys = [
+      ...new Set(migrated.map((p) => `${p.stateSlug}/${p.citySlug}`)),
+    ];
+    cityRoutes = cityKeys.map((key) => ({
+      url: `${baseUrl}/propiedades/${key}`,
+      changeFrequency: "daily",
+      priority: 0.8,
+    }));
+
+    propertyRoutes = migrated.map((p) => ({
+      url: `${baseUrl}${propertyUrl(p)}`,
       lastModified: p.updatedAt,
       changeFrequency: "weekly",
       priority: 0.7,
-    }));
-
-    const citySlugs = [
-      ...new Set(properties.map((p) => p.citySlug).filter(Boolean)),
-    ];
-    cityRoutes = citySlugs.map((slug) => ({
-      url: `${baseUrl}/propiedades/ciudad/${slug}`,
-      changeFrequency: "daily",
-      priority: 0.8,
     }));
   } catch (error) {
     console.error("❌ Error building sitemap property routes:", error);
   }
 
-  return [...staticRoutes, ...blogRoutes, ...cityRoutes, ...propertyRoutes];
+  return [
+    ...staticRoutes,
+    ...blogRoutes,
+    ...stateRoutes,
+    ...cityRoutes,
+    ...propertyRoutes,
+  ];
 }

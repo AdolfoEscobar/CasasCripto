@@ -14,6 +14,11 @@ const emptyForm = {
   city: "",
   state: "",
   country: "",
+  // Tipo/operación alimentan el SEO long-tail ("casas en venta en X") y los
+  // filtros de las páginas geo. Operación defaultea a venta (el caso común);
+  // tipo queda vacío = "sin especificar" si el usuario no elige.
+  propertyType: "",
+  listingType: "venta",
   location: "",
   price: "",
   currency: "USD",
@@ -44,7 +49,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
 
   // País/estado/ciudad son TODOS <select> cerrados (no texto libre), para
   // que los datos queden estandarizados desde que se crean y las URLs de
-  // /propiedades/ciudad/[slug] no se dispersen en variantes como "CDMX",
+  // /propiedades/[estado]/[ciudad] no se dispersen en variantes como "CDMX",
   // "cdmx" y "Ciudad de México" siendo 3 valores distintos:
   // - País: lista completa (ver /api/geo/countries), mercados prioritarios
   //   (LatAm + España + EE. UU.) agrupados arriba.
@@ -193,6 +198,8 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       city: property.city || "",
       state: property.state || "",
       country: property.country || "",
+      propertyType: property.propertyType || "",
+      listingType: property.listingType || "venta",
       location: property.location || "",
       price: property.price ?? "",
       currency: property.currency || "USD",
@@ -649,6 +656,30 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                   {city}
                 </option>
               ))}
+            </select>
+            <select
+              className="select select-bordered w-full"
+              value={form.propertyType}
+              onChange={(e) => setForm({ ...form, propertyType: e.target.value })}
+              title="Tipo de propiedad (mejora tu posicionamiento en Google)"
+            >
+              <option value="">Tipo de propiedad (opcional)</option>
+              <option value="casa">Casa</option>
+              <option value="departamento">Departamento</option>
+              <option value="terreno">Terreno</option>
+              <option value="local">Local comercial</option>
+              <option value="oficina">Oficina</option>
+              <option value="rancho">Rancho</option>
+              <option value="edificio">Edificio</option>
+            </select>
+            <select
+              required
+              className="select select-bordered w-full"
+              value={form.listingType}
+              onChange={(e) => setForm({ ...form, listingType: e.target.value })}
+            >
+              <option value="venta">En venta</option>
+              <option value="renta">En renta</option>
             </select>
             <input
               required

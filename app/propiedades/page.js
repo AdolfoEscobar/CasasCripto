@@ -1,85 +1,99 @@
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
-import connectMongo from "@/libs/mongoose";
-import Property from "@/models/Property";
-import { getSEOTags } from "@/libs/seo";
-import { leanArrayToJSON } from "@/libs/leanToJSON";
+import FaqAccordion from "@/components/FaqAccordion";
+import { getMarketplaceData } from "@/libs/propertyGeo";
+import {
+  getSEOTags,
+  renderBreadcrumbSchema,
+  renderFaqSchema,
+  renderItemListSchema,
+} from "@/libs/seo";
+import { stateUrl, cityUrl, propertyUrl } from "@/libs/propertyUrls.mjs";
+import config from "@/config";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = getSEOTags({
-  title: "Propiedades crypto-friendly | Casas Cripto",
+  title: "Propiedades en venta que aceptan cripto | Casas Cripto",
   description:
-    "Explora propiedades reales publicadas por propietarios y agentes crypto-friendly en Casas Cripto, filtrables por ciudad.",
+    "Explora casas, departamentos y terrenos en venta publicados por propietarios verificados que aceptan USDC, USDT, BTC y ETH. Busca por estado y ciudad.",
   canonicalUrlRelative: "/propiedades",
 });
 
-// Marketplace real (no mockup): lista TODAS las propiedades "published",
-// ordenadas con las destacadas primero. Es la contraparte honesta de
-// <MarketplacePreview/> en el home, que muestra ejemplos. Cada ciudad con al
-// menos una propiedad es un chip que enlaza a su propia página SEO
-// (/propiedades/ciudad/[slug]) — más enlaces internos, más fácil de indexar.
-async function getProperties() {
-  await connectMongo();
+const HUB_FAQS = [
+  {
+    q: "¿Cómo compro una propiedad con criptomonedas en Casas Cripto?",
+    a: "Explora los listados por estado o ciudad, elige una propiedad que acepte tu cripto (cada listado indica cuáles: USDC, USDT, BTC, ETH) y contacta directo al propietario. El cierre de la operación se acuerda entre comprador y propietario.",
+  },
+  {
+    q: "¿Publicar mi propiedad cuesta algo?",
+    a: "No. Publicar es gratis: crea tu cuenta, sube tu propiedad indicando qué criptomonedas aceptas y aparece en el marketplace tras una revisión manual. Cada propiedad publicada genera su propia página indexable por estado y ciudad.",
+  },
+  {
+    q: "¿Las propiedades están verificadas?",
+    a: "Todo listado pasa por revisión manual antes de publicarse. Además, cada propietario tiene un perfil verificado y cada tarjeta muestra exactamente qué criptomonedas acepta.",
+  },
+];
 
-  const [properties, cityAgg] = await Promise.all([
-    Property.find({ status: "published" }).sort("-createdAt").lean(),
-    Property.aggregate([
-      { $match: { status: "published" } },
-      {
-        $group: {
-          _id: "$citySlug",
-          city: { $first: "$city" },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-    ]),
-  ]);
-
-  const now = Date.now();
-  // Las "destacadas" (pago único, ver app/api/stripe/create-featured-listing)
-  // aparecen primero mientras su featuredUntil siga vigente.
-  const sorted = properties.sort((a, b) => {
-    const aFeatured = a.featured && new Date(a.featuredUntil).getTime() > now;
-    const bFeatured = b.featured && new Date(b.featuredUntil).getTime() > now;
-    return Number(bFeatured) - Number(aFeatured);
-  });
-
-  return {
-    properties: leanArrayToJSON(JSON.parse(JSON.stringify(sorted))),
-    cities: cityAgg
-      .filter((c) => c._id)
-      .map((c) => ({ slug: c._id, name: c.city, count: c.count })),
-  };
-}
-
+// Hub del marketplace: lista TODAS las publicadas (destacadas primero) y es
+// el centro del interlinking — enlaza a CADA estado y ciudad con inventario,
+// para que Google descubra e indexe toda la jerarquía /estado/ciudad/detalle.
 export default async function PropiedadesPage() {
-  const { properties, cities } = await getProperties();
+  const { properties, states, cities } = await getMarketplaceData();
+  const baseUrl = `https://${config.domainName}`;
 
   return (
     <>
+      {renderBreadcrumbSchema([
+        { name: "Propiedades", url: `${baseUrl}/propiedades` },
+      ])}
+      {renderFaqSchema(HUB_FAQS)}
+      {renderItemListSchema(
+        properties.map((p) => ({
+          name: p.title,
+          url: `${baseUrl}${propertyUrl(p)}`,
+        }))
+      )}
       <main className="min-h-screen">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-24">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="font-medium text-primary mb-3">Marketplace</p>
             <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">
-              Propiedades crypto-friendly
+              Propiedades en venta que aceptan cripto
             </h1>
             <p className="opacity-70 leading-relaxed">
               Listados reales publicados por propietarios y agentes
-              verificados en Casas Cripto, con revisión manual antes de
-              publicarse.
+              verificados, con revisión manual antes de publicarse. Explora
+              por estado o ciudad y paga con USDC, USDT, BTC o ETH.
             </p>
           </div>
 
+          {states.length > 0 && (
+            <section className="mb-8">
+              <h2 className="text-center font-bold text-lg mb-4">
+                Explorar por estado
+              </h2>
+              <div className="flex flex-wrap justify-center gap-2">
+                {states.map((state) => (
+                  <Link
+                    key={state.slug}
+                    href={stateUrl(state.slug)}
+                    className="badge badge-lg badge-primary badge-outline min-h-[40px]"
+                  >
+                    {state.name} ({state.count})
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
           {cities.length > 0 && (
             <div className="flex flex-wrap justify-center gap-2 mb-12">
-              {cities.map((city) => (
+              {cities.slice(0, 24).map((city) => (
                 <Link
-                  key={city.slug}
-                  href={`/propiedades/ciudad/${city.slug}`}
+                  key={`${city.stateSlug}-${city.slug}`}
+                  href={cityUrl(city.stateSlug, city.slug)}
                   className="badge badge-lg badge-ghost border border-base-content/20 min-h-[40px]"
                 >
                   {city.name} ({city.count})
@@ -111,6 +125,11 @@ export default async function PropiedadesPage() {
               ))}
             </div>
           )}
+
+          <FaqAccordion
+            faqs={HUB_FAQS}
+            heading="Preguntas sobre el marketplace"
+          />
         </div>
       </main>
       <Footer />

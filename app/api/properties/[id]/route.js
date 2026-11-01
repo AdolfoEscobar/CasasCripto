@@ -18,6 +18,8 @@ const OWNER_EDITABLE_FIELDS = [
   "city",
   "state",
   "country",
+  "propertyType",
+  "listingType",
   "location",
   "price",
   "currency",
@@ -57,6 +59,23 @@ export async function PATCH(req, { params }) {
     }
 
     const body = await req.json();
+
+    // Misma validación de enums que en POST: tipo/operación alimentan el SEO
+    // long-tail y los filtros, así que nunca aceptamos valores fuera de lista
+    // (Mongoose los rechazaría con 500; mejor un 400 claro).
+    const VALID_TYPES = ["casa", "departamento", "terreno", "local", "oficina", "rancho", "edificio"];
+    const VALID_LISTINGS = ["venta", "renta"];
+    // El formulario manda "" cuando no hay tipo elegido: normalizar a
+    // undefined (campo ausente) porque "" NO pasa la validación del enum de
+    // Mongoose y tumbaría el guardado con 500.
+    if (body.propertyType === "") body.propertyType = undefined;
+    if (body.listingType === "") body.listingType = undefined;
+    if (body.propertyType && !VALID_TYPES.includes(body.propertyType)) {
+      return NextResponse.json({ error: "Tipo de propiedad inválido" }, { status: 400 });
+    }
+    if (body.listingType && !VALID_LISTINGS.includes(body.listingType)) {
+      return NextResponse.json({ error: "Operación inválida" }, { status: 400 });
+    }
 
     if (
       body.images !== undefined &&

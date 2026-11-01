@@ -34,15 +34,22 @@ const AuthModal = () => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
+          {/* Sin desenfoque en el overlay en móvil: uno a pantalla completa
+              sobre una página ya pesada (blobs gigantes + barras sticky con
+              desenfoque) congela el compositor de iOS WebKit a mitad de la
+              transición y la página queda muerta. En sm+ se mantiene. */}
           <div
             aria-hidden="true"
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 sm:backdrop-blur-sm"
             onClick={closeAuthModal}
           />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
+          {/* `m-auto` en el panel (no items/justify-center): con contenido
+              más alto que el viewport (ej. iPhone en horizontal) el
+              centrado flex recorta la parte superior sin forma de verla. */}
+          <div className="flex min-h-full p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
@@ -53,8 +60,8 @@ const AuthModal = () => {
               leaveTo="opacity-0 scale-95"
             >
               {/* Panel transparente: la tarjeta visual la pinta el propio
-                  SignInCard (glass-card). */}
-              <Dialog.Panel className="relative w-full max-w-md transform transition-all">
+                  SignInCard (sólida en móvil, glass en sm+). */}
+              <Dialog.Panel className="relative m-auto w-full max-w-md transform transition-all">
                 <Dialog.Title className="sr-only">
                   Iniciar sesión o crear cuenta
                 </Dialog.Title>

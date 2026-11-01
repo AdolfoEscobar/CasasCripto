@@ -1,60 +1,54 @@
 import Link from "next/link";
 import Script from "next/script";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Footer from "@/components/Footer";
+import PropertyCard from "@/components/PropertyCard";
 import PropertyImage from "@/components/PropertyImage";
-import connectMongo from "@/libs/mongoose";
-import Property from "@/models/Property";
-import { getSEOTags, renderBreadcrumbSchema } from "@/libs/seo";
-import { leanToJSON } from "@/libs/leanToJSON";
+import { getPropertyBySlug, getCityData } from "@/libs/propertyGeo";
+import { getSEOTags, renderBreadcrumbSchema, safeJsonLd } from "@/libs/seo";
+import { stateUrl, cityUrl, propertyUrl } from "@/libs/propertyUrls.mjs";
+import {
+  listingTitle,
+  listingDescription,
+  capFirst,
+  PROPERTY_TYPES,
+  LISTING_TYPES,
+} from "@/libs/geoSeo.mjs";
 import { imageSrc, imageSrcList } from "@/libs/propertyImages";
 import config from "@/config";
 
 export const dynamic = "force-dynamic";
 
-async function getProperty(id) {
-  await connectMongo();
-  try {
-    const property = await Property.findOne({ _id: id, status: "published" }).lean();
-    return property ? leanToJSON(JSON.parse(JSON.stringify(property))) : null;
-  } catch {
-    // CastError si el id no es un ObjectId válido — tratarlo como "no existe".
-    return null;
-  }
-}
-
-// Cada propiedad publicada es su propia URL indexable, con título, meta
-// description y datos estructurados únicos — esto es lo que realmente mueve
-// el SEO de un marketplace de día cero (ver también /sitemap.js).
+// Detalle de propiedad: /propiedades/chihuahua/delicias/casa-en-venta-centro-a1b2c3
+// El lookup es por `propertySlug` (único). Si los segmentos de estado/ciudad
+// de la URL no coinciden con el documento (ej. alguien cambió la ciudad de la
+// propiedad después de publicada), se redirige 301 a la canónica — una sola
+// URL por listado, sin duplicados.
 export async function generateMetadata({ params }) {
-  const { id } = await params;
-  const property = await getProperty(id);
+  const { param, ciudad, slug } = await params;
+  const property = await getPropertyBySlug(slug);
 
   if (!property) {
     return getSEOTags({
       title: "Propiedad no encontrada | Casas Cripto",
-      canonicalUrlRelative: `/propiedades/${id}`,
+      canonicalUrlRelative: `/propiedades/${param}/${ciudad}/${slug}`,
     });
   }
 
-  const title = `${property.title} en ${property.city} | Acepta cripto | Casas Cripto`;
-  const description =
-    property.description?.slice(0, 155) ||
-    `Propiedad en venta en ${property.city}${
-      property.country ? `, ${property.country}` : ""
-    } que acepta ${(property.cryptoAccepted || []).join(", ") || "criptomonedas"}. Precio: $${property.price?.toLocaleString()} ${property.currency}.`;
-
+  const title = listingTitle(property);
+  const description = listingDescription(property);
   const ogImage = imageSrc(property.images?.[0]);
+  const canonical = propertyUrl(property);
 
   return getSEOTags({
     title,
     description,
-    canonicalUrlRelative: `/propiedades/${id}`,
+    canonicalUrlRelative: canonical,
     extraTags: {
       openGraph: {
         title,
         description,
-        url: `/propiedades/${id}`,
+        url: canonical,
         images: ogImage ? [{ url: ogImage }] : undefined,
       },
     },
@@ -62,24 +56,39 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PropertyDetailPage({ params }) {
-  const { id } = await params;
-  const property = await getProperty(id);
+  const { param, ciudad, slug } = await params;
+  const property = await getPropertyBySlug(slug);
 
   if (!property) {
     notFound();
   }
+
+  const canonical = propertyUrl(property);
+  if (
+    property.stateSlug !== param ||
+    property.citySlug !== ciudad ||
+    canonical !== `/propiedades/${param}/${ciudad}/${slug}`
+  ) {
+    permanentRedirect(canonical);
+  }
+
+  const baseUrl = `https://${config.domainName}`;
+  const place = [property.city, property.state].filter(Boolean).join(", ");
+  const typeLabel = PROPERTY_TYPES[property.propertyType]?.singular;
+  const opLabel = LISTING_TYPES[property.listingType];
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
     name: property.title,
     description: property.description || property.title,
-    url: `https://${config.domainName}/propiedades/${property.id}`,
+    url: `${baseUrl}${canonical}`,
     datePosted: property.createdAt,
     ...(property.images?.length && { image: imageSrcList(property.images) }),
     address: {
       "@type": "PostalAddress",
       addressLocality: property.city,
+      ...(property.state && { addressRegion: property.state }),
       ...(property.country && { addressCountry: property.country }),
     },
     offers: {
@@ -91,27 +100,40 @@ export default async function PropertyDetailPage({ params }) {
   };
 
   const breadcrumbItems = [
-    { name: "Propiedades", url: `https://${config.domainName}/propiedades` },
+    { name: "Propiedades", url: `${baseUrl}/propiedades` },
+    ...(property.stateSlug
+      ? [
+          {
+            name: property.state || property.country,
+            url: `${baseUrl}${stateUrl(property.stateSlug)}`,
+          },
+        ]
+      : []),
     ...(property.citySlug
       ? [
           {
             name: property.city,
-            url: `https://${config.domainName}/propiedades/ciudad/${property.citySlug}`,
+            url: `${baseUrl}${cityUrl(property.stateSlug, property.citySlug)}`,
           },
         ]
       : []),
-    {
-      name: property.title,
-      url: `https://${config.domainName}/propiedades/${property.id}`,
-    },
+    { name: property.title, url: `${baseUrl}${canonical}` },
   ];
+
+  // "Más en esta ciudad" — interlinking entre detalles + frescura de enlaces
+  // internos. Excluye la propiedad actual.
+  const { properties: neighbors } = await getCityData(
+    property.stateSlug,
+    property.citySlug
+  );
+  const related = neighbors.filter((p) => p.id !== property.id).slice(0, 3);
 
   return (
     <>
       <Script
         type="application/ld+json"
         id={`json-ld-property-${property.id}`}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       {renderBreadcrumbSchema(breadcrumbItems)}
       <main className="min-h-screen">
@@ -121,12 +143,23 @@ export default async function PropertyDetailPage({ params }) {
               <li>
                 <Link href="/propiedades">Propiedades</Link>
               </li>
+              {property.stateSlug && (
+                <li className="min-w-0">
+                  <Link
+                    href={stateUrl(property.stateSlug)}
+                    title={property.state}
+                    className="truncate max-w-[30vw] block"
+                  >
+                    {property.state || property.country}
+                  </Link>
+                </li>
+              )}
               {property.citySlug && (
                 <li className="min-w-0">
                   <Link
-                    href={`/propiedades?ciudad=${property.citySlug}`}
+                    href={cityUrl(property.stateSlug, property.citySlug)}
                     title={property.city}
-                    className="truncate max-w-[35vw] block"
+                    className="truncate max-w-[30vw] block"
                   >
                     {property.city}
                   </Link>
@@ -141,7 +174,7 @@ export default async function PropertyDetailPage({ params }) {
               {property.images?.[0] ? (
                 <PropertyImage
                   image={property.images[0]}
-                  alt={property.title}
+                  alt={`${property.title} en ${place}`}
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   className="w-full aspect-[4/3] object-cover rounded-2xl"
                   eager
@@ -171,7 +204,7 @@ export default async function PropertyDetailPage({ params }) {
                     <PropertyImage
                       key={i}
                       image={img}
-                      alt={`${property.title} - foto ${i + 2}`}
+                      alt={`${property.title} en ${place} - foto ${i + 2}`}
                       sizes="(max-width: 1024px) 33vw, 20vw"
                       className="w-full aspect-[4/3] object-cover rounded-lg"
                     />
@@ -179,27 +212,35 @@ export default async function PropertyDetailPage({ params }) {
                 </div>
               )}
 
-              {property.featured &&
-                property.featuredUntil &&
-                new Date(property.featuredUntil) > new Date() && (
-                  <span className="badge badge-warning font-semibold mt-4 gap-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                    </svg>
-                    Listado destacado
+              <div className="flex flex-wrap gap-2 mt-4">
+                {property.featured &&
+                  property.featuredUntil &&
+                  new Date(property.featuredUntil) > new Date() && (
+                    <span className="badge badge-warning font-semibold gap-1">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
+                      </svg>
+                      Listado destacado
+                    </span>
+                  )}
+                {typeLabel && (
+                  <span className="badge badge-primary badge-outline">
+                    {capFirst(`${typeLabel} ${opLabel || ""}`.trim())}
                   </span>
                 )}
+              </div>
 
               <h1 className="font-extrabold text-2xl sm:text-3xl tracking-tight mt-4">
                 {property.title}
               </h1>
               <p className="opacity-60 mt-1 break-words">
                 {property.city}
+                {property.state ? `, ${property.state}` : ""}
                 {property.country ? `, ${property.country}` : ""}
                 {property.location ? ` · ${property.location}` : ""}
               </p>
@@ -251,6 +292,27 @@ export default async function PropertyDetailPage({ params }) {
               </div>
             </div>
           </div>
+
+          {related.length > 0 && (
+            <section className="mt-16 md:mt-20">
+              <div className="flex items-baseline justify-between gap-4 mb-6">
+                <h2 className="font-extrabold text-2xl tracking-tight">
+                  Más propiedades en {property.city}
+                </h2>
+                <Link
+                  href={cityUrl(property.stateSlug, property.citySlug)}
+                  className="link link-primary text-sm whitespace-nowrap"
+                >
+                  Ver todas
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+                {related.map((p) => (
+                  <PropertyCard key={p.id} property={p} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
       <Footer />

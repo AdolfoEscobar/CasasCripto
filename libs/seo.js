@@ -1,5 +1,12 @@
 import config from "@/config";
 
+// Serializa JSON-LD para inyectar con dangerouslySetInnerHTML: JSON.stringify
+// NO escapa `</script>`, así que un título o nombre con ese texto rompería el
+// bloque <script> (XSS potencial). `\u003c` es equivalente a `<` en JSON, así
+// que el schema sigue siendo válido para Google.
+export const safeJsonLd = (obj) =>
+  JSON.stringify(obj).replace(/</g, "\\u003c");
+
 // These are all the SEO tags you can add to your pages.
 // It prefills data with default title/description/OG, etc.. and you can cusotmize it for each page.
 // It's already added in the root layout.js so you don't have to add it to every pages
@@ -41,7 +48,7 @@ export const getSEOTags = ({
       //     height: 660,
       //   },
       // ],
-      locale: "es_ES",
+      locale: "es_MX",
       type: "website",
     },
 
@@ -103,14 +110,14 @@ export const renderSchemaTags = () => {
     <script
       type="application/ld+json"
       id="json-ld-organization"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     ></script>
   );
 };
 
-// BreadcrumbList JSON-LD reutilizable — usado en /propiedades/[id] y
-// /propiedades/ciudad/[slug] para que Google pueda mostrar la ruta de
-// navegación (breadcrumbs) directamente en el resultado de búsqueda.
+// BreadcrumbList JSON-LD reutilizable — usado en las páginas de
+// /propiedades (estado, ciudad, detalle) para que Google pueda mostrar la
+// ruta de navegación directamente en el resultado de búsqueda.
 // `items` es un array de { name, url } en orden, del más general al actual.
 export const renderBreadcrumbSchema = (items) => {
   const schema = {
@@ -128,7 +135,58 @@ export const renderBreadcrumbSchema = (items) => {
     <script
       type="application/ld+json"
       id="json-ld-breadcrumb"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    ></script>
+  );
+};
+
+// FAQPage JSON-LD — acompaña a las FAQs visibles de las páginas geo
+// (ver libs/geoSeo.mjs `geoFaqs`). Google solo genera rich results de FAQ
+// cuando las preguntas/respuestas también están visibles en la página, así
+// que este schema NUNCA se renderiza sin su bloque <FaqAccordion/> gemelo.
+export const renderFaqSchema = (faqs, id = "json-ld-faq") => {
+  if (!faqs?.length) return null;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      id={id}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
+    ></script>
+  );
+};
+
+// ItemList JSON-LD para páginas de listado (hub, estado, ciudad): le dice a
+// Google que la página es una colección ordenada de listados inmobiliarios,
+// cada uno con su URL canónica.
+export const renderItemListSchema = (items, id = "json-ld-itemlist") => {
+  if (!items?.length) return null;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    numberOfItems: items.length,
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: item.url,
+      name: item.name,
+    })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      id={id}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     ></script>
   );
 };
