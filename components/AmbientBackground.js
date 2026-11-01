@@ -13,9 +13,19 @@
 // navegador) — eso es lo que causaba un fondo negro tapándolo todo. En vez
 // de eso, este div va sin z-index (nivel 0) y el contenido de la app va en
 // `relative z-10`: stacking garantizado por CSS normal.
+//
+// Rendimiento: los glows son radial-gradients (ver `.ambient-blob` en
+// globals.css), NO divs sólidos con `blur-[100px]`. Un blur gigante obliga
+// al navegador a re-desenfocar toda la capa en cada frame de la animación,
+// y eso causaba el parpadeo al recargar + GPU alta en scroll. El gradiente
+// se pinta una sola vez y `animate-float` (solo translateY, capa del
+// compositor) lo mueve sin repintar: mismo look, costo ~cero.
 export default function AmbientBackground() {
   return (
-    <div aria-hidden="true" className="fixed inset-0 bg-base-100">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 overflow-hidden bg-base-100"
+    >
       {/* tinte base con los 3 colores de marca, para que SIEMPRE haya algo
           de color visible aunque los blobs queden fuera de un viewport
           muy ancho o muy angosto */}
@@ -23,20 +33,20 @@ export default function AmbientBackground() {
       <div className="absolute inset-0 bg-grid-fade" />
 
       {/* oro — eco del techo/acento del logo */}
-      <div className="absolute -top-20 -left-20 w-[36rem] h-[36rem] rounded-full bg-primary/45 blur-[100px] animate-float" />
+      <div className="ambient-blob ambient-blob-gold -top-52 -left-52 h-[52rem] w-[52rem] animate-float" />
       {/* cian/azul — eco de la casa hexagonal del logo */}
       <div
-        className="absolute top-10 -right-24 w-[34rem] h-[34rem] rounded-full bg-secondary/40 blur-[100px] animate-float"
+        className="ambient-blob ambient-blob-cyan -top-18 -right-4 h-[48rem] w-[48rem] animate-float"
         style={{ animationDelay: "1.5s" }}
       />
       {/* violeta — toque Web3/neón */}
       <div
-        className="absolute top-[50%] -left-16 w-[30rem] h-[30rem] rounded-full bg-accent/35 blur-[100px] animate-float"
+        className="ambient-blob ambient-blob-violet top-[calc(50%-7rem)] -left-44 h-[44rem] w-[44rem] animate-float"
         style={{ animationDelay: "3s" }}
       />
       {/* oro extra a media altura, lado derecho, para que el color no se "acabe" en la mitad de la página */}
       <div
-        className="absolute top-[75%] -right-20 w-[30rem] h-[30rem] rounded-full bg-primary/35 blur-[100px] animate-float"
+        className="ambient-blob ambient-blob-gold-soft top-[calc(75%-7rem)] -right-8 h-[44rem] w-[44rem] animate-float"
         style={{ animationDelay: "4.5s" }}
       />
     </div>

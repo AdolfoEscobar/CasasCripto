@@ -190,6 +190,43 @@ progress::-webkit-progress-value {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
 }
 
+/* Blobs del fondo ambiental (ver <AmbientBackground/>): cada glow es un
+   radial-gradient pintado UNA vez, en vez de un div sólido con
+   `blur-[100px]` que el navegador tendría que re-desenfocar en cada frame
+   de la animación (parpadeo al recargar + GPU alta). `translateZ(0)` +
+   `will-change` promueven cada blob a su propia capa del compositor, así
+   `animate-float` (solo translateY) mueve píxeles ya pintados sin repintar.
+   Cajas ~40% más grandes que los divs con blur originales para compensar
+   la dispersión que aportaba el blur. */
+.ambient-blob {
+  position: absolute;
+  border-radius: 9999px;
+  transform: translateZ(0);
+  will-change: transform;
+  background: radial-gradient(
+    closest-side,
+    var(--blob) 0%,
+    var(--blob) 22%,
+    transparent 100%
+  );
+}
+
+.ambient-blob-gold {
+  --blob: color-mix(in oklab, var(--color-primary) 45%, transparent);
+}
+
+.ambient-blob-gold-soft {
+  --blob: color-mix(in oklab, var(--color-primary) 35%, transparent);
+}
+
+.ambient-blob-cyan {
+  --blob: color-mix(in oklab, var(--color-secondary) 40%, transparent);
+}
+
+.ambient-blob-violet {
+  --blob: color-mix(in oklab, var(--color-accent) 35%, transparent);
+}
+
 .badge-elite {
   border: 1px solid color-mix(in oklab, var(--color-primary) 45%, transparent);
   background: color-mix(in oklab, var(--color-primary) 12%, transparent);
