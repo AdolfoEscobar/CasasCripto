@@ -3,18 +3,22 @@
 import { Suspense } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { useAuthModal } from "./AuthModalContext";
+import { useAuthModal, AuthModalUrlTrigger } from "./AuthModalContext";
 import SignInCard from "./SignInCard";
 
-// Modal global de login: se abre desde cualquier página sin navegar (ver
-// useAuthModal / requestAuthModal). Reutiliza el mismo <SignInCard/> de la
-// página /signin para no duplicar la lógica de Google + magic link.
-// La página /signin sigue existiendo como fallback (visitas directas,
-// callbacks de OAuth con error, SEO).
+// Modal global de login — la única UI de login de la app. Se abre desde
+// cualquier página sin navegar (ver useAuthModal / requestAuthModal, o con
+// ?auth=signin en la URL para los redirects de servidor). Los casos borde
+// de NextAuth (OAuth denegado, magic link vencido) caen en app/auth/error,
+// que ofrece reintentar abriendo este modal.
 const AuthModal = () => {
   const { isOpen, closeAuthModal, callbackUrl } = useAuthModal();
 
   return (
+    <>
+    <Suspense fallback={null}>
+      <AuthModalUrlTrigger />
+    </Suspense>
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
@@ -49,14 +53,13 @@ const AuthModal = () => {
               leaveTo="opacity-0 scale-95"
             >
               {/* Panel transparente: la tarjeta visual la pinta el propio
-                  SignInCard (glass-card), igual que en /signin. */}
+                  SignInCard (glass-card). */}
               <Dialog.Panel className="relative w-full max-w-md transform transition-all">
                 <Dialog.Title className="sr-only">
                   Iniciar sesión o crear cuenta
                 </Dialog.Title>
                 <Suspense fallback={null}>
                   <SignInCard
-                    variant="modal"
                     initialCallbackUrl={callbackUrl}
                     onClose={closeAuthModal}
                   />
@@ -67,6 +70,7 @@ const AuthModal = () => {
         </div>
       </Dialog>
     </Transition>
+    </>
   );
 };
 

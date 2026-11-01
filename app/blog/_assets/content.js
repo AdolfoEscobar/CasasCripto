@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SignInInlineButton from "@/components/auth/SignInInlineButton";
 
 // ==================================================================================================================================================================
 // BLOG CATEGORIES 🏷️
@@ -1706,9 +1707,9 @@ export const articles = [
           <h2 className={styles.h2}>Paso 1: crea tu cuenta gratis</h2>
           <p className={styles.p}>
             Entra a{" "}
-            <Link href="/signin" className={styles.link}>
+            <SignInInlineButton className={styles.link}>
               iniciar sesión
-            </Link>{" "}
+            </SignInInlineButton>{" "}
             y crea tu cuenta con Google o con tu email (enlace mágico, sin
             contraseña). Automáticamente quedas en el plan Básico gratuito:
             hasta 20 propiedades, sin tarjeta y sin fecha de vencimiento.

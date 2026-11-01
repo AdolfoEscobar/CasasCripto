@@ -3,7 +3,8 @@ import { auth } from "@/libs/auth";
 import config from "@/config";
 
 // This is a server-side component to ensure the user is logged in and is an admin
-// If not, it will redirect to the login page.
+// If not logged in, it redirects home with ?auth=signin so the global login
+// modal opens on landing (there is no login page anymore).
 // It's applied to all subpages of /admin/dashboard in /app/dashboard/*** pages
 //
 // La navegación (incluyendo los links de Admin: Dashboard/Usuarios/
@@ -14,7 +15,9 @@ export default async function LayoutAdminPrivate({ children }) {
   const session = await auth();
 
   if (!session) {
-    redirect(config.auth.loginUrl);
+    // callbackUrl preserva el destino: tras loguearse el admin cae
+    // directo en /admin/dashboard en vez de en el dashboard de usuario.
+    redirect(`/?auth=signin&callbackUrl=${encodeURIComponent("/admin/dashboard")}`);
   }
 
   if (session.user.role !== "admin") {

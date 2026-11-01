@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Playfair_Display } from "next/font/google";
 import {
   HomeIcon,
   BuildingOffice2Icon,
@@ -20,14 +19,9 @@ import {
 import logo from "@/app/icon.png";
 import config from "@/config";
 
-// Misma tipografía "VIP" (Playfair Display itálica + degradado dorado) que
-// usaba el Header flotante anterior, para que el rebranding del logo no
-// cambie al migrar a navegación lateral.
-const accentFont = Playfair_Display({
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["600", "700"],
-});
+// El logo usa la misma tipografía display de los titulares (Sora vía
+// `font-display`) — el degradado dorado es el diferenciador de marca,
+// no una tercera familia tipográfica.
 
 // Navegación principal del "producto": siempre visible, en todas las
 // páginas (home, marketplace, blog), porque este sidebar es ahora la única
@@ -129,9 +123,7 @@ const Sidebar = () => {
             height={40}
           />
         </span>
-        <span
-          className={`${accentFont.className} italic text-xl tracking-wide text-gradient-gold leading-tight pb-1`}
-        >
+        <span className="font-display text-xl font-extrabold tracking-tight text-gradient-gold leading-tight">
           {config.appName}
         </span>
       </Link>

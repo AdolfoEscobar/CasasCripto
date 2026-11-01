@@ -64,7 +64,7 @@ const ClientLayout = ({ children }) => {
           {/* Content inside app/page.js files  */}
           {children}
 
-          {/* Global login modal — opens in place instead of navigating to /signin */}
+          {/* Global login modal — the only login UI, opens in place */}
           <AuthModal />
 
           {/* Show Success/Error messages anywhere from the app with toast() */}

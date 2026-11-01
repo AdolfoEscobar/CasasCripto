@@ -1,17 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Playfair_Display } from "next/font/google";
 import config from "@/config";
 import logo from "@/app/icon.png";
-
-// Misma tipografía "VIP" del logo (Playfair Display itálica + degradado
-// dorado vía `text-gradient-gold`) que el sidebar y el topbar móvil, para
-// que el branding sea idéntico en todas las pantallas.
-const accentFont = Playfair_Display({
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["600", "700"],
-});
 
 const columns = [
   {
@@ -73,9 +63,7 @@ const Footer = () => {
               width={24}
               height={24}
             />
-            <strong
-              className={`${accentFont.className} italic tracking-wide text-gradient-gold leading-tight text-lg`}
-            >
+            <strong className="font-display text-lg font-extrabold tracking-tight text-gradient-gold leading-tight">
               {config.appName}
             </strong>
           </Link>

@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Playfair_Display } from "next/font/google";
 import { useSession } from "next-auth/react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
@@ -15,14 +14,8 @@ import ButtonAccount from "./ButtonAccount";
 import logo from "@/app/icon.png";
 import config from "@/config";
 
-// Misma tipografía "VIP" del logo en desktop (Playfair Display itálica +
-// degradado dorado vía `text-gradient-gold`) para que el branding no cambie
-// entre mobile y desktop. Ver <Sidebar/>.
-const accentFont = Playfair_Display({
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["600", "700"],
-});
+// El logo móvil usa la misma tipografía display de los titulares (Sora vía
+// `font-display`) que el sidebar y el footer — ver <Sidebar/>.
 
 // Barra superior compacta, SOLO visible en mobile/tablet (<lg). Sustituye al
 // antiguo burger del Header flotante: aquí solo abre/cierra el drawer que
@@ -72,9 +65,7 @@ const MobileTopbar = () => {
           height={36}
         />
       </span>
-      <span
-        className={`${accentFont.className} italic text-lg tracking-wide text-gradient-gold leading-tight whitespace-nowrap pb-1 truncate`}
-      >
+      <span className="font-display text-lg font-extrabold tracking-tight text-gradient-gold leading-tight whitespace-nowrap truncate">
         {config.appName}
       </span>
     </Link>

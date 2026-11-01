@@ -206,7 +206,8 @@ progress::-webkit-progress-value {
      las páginas (homepage, propiedades, blog, demo-ai, dashboard, admin,
      legales) sin depender de que cada archivo repita la clase.
    - h3+ y cuerpo → Inter (legibilidad).
-   - Logo → Playfair itálica (acento de marca, solo en logos).
+   - Logo → Sora extrabold + degradado dorado (mismo display que
+     titulares; el color es el diferenciador, no otra familia).
    `text-wrap: balance` evita huérfanas de una palabra en titulares. */
 h1,
 h2 {

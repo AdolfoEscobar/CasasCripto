@@ -5,8 +5,10 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import config from "@/config";
 
 // Evento global para abrir el modal de login desde fuera de React (ej. el
@@ -61,4 +63,33 @@ export function useAuthModal() {
     throw new Error("useAuthModal must be used within AuthModalProvider");
   }
   return ctx;
+}
+
+// Puente para los redirects de servidor (los layouts privados no pueden
+// abrir el modal: redirigen a /?auth=signin&callbackUrl=... y este
+// componente lo abre al montar). Limpia la URL después para que recargar
+// no reabra el modal. Debe renderizarse dentro del provider y en Suspense
+// (usa useSearchParams).
+export function AuthModalUrlTrigger() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const { openAuthModal } = useAuthModal();
+  const openedRef = useRef(false);
+
+  useEffect(() => {
+    if (openedRef.current) return;
+    if (searchParams.get("auth") !== "signin") return;
+    openedRef.current = true;
+
+    openAuthModal(searchParams.get("callbackUrl") || undefined);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("auth");
+    params.delete("callbackUrl");
+    const qs = params.toString();
+    router.replace(pathname + (qs ? `?${qs}` : ""), { scroll: false });
+  }, [searchParams, pathname, router, openAuthModal]);
+
+  return null;
 }

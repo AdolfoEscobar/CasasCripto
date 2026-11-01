@@ -208,11 +208,9 @@ const config = {
     main: "#E3BA5F",
   },
   auth: {
-    // REQUIRED — the path to log in users. It's use to protect private routes (like /dashboard). It's used in apiClient (/libs/api.js) upon 401 errors from our API
-    // Fallback de login en página completa (visitas directas, OAuth errors).
-    // El flujo principal en la app es el modal global — ver
-    // components/auth/AuthModal.js + app/signin/page.js
-    loginUrl: "/signin",
+    // REQUIRED — default landing path after login. Private layouts redirect
+    // logged-out users home with ?auth=signin (the global login modal opens
+    // on landing — there is no login page). See components/auth/AuthModal.js.
     callbackUrl: "/dashboard",
   },
 };

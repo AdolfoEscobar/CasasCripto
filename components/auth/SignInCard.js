@@ -6,19 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import config from "@/config";
-
-// Human-friendly copy for the error codes NextAuth appends to the callback URL
-// (see https://authjs.dev/reference/core/types#signinpageerrorparam)
-const ERROR_MESSAGES = {
-  OAuthAccountNotLinked:
-    "Ese correo ya está registrado con otro método de acceso. Prueba con el mismo método que usaste la primera vez.",
-  EmailSignin:
-    "No pudimos enviar el enlace de acceso. Verifica el correo e inténtalo de nuevo.",
-  Verification:
-    "El enlace de acceso venció o ya fue usado. Solicita uno nuevo.",
-  AccessDenied: "No tienes permiso para acceder con esta cuenta.",
-  Default: "Ocurrió un problema al iniciar sesión. Inténtalo de nuevo.",
-};
+import { getAuthErrorMessage } from "./authErrors";
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -41,18 +29,13 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// variant "page": tarjeta de /signin (pantalla completa, con "Volver al inicio").
-// variant "modal": mismo formulario dentro del <AuthModal/> global —
-// initialCallbackUrl lo fija quien abre el modal y onClose lo cierra.
-const SignInCard = ({
-  variant = "page",
-  initialCallbackUrl = null,
-  onClose = null,
-}) => {
+// Formulario de login (Google + magic link) del <AuthModal/> global — la
+// única UI de login de la app. initialCallbackUrl lo fija quien abre el
+// modal y onClose lo cierra.
+const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
-  const isModal = variant === "modal";
 
   const callbackUrl =
     initialCallbackUrl ||
@@ -66,18 +49,17 @@ const SignInCard = ({
   const [emailSent, setEmailSent] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Already logged in? Skip the login UI entirely. In modal mode the
-  // modal closes first so it never lingers over the target page.
+  // Already logged in? Close the modal and land on the callback URL.
   useEffect(() => {
     if (status === "authenticated") {
-      if (isModal) onClose?.();
+      onClose?.();
       router.replace(callbackUrl);
     }
-  }, [status, callbackUrl, router, isModal, onClose]);
+  }, [status, callbackUrl, router, onClose]);
 
   useEffect(() => {
     if (urlError) {
-      setErrorMsg(ERROR_MESSAGES[urlError] || ERROR_MESSAGES.Default);
+      setErrorMsg(getAuthErrorMessage(urlError));
     }
   }, [urlError]);
 
@@ -104,7 +86,7 @@ const SignInCard = ({
     try {
       await signIn("google", { callbackUrl });
     } catch {
-      setErrorMsg(ERROR_MESSAGES.Default);
+      setErrorMsg(getAuthErrorMessage());
       setLoadingGoogle(false);
     }
   };
@@ -128,13 +110,13 @@ const SignInCard = ({
       });
 
       if (res?.error) {
-        setErrorMsg(ERROR_MESSAGES[res.error] || ERROR_MESSAGES.Default);
+        setErrorMsg(getAuthErrorMessage(res.error));
       } else {
         setEmailSent(true);
         toast.success("Enlace enviado. Revisa tu correo.");
       }
     } catch {
-      setErrorMsg(ERROR_MESSAGES.Default);
+      setErrorMsg(getAuthErrorMessage());
     } finally {
       setLoadingEmail(false);
     }
@@ -146,25 +128,23 @@ const SignInCard = ({
   };
 
   return (
-    <div className={`w-full ${isModal ? "" : "max-w-md"}`}>
+    <div className="w-full">
       <div className="glass-card glow-primary rounded-box p-6 sm:p-10 relative">
-        {isModal && (
-          <button
-            type="button"
-            aria-label="Cerrar"
-            onClick={() => onClose?.()}
-            className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3"
+        <button
+          type="button"
+          aria-label="Cerrar"
+          onClick={() => onClose?.()}
+          className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-5 h-5"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-            </svg>
-          </button>
-        )}
+            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+          </svg>
+        </button>
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-extrabold">
             Bienvenido a{" "}
@@ -308,14 +288,6 @@ const SignInCard = ({
           .
         </p>
       </div>
-
-      {!isModal && (
-        <p className="mt-6 text-center text-sm text-base-content/50">
-          <Link href="/" className="link link-hover">
-            ← Volver al inicio
-          </Link>
-        </p>
-      )}
     </div>
   );
 };

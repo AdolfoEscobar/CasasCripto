@@ -10,7 +10,7 @@ You are working on **Casas Cripto**, a modern real estate **marketplace** focuse
 - **Payments & monetization**: listing does **not** require Stripe/`hasAccess`. Plan Básico is free (`config.stripe.plans` `isFree: true`, sentinel `priceId` `price_free_basico`, `maxProperties: 20`). Premium is Stripe Checkout `subscription` + Customer Portal (`maxProperties: 100`). One-time Checkout with inline `price_data` for **donations** (`createDonationCheckout`) and **featured listings** (`createFeaturedListingCheckout`, `config.featuredListing`). On-chain donations via placeholder wallets in `components/CopyWalletAddress.js`. Property `cryptoAccepted` is informational — sale settlement is still off-platform.
 - **Email**: Resend for transactional emails (magic links, notifications)
 - **AI listing tools**: Meta Model API (`libs/metaModel.js`) — Muse Spark (`/api/ai/listing-copy`), Muse Image (`/api/ai/listing-image`), SAM 3.1 (`/api/ai/privacy-scan`), each with a stricter public variant under `/api/ai/public/*` for the no-login `/demo-ai`. Daily per-user/per-IP rate limits via `libs/aiRateLimit.js` + `models/AiUsage.js`. Without `MODEL_API_KEY` every route returns a sample response, so the UI is testable with no key.
-- **Authentication**: NextAuth with Google OAuth and Email (magic link) providers, JWT sessions carrying a `role` (`user`, `admin`, `editor`, `moderator`). Custom sign-in page at `/signin` (`pages.signIn` in `libs/auth.js`).
+- **Authentication**: NextAuth with Google OAuth and Email (magic link) providers, JWT sessions carrying a `role` (`user`, `admin`, `editor`, `moderator`). No login page: global login modal (`components/auth/AuthModal.js` + `SignInCard`), edge-case errors at `/auth/error` (`pages` in `libs/auth.js`).
 - **Navigation**: global `AppShell` + left `Sidebar` + classic desktop top `Topbar` (quick links + account, `hidden lg:flex`) mounted in `app/layout.js`. No legacy `Header.js` / `HeaderBlog`.
 - **Deployment**: Optimized for Vercel deployment
 
@@ -28,7 +28,7 @@ This codebase started from the ShipFast Next.js boilerplate, was rebranded into 
 
 - ✅ **Implemented**:
   - Landing in Spanish at `app/page.js`: `Hero`, `Problem`, `MarketplacePreview` (home teaser — the real catalog is `/propiedades`), `FeaturesAccordion`, `StatsSection`, `Pricing` (free Básico + paid Premium + "Elite / Inversionistas" contact card), `TokenRoadmap`, `InvestAndDonate` (`#invertir` / `#donar`), `FAQ`, `CTA`, `Footer`.
-  - Custom sign-in at `app/signin` (`SignInCard`).
+  - Global login modal (`components/auth/AuthModal.js` + `SignInCard`); auth edge-case page at `app/auth/error`.
   - Auth with roles; user dashboard `app/(private)/(user)/dashboard` with `PropertyManager.js` (create/edit/delete listings, featured-listing checkout).
   - Admin RBAC `app/(private)/admin/dashboard` + user API `app/api/admin/*` + property review UI `app/(private)/admin/dashboard/properties`.
   - **`models/Property.js`**: `owner`, `title`, `description`, structured `city` / `state` / `country` (+ auto `citySlug`), optional `location`, `price`, `currency`, `cryptoAccepted[]`, `images[]` (URLs), contact fields, moderation `status` (`pending` | `published` | `rejected`) + `rejectionReason`, commercial `dealStatus` (`active` | `under_offer` | `closed`), `commissionRate` (default 1.5%, not billed yet), `featured` / `featuredUntil`.
@@ -91,7 +91,7 @@ CasasCripto/
 │   │   └── admin/dashboard/       # Admin home, users, properties moderation
 │   ├── propiedades/               # Marketplace: index, [id], ciudad/[slug]
 │   ├── demo-ai/                   # Public no-login Meta AI demo (DemoAIClient.js)
-│   ├── signin/                    # Custom elite sign-in
+│   ├── auth/error/                # Branded NextAuth edge-case errors
 │   ├── blog/, privacy-policy/, tos/
 │   ├── sitemap.js
 │   └── page.js, layout.js         # Landing + global AppShell

@@ -7,7 +7,7 @@
 ## Stack técnico
 
 - **Framework**: Next.js 16 (App Router) + React 19
-- **Auth**: NextAuth v5 (beta) — Google OAuth + Email (magic link vía Resend) + adapter de MongoDB; página de login propia en `/signin`
+- **Auth**: NextAuth v5 (beta) — Google OAuth + Email (magic link vía Resend) + adapter de MongoDB; login en modal global (`components/auth/AuthModal.js`), errores borde en `/auth/error`
 - **Base de datos**: MongoDB con Mongoose (`User`, `Lead`, `Property`)
 - **Pagos**: Stripe — Checkout + Customer Portal para Premium; Checkout de monto libre (`price_data`) para donaciones y para **destacar un listado**; donaciones on-chain (wallets placeholder)
 - **Geo**: `country-state-city` + `i18n-iso-countries` **solo en servidor** (`libs/geo.js` → `/api/geo/*`)
@@ -60,7 +60,7 @@
    ```bash
    npm run dev
    ```
-4. Abre [http://localhost:3000](http://localhost:3000). Marketplace: [http://localhost:3000/propiedades](http://localhost:3000/propiedades). Panel: `/dashboard` (login en `/signin`).
+4. Abre [http://localhost:3000](http://localhost:3000). Marketplace: [http://localhost:3000/propiedades](http://localhost:3000/propiedades). Panel: `/dashboard` (el login se abre en modal).
 
 ## Convenciones de código
 
