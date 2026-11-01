@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
 import User from "@/models/User";
@@ -15,6 +16,14 @@ export const dynamic = "force-dynamic";
 // y confirmada, usa el límite más alto de ese plan en su lugar.
 export default async function Dashboard() {
   const session = await auth();
+
+  // El layout ya redirige sin sesión, pero layout y page se ejecutan en
+  // paralelo en el App Router: sin este guard la page revienta con
+  // "Cannot read properties of null" antes de que el redirect aplique.
+  if (!session?.user?.id) {
+    redirect(`/?auth=signin&callbackUrl=${encodeURIComponent(config.auth.callbackUrl)}`);
+  }
+
   await connectMongo();
 
   const dbUser = await User.findById(session.user.id).lean();
