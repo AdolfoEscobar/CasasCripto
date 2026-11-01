@@ -33,9 +33,28 @@ export async function POST(req) {
       );
     }
 
-    const result = await generateListingImage({ prompt: prompt.trim() });
+    try {
+      const result = await generateListingImage({ prompt: prompt.trim() });
 
-    return NextResponse.json({ data: { ...result, remaining } });
+      return NextResponse.json({ data: { ...result, remaining } });
+    } catch (error) {
+      if (error?.code === "meta_timeout") {
+        return NextResponse.json(
+          { error: "El servicio de IA tardó demasiado. Intenta de nuevo." },
+          { status: 504 }
+        );
+      }
+      if (error?.retriesExhausted) {
+        return NextResponse.json(
+          {
+            error:
+              "El servicio de IA está saturado en este momento. Intenta de nuevo en un momento.",
+          },
+          { status: 503 }
+        );
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("❌ Error in public listing-image demo:", error);
     return NextResponse.json(

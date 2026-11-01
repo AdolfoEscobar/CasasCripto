@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
 import logo from "@/app/icon.png";
+import { SocialIcon } from "./SocialIcons";
 
 const columns = [
   {
@@ -40,6 +41,16 @@ const columns = [
       { label: "Política de privacidad", href: "/privacy-policy" },
     ],
   },
+  {
+    title: "Síguenos",
+    links: config.socials.map((s) => ({
+      label: s.label,
+      href: s.href,
+      icon: s.icon,
+      external: true,
+      newTab: true,
+    })),
+  },
 ];
 
 // Footer apilado (marca → columnas → legal): en desktop el sidebar come
@@ -77,7 +88,7 @@ const Footer = () => {
 
         <nav
           aria-label="Footer"
-          className="grid grid-cols-2 sm:grid-cols-3 gap-8"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-8"
         >
           {columns.map((col) => (
             <div key={col.title}>
@@ -88,7 +99,19 @@ const Footer = () => {
                 {col.links.map((link) =>
                   link.external ? (
                     <li key={link.label}>
-                      <a href={link.href} className="link link-hover">
+                      <a
+                        href={link.href}
+                        className={`link link-hover ${link.icon ? "inline-flex items-center gap-2" : ""}`}
+                        {...(link.newTab
+                          ? {
+                              target: "_blank",
+                              rel: "noopener noreferrer",
+                            }
+                          : {})}
+                      >
+                        {link.icon && (
+                          <SocialIcon name={link.icon} className="w-4 h-4" />
+                        )}
                         {link.label}
                       </a>
                     </li>

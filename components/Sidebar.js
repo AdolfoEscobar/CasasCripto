@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import logo from "@/app/icon.png";
 import config from "@/config";
+import SocialIcons from "./SocialIcons";
 
 // El logo usa la misma tipografía display de los titulares (Sora vía
 // `font-display`) — el degradado dorado es el diferenciador de marca,
@@ -189,6 +190,9 @@ const Sidebar = () => {
         >
           Invertir
         </Link>
+        <div className="mt-1 flex items-center justify-center">
+          <SocialIcons />
+        </div>
       </div>
     </div>
   );

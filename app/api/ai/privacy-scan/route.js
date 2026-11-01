@@ -67,6 +67,15 @@ export async function POST(req) {
           { status: 504 }
         );
       }
+      if (error?.retriesExhausted) {
+        return NextResponse.json(
+          {
+            error:
+              "El servicio de IA está saturado en este momento. Intenta de nuevo en un momento.",
+          },
+          { status: 503 }
+        );
+      }
       throw error;
     }
   } catch (error) {

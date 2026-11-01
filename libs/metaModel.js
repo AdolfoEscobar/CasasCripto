@@ -2,7 +2,7 @@
 // Global AI Developer Hackathon. API compatible con OpenAI — HTTP + Bearer
 // token, sin SDK adicional (usamos `fetch` nativo de Next.js). Docs:
 // https://dev.meta.ai/docs/overview · https://dev.meta.ai/docs/api-reference
-import { fetchImageAsDataUrl } from "./imageUrl";
+import { fetchImageAsDataUrl } from "./imageUrl.js";
 //
 // MODO MOCK: los $150 de crédito del hackathon tardan hasta 2 días hábiles
 // en reflejarse después de reclamarlos en el form, y `MODEL_API_KEY` puede
@@ -19,7 +19,57 @@ const META_MODEL_API_KEY = process.env.MODEL_API_KEY;
 
 export const isMetaModelConfigured = () => Boolean(META_MODEL_API_KEY);
 
+// Statuses que ameritan reintento con backoff: rate limit y fallos
+// transitorios del lado de Meta. Los demás 4xx (400, 401, 403, 404...) no se
+// reintentan: repetirlos no cambia el resultado y solo suma latencia.
+const RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);
+
+// Intentos totales por llamada a Meta (1 inicial + 2 reintentos).
+const MAX_ATTEMPTS = 3;
+
+function retryDelayMs(attempt) {
+  // Backoff exponencial con jitter: ~0.7s, ~1.4s (+ hasta ~35% aleatorio
+  // para no sincronizar reintentos entre instancias). META_RETRY_BASE_MS
+  // solo existe para que los tests no duerman de verdad.
+  const base = Number(process.env.META_RETRY_BASE_MS) || 700;
+  return base * 2 ** attempt + Math.random() * base * 0.35;
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isRetryableMetaError(error) {
+  if (error?.code === "meta_timeout" || error?.code === "meta_network") {
+    return true;
+  }
+  return (
+    typeof error?.status === "number" && RETRYABLE_STATUS.has(error.status)
+  );
+}
+
 async function metaFetch(path, options = {}) {
+  let delayOverrideMs = 0;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      await sleep(Math.max(retryDelayMs(attempt - 1), delayOverrideMs));
+      delayOverrideMs = 0;
+    }
+    try {
+      return await metaFetchOnce(path, options);
+    } catch (error) {
+      const retryable = isRetryableMetaError(error);
+      if (!retryable || attempt === MAX_ATTEMPTS - 1) {
+        // `retriesExhausted` le dice a las rutas que el fallo sobrevivió a
+        // los reintentos: mapean a un 503 amable ("saturado, intenta de
+        // nuevo") en vez de un 500 opaco.
+        if (retryable) error.retriesExhausted = true;
+        throw error;
+      }
+      delayOverrideMs = error.retryAfterMs || 0;
+    }
+  }
+}
+
+async function metaFetchOnce(path, options = {}) {
   let res;
   try {
     res = await fetch(`${META_MODEL_BASE_URL}${path}`, {
@@ -39,7 +89,11 @@ async function metaFetch(path, options = {}) {
       err.code = "meta_timeout";
       throw err;
     }
-    throw e;
+    // fetch lanzó sin respuesta (DNS, conexión reseteada...): transitorio.
+    const err = new Error(`Meta Model API ${path} → network: ${e?.message || e}`);
+    err.code = "meta_network";
+    err.cause = e;
+    throw err;
   }
 
   if (!res.ok) {
@@ -56,6 +110,12 @@ async function metaFetch(path, options = {}) {
       // Cuerpo no-JSON: se mapea solo por status/timeout.
     }
     err.status = res.status;
+    // En 429 Meta puede pedir espera explícita: se respeta (topada a 10s
+    // para no colgar la serverless function con un valor absurdo).
+    const retryAfter = Number(res.headers?.get?.("retry-after"));
+    if (Number.isFinite(retryAfter) && retryAfter > 0) {
+      err.retryAfterMs = Math.min(retryAfter * 1000, 10000);
+    }
     throw err;
   }
 
@@ -79,13 +139,54 @@ function safeParseJSON(text) {
 // keys/cuentas (ej. las del hackathon) solo tienen habilitado `1.1` y
 // responden 404 `model_not_found`. Por eso se intenta en orden y se usa el
 // primero que acepte la cuenta. `MUSE_SPARK_MODEL` permite fijar uno a mano
-// (ver qué trae `GET /v1/models` con tu key) y siempre va primero.
+// (ver qué trae `GET /v1/models` con tu key) y siempre va primero. Si NINGUNO
+// responde, se consulta `GET /v1/models` una vez y se reintenta con el primer
+// id tipo spark no probado (cubre renames de Meta y propagación tardía de
+// permisos en keys nuevas).
 const LISTING_COPY_MODELS = [
   process.env.MUSE_SPARK_MODEL,
   "muse-spark-1.3",
   "muse-spark-1.1",
   "muse-spark",
 ].filter(Boolean);
+
+// Último modelo que respondió OK en esta instancia serverless (warm). Se
+// prueba primero para no pagar un 404 conocido en cada request; si también
+// falla, la cadena sigue normal. Best-effort: en cold starts no existe.
+let lastWorkingCopyModel = null;
+
+function buildCopyBody(model, prompt) {
+  return {
+    model,
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
+    // Muse Spark razona antes de responder y ese "pensamiento" también
+    // consume max_tokens — "minimal" lo reduce (sigue gastando algunos
+    // tokens) y max_tokens trae colchón de sobra para no cortar el JSON
+    // de salida (confirmado con una llamada real: sin esto, el content
+    // llega null por finish_reason "length").
+    reasoning_effort: "minimal",
+    max_tokens: 900,
+  };
+}
+
+// Best-effort, nunca lanza: devuelve un id tipo spark no intentado o null.
+async function discoverUntriedSparkModel(tried) {
+  try {
+    const data = await metaFetch("/models", { method: "GET" });
+    const entries = Array.isArray(data?.data) ? data.data : [];
+    for (const entry of entries) {
+      const id = entry?.id;
+      if (typeof id === "string" && /spark/i.test(id) && !tried.has(id)) {
+        return id;
+      }
+    }
+  } catch {
+    // Sin lista de modelos no hay descubrimiento; el llamador reporta el
+    // error original.
+  }
+  return null;
+}
 
 export async function generateListingCopy({
   rawNotes,
@@ -122,26 +223,22 @@ formato exacto:
 
   // Intenta cada modelo candidato hasta que uno responda. Solo
   // `model_not_found` amerita probar el siguiente; cualquier otro error
-  // (auth, rate limit, timeout, 500) se propaga de inmediato.
+  // (auth, rate limit agotado, timeout agotado, 500) se propaga de inmediato
+  // — los transitorios ya traen sus propios reintentos desde metaFetch.
+  const candidates = lastWorkingCopyModel
+    ? [
+        lastWorkingCopyModel,
+        ...LISTING_COPY_MODELS.filter((m) => m !== lastWorkingCopyModel),
+      ]
+    : LISTING_COPY_MODELS;
   let data = null;
   let usedModel = null;
   let lastNotFound = null;
-  for (const model of LISTING_COPY_MODELS) {
+  for (const model of candidates) {
     try {
       data = await metaFetch("/chat/completions", {
         method: "POST",
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
-          // Muse Spark razona antes de responder y ese "pensamiento" también
-          // consume max_tokens — "minimal" lo reduce (sigue gastando algunos
-          // tokens) y max_tokens trae colchón de sobra para no cortar el JSON
-          // de salida (confirmado con una llamada real: sin esto, el content
-          // llega null por finish_reason "length").
-          reasoning_effort: "minimal",
-          max_tokens: 900,
-        }),
+        body: JSON.stringify(buildCopyBody(model, prompt)),
       });
       usedModel = model;
       break;
@@ -153,7 +250,27 @@ formato exacto:
       throw e;
     }
   }
+  if (!data) {
+    // Ningún candidato conocido aceptó la key: último recurso antes del 503 —
+    // preguntar qué trae la cuenta y probar un id spark no intentado.
+    const discovered = await discoverUntriedSparkModel(new Set(candidates));
+    if (discovered) {
+      try {
+        data = await metaFetch("/chat/completions", {
+          method: "POST",
+          body: JSON.stringify(buildCopyBody(discovered, prompt)),
+        });
+        usedModel = discovered;
+      } catch (e) {
+        // Si el descubierto falla por otra razón (saturación, timeout), esa
+        // señal fresca vale más que el model_not_found original.
+        if (e?.code !== "model_not_found") throw e;
+        lastNotFound = e;
+      }
+    }
+  }
   if (!data) throw lastNotFound;
+  lastWorkingCopyModel = usedModel;
 
   const raw = data?.choices?.[0]?.message?.content || "{}";
   const parsed = safeParseJSON(raw);

@@ -10,6 +10,20 @@ const config = {
   // posicionamiento MVP: directorio + intermediación, sin prometer
   // operación on-chain que aún no existe.
   tagline: "El directorio de propiedades que aceptan cripto.",
+  // Redes sociales oficiales — se muestran en el Footer (columna "Síguenos").
+  socials: [
+    {
+      label: "Instagram",
+      href: "https://instagram.com/casascripto",
+      icon: "instagram",
+    },
+    {
+      label: "Twitter",
+      href: "https://twitter.com/casascriptocom",
+      icon: "x",
+    },
+    { label: "Telegram", href: "https://t.me/casascripto", icon: "telegram" },
+  ],
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
     id: "",

@@ -75,6 +75,17 @@ export async function POST(req) {
           { status: 504 }
         );
       }
+      // El fallo sobrevivió a los reintentos con backoff (ver metaFetch):
+      // saturación real de Meta, no un error nuestro.
+      if (error?.retriesExhausted) {
+        return NextResponse.json(
+          {
+            error:
+              "El servicio de IA está saturado en este momento. Intenta de nuevo en un momento.",
+          },
+          { status: 503 }
+        );
+      }
       throw error;
     }
   } catch (error) {
