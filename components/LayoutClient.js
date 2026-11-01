@@ -8,6 +8,8 @@ import { SessionProvider } from "next-auth/react";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
+import { AuthModalProvider } from "@/components/auth/AuthModalContext";
+import AuthModal from "@/components/auth/AuthModal";
 import config from "@/config";
 
 // Crisp customer chat support:
@@ -55,27 +57,32 @@ const ClientLayout = ({ children }) => {
   return (
     <>
       <SessionProvider>
-        {/* Show a progress bar at the top when navigating between pages */}
-        <NextTopLoader color={config.colors.main} showSpinner={false} />
+        <AuthModalProvider>
+          {/* Show a progress bar at the top when navigating between pages */}
+          <NextTopLoader color={config.colors.main} showSpinner={false} />
 
-        {/* Content inside app/page.js files  */}
-        {children}
+          {/* Content inside app/page.js files  */}
+          {children}
 
-        {/* Show Success/Error messages anywhere from the app with toast() */}
-        <Toaster
-          toastOptions={{
-            duration: 3000,
-          }}
-        />
+          {/* Global login modal — opens in place instead of navigating to /signin */}
+          <AuthModal />
 
-        {/* Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content="" */}
-        <Tooltip
-          id="tooltip"
-          className="z-[60] !opacity-100 max-w-sm shadow-lg"
-        />
+          {/* Show Success/Error messages anywhere from the app with toast() */}
+          <Toaster
+            toastOptions={{
+              duration: 3000,
+            }}
+          />
 
-        {/* Set Crisp customer chat support */}
-        <CrispChat />
+          {/* Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content="" */}
+          <Tooltip
+            id="tooltip"
+            className="z-[60] !opacity-100 max-w-sm shadow-lg"
+          />
+
+          {/* Set Crisp customer chat support */}
+          <CrispChat />
+        </AuthModalProvider>
       </SessionProvider>
     </>
   );

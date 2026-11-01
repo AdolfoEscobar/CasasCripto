@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import Footer from "@/components/Footer";
+import { useAuthModal } from "@/components/auth/AuthModalContext";
+import config from "@/config";
 
-// Cliente ligero — a propósito NO usa libs/api.js (su interceptor redirige
-// a /signin en cualquier 401, lo cual no aplica aquí: esta página es
+// Cliente ligero — a propósito NO usa libs/api.js (su interceptor abre el
+// modal de login en cualquier 401, lo cual no aplica aquí: esta página es
 // pública por diseño). Usa `fetch` directo. Consciente de sesión: si hay
 // usuario autenticado llama a /api/ai/* (cuota generosa por usuario); si
 // no, a /api/ai/public/* (cuota estricta por IP). Sin esto, un logueado
@@ -33,6 +34,7 @@ const SectionBadge = ({ children, color = "secondary" }) => (
 
 export default function DemoAIClient() {
   const { status } = useSession();
+  const { openAuthModal } = useAuthModal();
   const authed = status === "authenticated";
   const base = authed ? "ai" : "ai/public";
 
@@ -279,9 +281,12 @@ export default function DemoAIClient() {
             ¿Te gustó? Crea una cuenta gratis y publica tu propiedad usando
             esta misma IA, sin límite diario tan estricto.
           </p>
-          <Link href="/signin" className="btn btn-primary btn-sm rounded-full">
+          <button
+            className="btn btn-primary btn-sm rounded-full"
+            onClick={() => openAuthModal(config.auth.callbackUrl)}
+          >
             Crear cuenta gratis
-          </Link>
+          </button>
         </div>
       </div>
       <Footer />

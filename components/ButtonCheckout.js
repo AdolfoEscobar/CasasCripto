@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import apiClient from "@/libs/api";
+import { useAuthModal } from "./auth/AuthModalContext";
 import config from "@/config";
 
 // This component is used to create Stripe Checkout Sessions
@@ -13,13 +14,15 @@ import config from "@/config";
 const ButtonCheckout = ({ priceId, mode = "payment", label }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { status } = useSession();
+  const { openAuthModal } = useAuthModal();
 
   const handlePayment = async () => {
-    // If we already know there's no session, go straight to sign-in and come
+    // If we already know there's no session, open the login modal and come
     // back here afterwards (preserves purchase intent). While status is
     // "loading" we still try the POST and let the API's 401 decide.
     if (status === "unauthenticated") {
-      return signIn(undefined, { callbackUrl: window.location.href });
+      openAuthModal(window.location.href);
+      return;
     }
 
     setIsLoading(true);

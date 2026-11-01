@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@/libs/api";
+import { requestAuthModal } from "@/components/auth/AuthModalContext";
 import LoadingCircle from "@/components/common/LoadingCircle";
 import UserForm from "@/components/admin/users/UserForm";
 
@@ -34,7 +35,9 @@ export default function EditUserPage({ params }) {
         console.error("Error fetching user:", error);
         setError(error.response?.data?.error || "Error loading user");
         if (error.response?.status === 401) {
-          router.push("/auth/signin");
+          // El interceptor de apiClient ya abrió el modal de login; esto es
+          // solo respaldo (nunca navegar: /auth/signin no existe).
+          requestAuthModal();
         }
       } finally {
         setLoading(false);

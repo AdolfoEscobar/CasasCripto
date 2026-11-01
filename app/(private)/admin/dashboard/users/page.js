@@ -2,6 +2,7 @@
 "use client";
 
 import apiClient from "@/libs/api";
+import { requestAuthModal } from "@/components/auth/AuthModalContext";
 import { useState, useEffect } from "react";
 import LoadingCircle from "@/components/common/LoadingCircle";
 import Link from "next/link";
@@ -45,7 +46,9 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error fetching users:", error);
       if (error.response?.status === 401) {
-        router.push("/auth/signin");
+        // El interceptor de apiClient ya abrió el modal de login; esto es
+        // solo respaldo (nunca navegar: /auth/signin no existe).
+        requestAuthModal();
       }
       setError(error.response?.data?.error || "Error loading users");
       setUsers([]);

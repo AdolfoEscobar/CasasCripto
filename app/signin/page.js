@@ -20,6 +20,8 @@ const trustPoints = [
 // Split-screen, "elite fintech" login: brand/pitch panel on the left (hidden
 // on mobile), the actual sign-in card on the right. Replaces the default
 // NextAuth UI — see libs/auth.js (pages.signIn: "/signin").
+// Fallback para visitas directas y callbacks de OAuth: dentro de la app el
+// login se abre en el modal global (<AuthModal/>) sin cambiar de página.
 export default function SignInPage() {
   return (
     <main className="min-h-screen grid lg:grid-cols-2">

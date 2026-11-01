@@ -41,12 +41,23 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const SignInCard = () => {
+// variant "page": tarjeta de /signin (pantalla completa, con "Volver al inicio").
+// variant "modal": mismo formulario dentro del <AuthModal/> global —
+// initialCallbackUrl lo fija quien abre el modal y onClose lo cierra.
+const SignInCard = ({
+  variant = "page",
+  initialCallbackUrl = null,
+  onClose = null,
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
+  const isModal = variant === "modal";
 
-  const callbackUrl = searchParams.get("callbackUrl") || config.auth.callbackUrl;
+  const callbackUrl =
+    initialCallbackUrl ||
+    searchParams.get("callbackUrl") ||
+    config.auth.callbackUrl;
   const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -55,12 +66,14 @@ const SignInCard = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Already logged in? Skip the login screen entirely.
+  // Already logged in? Skip the login UI entirely. In modal mode the
+  // modal closes first so it never lingers over the target page.
   useEffect(() => {
     if (status === "authenticated") {
+      if (isModal) onClose?.();
       router.replace(callbackUrl);
     }
-  }, [status, callbackUrl, router]);
+  }, [status, callbackUrl, router, isModal, onClose]);
 
   useEffect(() => {
     if (urlError) {
@@ -96,8 +109,9 @@ const SignInCard = () => {
     }
   };
 
-  const handleEmail = async (e) => {
-    e.preventDefault();
+  // Envío del magic link, separado del submit para reutilizarlo en el
+  // botón "Reenviar" de la vista de éxito.
+  const sendMagicLink = async () => {
     setErrorMsg("");
 
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
@@ -126,21 +140,44 @@ const SignInCard = () => {
     }
   };
 
+  const handleEmail = (e) => {
+    e.preventDefault();
+    sendMagicLink();
+  };
+
   return (
-    <div className="w-full max-w-md">
-      <div className="glass-card glow-primary rounded-box p-8 sm:p-10">
+    <div className={`w-full ${isModal ? "" : "max-w-md"}`}>
+      <div className="glass-card glow-primary rounded-box p-6 sm:p-10 relative">
+        {isModal && (
+          <button
+            type="button"
+            aria-label="Cerrar"
+            onClick={() => onClose?.()}
+            className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="w-5 h-5"
+            >
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+        )}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-extrabold">
             Bienvenido a{" "}
             <span className="text-gradient-gold">{config.appName}</span>
           </h1>
           <p className="mt-2 text-sm text-base-content/60">
-            Inicia sesión para gestionar tus propiedades e inversiones
+            Accede o crea tu cuenta para gestionar tus propiedades e
+            inversiones
           </p>
         </div>
 
         {errorMsg && (
-          <div className="alert alert-error mb-6 py-3 text-sm">
+          <div role="alert" className="alert alert-error mb-6 py-3 text-sm">
             <span>{errorMsg}</span>
           </div>
         )}
@@ -169,22 +206,38 @@ const SignInCard = () => {
               <span className="font-medium text-base-content">{email}</span>.
               Ábrelo desde este mismo dispositivo para continuar.
             </p>
-            <button
-              className="btn btn-ghost btn-sm mt-6"
-              onClick={() => {
-                setEmailSent(false);
-                setEmail("");
-              }}
-            >
-              Usar otro correo
-            </button>
+            <p className="mt-3 text-xs text-base-content/50">
+              ¿No lo ves? Revisa tu carpeta de spam o promociones.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={sendMagicLink}
+                disabled={loadingEmail}
+              >
+                {loadingEmail ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  "Reenviar enlace"
+                )}
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setEmailSent(false);
+                  setEmail("");
+                }}
+              >
+                Usar otro correo
+              </button>
+            </div>
           </div>
         ) : (
           <>
             <button
               className="btn btn-outline w-full border-base-content/20 gap-3 hover:border-primary/60"
               onClick={handleGoogle}
-              disabled={loadingGoogle}
+              disabled={loadingGoogle || loadingEmail}
             >
               {loadingGoogle ? (
                 <span className="loading loading-spinner loading-xs" />
@@ -217,10 +270,13 @@ const SignInCard = () => {
                 <input
                   type="email"
                   placeholder="tucorreo@ejemplo.com"
+                  aria-label="Correo electrónico"
                   className="grow"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
+                  inputMode="email"
+                  enterKeyHint="send"
                   required
                 />
               </label>
@@ -228,7 +284,7 @@ const SignInCard = () => {
               <button
                 type="submit"
                 className="btn btn-primary w-full"
-                disabled={loadingEmail}
+                disabled={loadingEmail || loadingGoogle}
               >
                 {loadingEmail ? (
                   <span className="loading loading-spinner loading-xs" />
@@ -253,11 +309,13 @@ const SignInCard = () => {
         </p>
       </div>
 
-      <p className="mt-6 text-center text-sm text-base-content/50">
-        <Link href="/" className="link link-hover">
-          ← Volver al inicio
-        </Link>
-      </p>
+      {!isModal && (
+        <p className="mt-6 text-center text-sm text-base-content/50">
+          <Link href="/" className="link link-hover">
+            ← Volver al inicio
+          </Link>
+        </p>
+      )}
     </div>
   );
 };

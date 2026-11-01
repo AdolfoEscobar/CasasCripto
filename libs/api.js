@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { signIn } from "next-auth/react";
+import { requestAuthModal } from "@/components/auth/AuthModalContext";
 import config from "@/config";
 
 // use this to interact with our own API (/app/api folder) from the front-end side
@@ -17,10 +17,11 @@ apiClient.interceptors.response.use(
     let message = "";
 
     if (error.response?.status === 401) {
-      // User not auth, ask to re login
+      // User not auth, ask to re login via the global modal (no navigation).
       toast.error("Inicia sesión para continuar");
       // automatically redirect to /dashboard page after login
-      return signIn(undefined, { callbackUrl: config.auth.callbackUrl });
+      requestAuthModal(config.auth.callbackUrl);
+      return Promise.reject(error);
     } else if (error.response?.status === 403) {
       // User not authorized, must subscribe/purchase/pick a plan
       message = "Elige un plan para usar esta función";
