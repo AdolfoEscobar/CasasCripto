@@ -43,6 +43,18 @@ export async function POST(req) {
     const hasOidc =
       !!process.env.BLOB_STORE_ID && !!process.env.VERCEL_OIDC_TOKEN;
     if (!hasReadWriteToken && !hasOidc) {
+      // Diagnóstico (solo presencia sí/no, NUNCA valores): ver en Vercel →
+      // Deployments → Runtime Logs. Con stores OIDC, BLOB_STORE_ID lo
+      // inyecta la conexión Storage→Project y VERCEL_OIDC_TOKEN lo inyecta
+      // Vercel en runtime; si alguno falta aquí, esa es la pieza a arreglar.
+      console.error(
+        "❌ [uploads] sin credenciales de Blob:",
+        JSON.stringify({
+          hasReadWriteToken,
+          hasStoreId: !!process.env.BLOB_STORE_ID,
+          hasOidcToken: !!process.env.VERCEL_OIDC_TOKEN,
+        })
+      );
       return NextResponse.json(
         {
           error:
