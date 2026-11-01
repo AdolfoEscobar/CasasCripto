@@ -7,8 +7,11 @@ import assert from "node:assert/strict";
 process.env.MODEL_API_KEY = "test-key";
 process.env.MUSE_SPARK_MODEL = "spark-test-1";
 process.env.META_RETRY_BASE_MS = "1";
+process.env.META_NOTFOUND_RETRY_DELAY_MS = "1";
 
-const { generateListingCopy } = await import("./metaModel.js");
+const { generateListingCopy, generateListingImage } = await import(
+  "./metaModel.js"
+);
 
 const realFetch = globalThis.fetch;
 let calls;
@@ -131,6 +134,59 @@ describe("metaModel backoff", () => {
       calls.filter((c) => c.url.endsWith("/models")).length,
       1
     );
+  });
+
+  it("reintenta la ronda completa si todos los modelos dan 404 transitorio", async () => {
+    // Instancia fresca (?query): sin último-modelo-bueno heredado de otros
+    // tests, los candidatos son exactamente 4.
+    const fresh = await import("./metaModel.js?round-retry");
+    let posts = 0;
+    mockFetch((entry) => {
+      if (entry.url.endsWith("/models")) {
+        return jsonResponse(200, { data: [] });
+      }
+      posts++;
+      // Ronda 1: los 4 candidatos en 404; ronda 2: el primero responde.
+      if (posts <= 4) return metaError(404, "model_not_found");
+      return chatOk(entry.model);
+    });
+    const result = await fresh.generateListingCopy(baseArgs);
+    assert.equal(result.mock, false);
+    assert.equal(posts, 5);
+  });
+
+  it("falla en 404 solo tras agotar el reintento de ronda", async () => {
+    const fresh = await import("./metaModel.js?round-exhausted");
+    mockFetch((entry) => {
+      if (entry.url.endsWith("/models")) {
+        return jsonResponse(200, { data: [] });
+      }
+      return metaError(404, "model_not_found");
+    });
+    await assert.rejects(() => fresh.generateListingCopy(baseArgs), {
+      code: "model_not_found",
+    });
+    // 4 candidatos × 2 rondas + 1 GET /models por ronda.
+    assert.equal(
+      calls.filter((c) => !c.url.endsWith("/models")).length,
+      8
+    );
+    assert.equal(
+      calls.filter((c) => c.url.endsWith("/models")).length,
+      2
+    );
+  });
+
+  it("listing-image reintenta una vez un 404 transitorio", async () => {
+    mockFetch((entry, n) =>
+      n === 1
+        ? metaError(404, "model_not_found")
+        : jsonResponse(200, { data: [{ url: "https://img.test/casa.png" }] })
+    );
+    const result = await generateListingImage({ prompt: "casa bonita" });
+    assert.equal(result.mock, false);
+    assert.equal(result.imageUrl, "https://img.test/casa.png");
+    assert.equal(calls.length, 2);
   });
 
   it("marca retriesExhausted cuando se agotan los reintentos", async () => {

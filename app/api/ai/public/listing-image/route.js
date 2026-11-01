@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { generateListingImage } from "@/libs/metaModel";
-import { checkAiRateLimit, AI_LIMITS, getClientIp } from "@/libs/aiRateLimit";
+import {
+  checkAiRateLimit,
+  refundAiRateLimit,
+  AI_LIMITS,
+  getClientIp,
+} from "@/libs/aiRateLimit";
 
 // POST /api/ai/public/listing-image — ver app/api/ai/public/listing-copy
 // para el porqué de esta versión pública. Más estricta que la autenticada
@@ -17,11 +22,12 @@ export async function POST(req) {
       );
     }
 
-    const ip = getClientIp(req);
+    const key = `ip:${getClientIp(req)}`;
+    const action = "listing-image";
     const { allowed, remaining } = await checkAiRateLimit({
-      key: `ip:${ip}`,
-      action: "listing-image",
-      limit: AI_LIMITS.public["listing-image"],
+      key,
+      action,
+      limit: AI_LIMITS.public[action],
     });
     if (!allowed) {
       return NextResponse.json(
@@ -38,6 +44,16 @@ export async function POST(req) {
 
       return NextResponse.json({ data: { ...result, remaining } });
     } catch (error) {
+      if (error?.code === "model_not_found") {
+        await refundAiRateLimit({ key, action });
+        return NextResponse.json(
+          {
+            error:
+              "El modelo de imágenes de Meta no está disponible en este momento. Intenta de nuevo más tarde.",
+          },
+          { status: 503 }
+        );
+      }
       if (error?.code === "meta_timeout") {
         return NextResponse.json(
           { error: "El servicio de IA tardó demasiado. Intenta de nuevo." },

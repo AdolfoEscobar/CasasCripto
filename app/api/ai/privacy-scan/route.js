@@ -49,6 +49,16 @@ export async function POST(req) {
       const result = await scanImagePrivacy({ imageUrl });
       return NextResponse.json({ data: result });
     } catch (error) {
+      if (error?.code === "model_not_found") {
+        await refundAiRateLimit({ key, action });
+        return NextResponse.json(
+          {
+            error:
+              "El modelo de revisión de Meta (SAM) no está habilitado para esta cuenta en este momento. Intenta de nuevo más tarde.",
+          },
+          { status: 503 }
+        );
+      }
       if (
         error?.code === "media_url_not_fetchable" ||
         error?.message?.includes("media_url_not_fetchable")

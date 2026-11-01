@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/libs/auth";
 import { generateListingImage } from "@/libs/metaModel";
-import { checkAiRateLimit, AI_LIMITS } from "@/libs/aiRateLimit";
+import { checkAiRateLimit, refundAiRateLimit, AI_LIMITS } from "@/libs/aiRateLimit";
 
 // POST /api/ai/listing-image
 // Genera una imagen del listado con Meta Muse Image a partir de un prompt
@@ -25,10 +25,12 @@ export async function POST(req) {
       );
     }
 
+    const key = `user:${session.user.id}`;
+    const action = "listing-image";
     const { allowed } = await checkAiRateLimit({
-      key: `user:${session.user.id}`,
-      action: "listing-image",
-      limit: AI_LIMITS.authenticated["listing-image"],
+      key,
+      action,
+      limit: AI_LIMITS.authenticated[action],
     });
     if (!allowed) {
       return NextResponse.json(
@@ -42,8 +44,19 @@ export async function POST(req) {
 
       return NextResponse.json({ data: result });
     } catch (error) {
-      // Paridad con listing-copy: timeout y saturación (post-reintentos)
-      // merecen su propio status y mensaje, no el 500 opaco.
+      // Paridad con listing-copy: modelo no habilitado, timeout y
+      // saturación (post-reintentos) merecen su propio status y mensaje,
+      // no el 500 opaco. Sin modelo no hubo trabajo real: se devuelve cuota.
+      if (error?.code === "model_not_found") {
+        await refundAiRateLimit({ key, action });
+        return NextResponse.json(
+          {
+            error:
+              "El modelo de imágenes de Meta no está habilitado para esta cuenta en este momento. Intenta de nuevo más tarde.",
+          },
+          { status: 503 }
+        );
+      }
       if (error?.code === "meta_timeout") {
         return NextResponse.json(
           { error: "El servicio de IA tardó demasiado. Intenta de nuevo." },
