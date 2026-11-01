@@ -36,9 +36,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // El SDK resuelve credenciales solo: OIDC (BLOB_STORE_ID +
-    // VERCEL_OIDC_TOKEN, lo que Vercel inyecta al conectar el store) o el
-    // token estático BLOB_READ_WRITE_TOKEN como fallback.
+    // El SDK resuelve credenciales solo: token estático
+    // BLOB_READ_WRITE_TOKEN o OIDC (BLOB_STORE_ID + VERCEL_OIDC_TOKEN).
+    // OJO (verificado en prod nov-2026): la conexión Storage→Proyecto
+    // inyecta BLOB_STORE_ID pero Vercel NO inyecta VERCEL_OIDC_TOKEN en
+    // runtime aquí — sin el token estático, las subidas mueren en el guard.
     const hasReadWriteToken = !!process.env.BLOB_READ_WRITE_TOKEN;
     const hasOidc =
       !!process.env.BLOB_STORE_ID && !!process.env.VERCEL_OIDC_TOKEN;
@@ -58,7 +60,7 @@ export async function POST(req) {
       return NextResponse.json(
         {
           error:
-            "Falta configurar el Blob Store: conéctalo al proyecto en el dashboard de Vercel",
+            "Falta configurar el Blob Store: añade BLOB_READ_WRITE_TOKEN al proyecto en el dashboard de Vercel y redespliega",
         },
         { status: 500 }
       );
