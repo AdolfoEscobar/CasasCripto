@@ -69,6 +69,27 @@ async function metaFetch(path, options = {}) {
   }
 }
 
+function notFoundRetryDelayMs() {
+  // Espera antes del único reintento anti-404-transitorio. Env solo para tests.
+  const override = Number(process.env.META_NOTFOUND_RETRY_DELAY_MS);
+  return Number.isFinite(override) ? override : 3000;
+}
+
+// Una sola segunda oportunidad ante 404: los 404 de Meta a veces son rachas
+// transitorias (la key pierde los modelos y los recupera sola) y este
+// reintento las absorbe en silencio. Si el 404 es real, solo suma ~3s a una
+// request que ya iba a fallar — las rutas devuelven cuota igual, porque el
+// error final sigue siendo model_not_found.
+async function metaFetchTolerant(path, options = {}) {
+  try {
+    return await metaFetch(path, options);
+  } catch (error) {
+    if (error?.code !== "model_not_found") throw error;
+    await sleep(notFoundRetryDelayMs());
+    return await metaFetch(path, options);
+  }
+}
+
 async function metaFetchOnce(path, options = {}) {
   let res;
   try {
@@ -188,6 +209,51 @@ async function discoverUntriedSparkModel(tried) {
   return null;
 }
 
+// Una ronda: cadena de candidatos + descubrimiento. Devuelve { data,
+// usedModel } o lanza (model_not_found si nadie respondió).
+async function attemptCopyOnce(candidates, prompt) {
+  let data = null;
+  let usedModel = null;
+  let lastNotFound = null;
+  for (const model of candidates) {
+    try {
+      data = await metaFetch("/chat/completions", {
+        method: "POST",
+        body: JSON.stringify(buildCopyBody(model, prompt)),
+      });
+      usedModel = model;
+      break;
+    } catch (e) {
+      if (e?.code === "model_not_found") {
+        lastNotFound = e;
+        continue;
+      }
+      throw e;
+    }
+  }
+  if (!data) {
+    // Ningún candidato conocido aceptó la key: último recurso antes del 503 —
+    // preguntar qué trae la cuenta y probar un id spark no intentado.
+    const discovered = await discoverUntriedSparkModel(new Set(candidates));
+    if (discovered) {
+      try {
+        data = await metaFetch("/chat/completions", {
+          method: "POST",
+          body: JSON.stringify(buildCopyBody(discovered, prompt)),
+        });
+        usedModel = discovered;
+      } catch (e) {
+        // Si el descubierto falla por otra razón (saturación, timeout), esa
+        // señal fresca vale más que el model_not_found original.
+        if (e?.code !== "model_not_found") throw e;
+        lastNotFound = e;
+      }
+    }
+  }
+  if (!data) throw lastNotFound;
+  return { data, usedModel };
+}
+
 export async function generateListingCopy({
   rawNotes,
   city,
@@ -231,45 +297,17 @@ formato exacto:
         ...LISTING_COPY_MODELS.filter((m) => m !== lastWorkingCopyModel),
       ]
     : LISTING_COPY_MODELS;
-  let data = null;
-  let usedModel = null;
-  let lastNotFound = null;
-  for (const model of candidates) {
-    try {
-      data = await metaFetch("/chat/completions", {
-        method: "POST",
-        body: JSON.stringify(buildCopyBody(model, prompt)),
-      });
-      usedModel = model;
-      break;
-    } catch (e) {
-      if (e?.code === "model_not_found") {
-        lastNotFound = e;
-        continue;
-      }
-      throw e;
-    }
+  let data;
+  let usedModel;
+  try {
+    ({ data, usedModel } = await attemptCopyOnce(candidates, prompt));
+  } catch (e) {
+    if (e?.code !== "model_not_found") throw e;
+    // Ronda completa en 404 (ver metaFetchTolerant): una espera y un segundo
+    // intento absorben las rachas transitorias sin que el usuario vea nada.
+    await sleep(notFoundRetryDelayMs());
+    ({ data, usedModel } = await attemptCopyOnce(candidates, prompt));
   }
-  if (!data) {
-    // Ningún candidato conocido aceptó la key: último recurso antes del 503 —
-    // preguntar qué trae la cuenta y probar un id spark no intentado.
-    const discovered = await discoverUntriedSparkModel(new Set(candidates));
-    if (discovered) {
-      try {
-        data = await metaFetch("/chat/completions", {
-          method: "POST",
-          body: JSON.stringify(buildCopyBody(discovered, prompt)),
-        });
-        usedModel = discovered;
-      } catch (e) {
-        // Si el descubierto falla por otra razón (saturación, timeout), esa
-        // señal fresca vale más que el model_not_found original.
-        if (e?.code !== "model_not_found") throw e;
-        lastNotFound = e;
-      }
-    }
-  }
-  if (!data) throw lastNotFound;
   lastWorkingCopyModel = usedModel;
 
   const raw = data?.choices?.[0]?.message?.content || "{}";
@@ -312,7 +350,7 @@ export async function generateListingImage({ prompt }) {
     return { imageUrl: MOCK_IMAGE_URL, mock: true };
   }
 
-  const data = await metaFetch("/images/generations", {
+  const data = await metaFetchTolerant("/images/generations", {
     method: "POST",
     body: JSON.stringify({
       model: LISTING_IMAGE_MODEL,
@@ -360,7 +398,7 @@ export async function scanImagePrivacy({ imageUrl }) {
   const findings = [];
 
   for (const label of SENSITIVE_PROMPTS) {
-    const data = await metaFetch("/responses", {
+    const data = await metaFetchTolerant("/responses", {
       method: "POST",
       body: JSON.stringify({
         model: PRIVACY_MODEL,
