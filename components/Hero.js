@@ -22,7 +22,7 @@ const Hero = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
             </span>
-            MVP en vivo · Ronda {config.investors.stage} abierta
+            Marketplace en vivo · Ronda {config.investors.stage} abierta
           </span>
 
           <h1 className="font-display font-extrabold text-3xl sm:text-5xl lg:text-[3.4rem] tracking-tight leading-[1.08]">
@@ -63,7 +63,7 @@ const Hero = () => {
           </div>
 
           {/* Señal de estado honesta en vez de testimonios/avatares falsos:
-          refleja lo que el MVP ya hace hoy, sin inventar tracción de
+          refleja lo que el producto ya hace hoy, sin inventar tracción de
           usuarios (misma filosofía que <StatsSection/>). */}
           <p className="text-sm opacity-70">
             <span className="font-semibold text-base-content">

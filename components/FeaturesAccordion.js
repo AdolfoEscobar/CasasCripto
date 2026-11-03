@@ -19,12 +19,12 @@ const steps = [
     number: "03",
     title: "Nosotros intermediamos el cierre",
     description:
-      "Calificamos el lead, conectamos a ambas partes y acompañamos la negociación. Humano y simple en el MVP; la automatización vendrá después.",
+      "Calificamos el lead, conectamos a ambas partes y acompañamos la negociación. Humano y simple por ahora; la automatización vendrá después.",
   },
 ];
 
-// Sección "cómo funciona" del landing. Posicionamiento deliberado para el
-// MVP: Casas Cripto es un directorio Web3 de propiedades + intermediación
+// Sección "cómo funciona" del landing. Posicionamiento deliberado:
+// Casas Cripto es un directorio Web3 de propiedades + intermediación
 // humana, no un banco, un exchange ni una plataforma de custodia. El copy
 // evita prometer escrow, KYC automático o el token $CASA (todo roadmap).
 const FeaturesAccordion = () => {
@@ -35,7 +35,7 @@ const FeaturesAccordion = () => {
           {/* Intro editorial */}
           <div>
             <span className="badge badge-elite font-medium text-xs sm:text-sm">
-              MVP en vivo · Directorio Web3
+              Directorio Web3 en vivo
             </span>
 
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-[2.75rem] tracking-tight leading-[1.1] mt-5">

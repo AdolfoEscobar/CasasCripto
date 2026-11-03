@@ -108,7 +108,7 @@ export default async function PropiedadesPage() {
                 Todavía no hay propiedades publicadas
               </p>
               <p className="opacity-70">
-                Estamos en fase de lanzamiento del marketplace. Mira un{" "}
+                Aún no hay listados visibles aquí. Mira un{" "}
                 <Link href="/#marketplace-preview" className="link link-primary">
                   adelanto del producto
                 </Link>{" "}

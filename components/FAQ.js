@@ -80,7 +80,7 @@ const faqList = [
       <p>
         La autenticación usa proveedores verificados (Google / magic link),
         los pagos corren sobre Stripe (PCI-DSS) y los datos tienen acceso
-        restringido por roles. En el MVP no custodiamos fondos: el cierre en
+        restringido por roles. Hoy no custodiamos fondos: el cierre en
         cripto se acompaña caso por caso, y la custodia on-chain con
         contratos auditados forma parte del roadmap.
       </p>

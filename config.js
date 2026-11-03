@@ -4,10 +4,13 @@ const config = {
   // REQUIRED: a short description of your app for SEO tags (can be overwritten)
   appDescription:
     "Casas Cripto es la plataforma inmobiliaria elite que conecta propietarios crypto-friendly con compradores e inversionistas globales. Lista, invierte o dona para construir el futuro del real estate en criptomonedas.",
-  // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
-  domainName: "casascripto.com",
+  // REQUIRED (no https://, no trailing slash). DEBE ser el dominio primario
+  // de Vercel: el apex (casascripto.com) redirige 308 → www, así que si esto
+  // apuntara al apex, TODOS los canonicals, el sitemap y el JSON-LD
+  // apuntarían a URLs que redirigen y Google no indexa bien el sitio.
+  domainName: "www.casascripto.com",
   // Tagline corto usado en Footer y plantilla de emails. Alineado con el
-  // posicionamiento MVP: directorio + intermediación, sin prometer
+  // posicionamiento actual: directorio + intermediación, sin prometer
   // operación on-chain que aún no existe.
   tagline: "El directorio de propiedades que aceptan cripto.",
   // Redes sociales oficiales — se muestran en el Footer (columna "Síguenos").
@@ -36,7 +39,7 @@ const config = {
     // el switch es automático por NODE_ENV, ver priceId abajo). Claves: en
     // .env.local van las de test (sk_test_... + whsec_... del `stripe
     // listen`); en Vercel (producción) las live (sk_live_... + whsec_... del
-    // destino https://casascripto.com/api/webhook/stripe, escuchando:
+    // destino https://www.casascripto.com/api/webhook/stripe, escuchando:
     // checkout.session.completed, checkout.session.expired,
     // customer.subscription.updated, customer.subscription.deleted,
     // invoice.paid, invoice.payment_failed). Nunca mezcles modos: precio
@@ -145,7 +148,8 @@ const config = {
       },
       {
         label: "Tracción",
-        value: "MVP funcional, auth, pagos y panel admin ya construidos",
+        value:
+          "Marketplace en vivo: listados publicados, auth, pagos y panel admin",
       },
       {
         label: "Ronda",
@@ -168,9 +172,9 @@ const config = {
     roadmap: [
       {
         phase: "Fase 1",
-        title: "MVP & fundaciones",
+        title: "Plataforma & fundaciones",
         detail:
-          "Plataforma web, autenticación, suscripciones y panel admin (completado).",
+          "Plataforma web, autenticación, suscripciones, panel admin y primer listado publicado (completado).",
       },
       {
         phase: "Fase 2",
@@ -192,10 +196,16 @@ const config = {
       },
     ],
   },
-  // Texto legal reutilizado en Footer, sección de inversión y token.
+  // Textos legales. `disclaimer` (completo) solo aparece junto al contenido
+  // de inversión/token (TokenRoadmap) y en /tos. El Footer global usa
+  // `shortDisclaimer` + link a /tos: repetir el párrafo completo en TODAS las
+  // páginas solo añade boilerplate duplicado que diluye el contenido único
+  // de cada página (ver secciones 2-4 de /tos, que ya cubren todo esto).
   legal: {
     disclaimer:
-      "Casas Cripto es un proyecto en etapa de desarrollo (MVP). Las suscripciones y donaciones de esta página son pagos de producto/apoyo voluntario, no instrumentos financieros. Nada en este sitio constituye una oferta de venta de valores, asesoría de inversión o garantía de retornos. El token $CASA es un concepto en diseño: su existencia, características y lanzamiento dependen de validación legal y regulatoria, y podrían no concretarse.",
+      "Casas Cripto es un directorio inmobiliario en operación que conecta propietarios que aceptan criptomonedas con compradores globales. Las suscripciones y donaciones de esta página son pagos de producto/apoyo voluntario, no instrumentos financieros. Nada en este sitio constituye una oferta de venta de valores, asesoría de inversión o garantía de retornos. El token $CASA es un concepto en diseño: su existencia, características y lanzamiento dependen de validación legal y regulatoria, y podrían no concretarse.",
+    shortDisclaimer:
+      "Las suscripciones y donaciones son pagos de producto y apoyo voluntario, no instrumentos financieros ni oferta de inversión.",
   },
   aws: {
     // If you use AWS S3/Cloudfront, put values in here

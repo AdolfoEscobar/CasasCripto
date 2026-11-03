@@ -130,7 +130,10 @@ const Footer = () => {
 
         <div className="border-t border-base-content/10 pt-6">
           <p className="text-xs text-base-content/50 leading-relaxed max-w-4xl">
-            {config.legal.disclaimer}
+            {config.legal.shortDisclaimer}{" "}
+            <Link href="/tos" className="link link-hover whitespace-nowrap">
+              Ver términos
+            </Link>
           </p>
         </div>
       </div>

@@ -50,7 +50,7 @@ Estos Términos y Condiciones ("Términos") rigen tu uso del sitio web ${config.
 
 1. Descripción del servicio
 
-${config.appName} es una plataforma inmobiliaria en etapa de desarrollo (MVP) que busca conectar propietarios y agentes crypto-friendly con compradores interesados en adquirir propiedades usando criptomonedas. Algunas funciones descritas en el Sitio (marketplace completo de propiedades, custodia on-chain, token ${config.token.ticker}) se encuentran en construcción o en fase de diseño y pueden no estar disponibles todavía.
+${config.appName} es una plataforma inmobiliaria en operación que conecta propietarios y agentes crypto-friendly con compradores interesados en adquirir propiedades usando criptomonedas. Algunas funciones descritas en el Sitio (custodia on-chain, token ${config.token.ticker}) se encuentran en construcción o en fase de diseño y pueden no estar disponibles todavía.
 
 2. Suscripciones de propietarios/agentes
 

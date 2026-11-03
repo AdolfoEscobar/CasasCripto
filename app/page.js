@@ -11,6 +11,11 @@ import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import { getSEOTags } from "@/libs/seo";
 
+// ISR: <MarketplacePreview/> lee listados reales de Mongo. Con revalidate
+// el home sigue siendo estático y rápido, pero se regenera solo cada hora
+// para mostrar propiedades recién publicadas sin redeploy.
+export const revalidate = 3600;
+
 // Canonical del home: era la única página sin él. Evita que Google vea
 // https://casascripto.com y https://www.casascripto.com (o con slash
 // final distinto) como contenido duplicado y diluya autoridad.

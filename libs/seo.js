@@ -38,7 +38,11 @@ export const getSEOTags = ({
     openGraph: {
       title: openGraph?.title || config.appName,
       description: openGraph?.description || config.appDescription,
-      url: openGraph?.url || `https://${config.domainName}/`,
+      url:
+        openGraph?.url ||
+        (canonicalUrlRelative
+          ? `https://${config.domainName}${canonicalUrlRelative}`
+          : `https://${config.domainName}/`),
       siteName: openGraph?.title || config.appName,
       // If you add an opengraph-image.(jpg|jpeg|png|gif) image to the /app folder, you don't need the code below
       // images: [
@@ -76,12 +80,13 @@ export const getSEOTags = ({
 // particular. Usa Organization + WebSite (no "SoftwareApplication": Casas
 // Cripto es un marketplace inmobiliario, no una app de software) para que
 // Google entienda qué es la marca y, con tráfico, pueda mostrar un sitelinks
-// search box. Deliberadamente SIN `sameAs` (redes sociales): los links del
-// Footer son placeholders ("#") hoy — publicar URLs falsas en structured
-// data es peor que no incluir el campo. Agrégalo en cuanto existan cuentas
-// reales. Learn more: https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data
+// search box. `sameAs` sale de config.socials (cuentas reales).
+// Learn more: https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data
 export const renderSchemaTags = () => {
   const baseUrl = `https://${config.domainName}`;
+  const sameAs = (config.socials || [])
+    .map((s) => s.href)
+    .filter((href) => href && href.startsWith("http"));
 
   const schema = {
     "@context": "https://schema.org",
@@ -93,6 +98,7 @@ export const renderSchemaTags = () => {
         url: baseUrl,
         logo: `${baseUrl}/icon.png`,
         description: config.appDescription,
+        ...(sameAs.length > 0 && { sameAs }),
       },
       {
         "@type": "WebSite",
