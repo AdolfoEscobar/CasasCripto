@@ -5,9 +5,9 @@ const stats = [
     detail: "Publicación, búsqueda y leads funcionando",
   },
   {
-    value: "4",
+    value: "3",
     label: "Criptos por propiedad",
-    detail: "USDC, USDT, BTC y ETH en cada propiedad",
+    detail: "ETH, USDC y USDT en la red Ethereum",
   },
   // PLANES OCULTOS (temporal, hasta tracción):
   // {

@@ -61,6 +61,7 @@ Al acceder o usar el Sitio, aceptas los términos de esta Política de Privacida
 Nombre y correo electrónico: para crear tu cuenta, autenticarte (Google o enlace mágico vía correo) y comunicarnos contigo sobre tu donación o interés como inversionista.
 Información de pago: procesada de forma segura por Stripe para donaciones. No almacenamos los datos completos de tu tarjeta en nuestros servidores.
 Rol de usuario: guardamos tu rol dentro de la plataforma (usuario, propietario/agente, admin) para controlar el acceso a funciones privadas.
+Dirección de wallet (opcional): si conectas MetaMask, guardamos tu dirección pública de Ethereum para identificarte en ofertas y operaciones con escrow.
 
 1.2 Datos no personales
 

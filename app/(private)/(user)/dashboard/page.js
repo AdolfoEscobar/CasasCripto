@@ -6,6 +6,8 @@ import connectMongo from "@/libs/mongoose";
 import User from "@/models/User";
 import config from "@/config";
 import PropertyManager from "./PropertyManager";
+import WalletCard from "@/components/WalletCard";
+import DealsPanel from "@/components/DealsPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +74,10 @@ export default async function Dashboard() {
           )}
         </div>
         */}
+
+        <WalletCard />
+
+        <DealsPanel />
 
         <PropertyManager
           maxProperties={plan?.maxProperties ?? 20}

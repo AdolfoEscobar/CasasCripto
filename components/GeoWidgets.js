@@ -54,7 +54,7 @@ export function SortPills({ base, filters, sort, q, count }) {
 }
 
 // Franja de datos reales bajo el H1, estilo portales grandes ("desde $X ·
-// aceptan [iconos] USDC, BTC"). El conteo vive en <SortPills/>, aquí no se
+// aceptan [iconos] USDC, ETH"). El conteo vive en <SortPills/>, aquí no se
 // repite.
 export function StatsStrip({ minPrice, currency, topCryptos }) {
   const cryptos = (topCryptos || []).slice(0, 4);

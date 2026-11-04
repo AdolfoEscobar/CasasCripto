@@ -5,8 +5,23 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { SiweMessage } from "siwe";
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  useSignMessage,
+} from "wagmi";
 import config from "@/config";
+import MetaMaskIcon from "@/components/MetaMaskIcon";
 import { getAuthErrorMessage } from "./authErrors";
+import {
+  METAMASK_DOWNLOAD_URL,
+  classifyConnectError,
+  hasInjectedProvider,
+  resolveWalletConnector,
+} from "@/libs/walletConnect";
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -29,13 +44,18 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Formulario de login (Google + magic link) del <AuthModal/> global — la
-// única UI de login de la app. initialCallbackUrl lo fija quien abre el
-// modal y onClose lo cierra.
+// Formulario de login (Google + magic link + MetaMask) del <AuthModal/>
+// global — la única UI de login de la app. initialCallbackUrl lo fija quien
+// abre el modal y onClose lo cierra.
 const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { connectAsync, connectors } = useConnect();
+  const { disconnectAsync } = useDisconnect();
+  const { signMessageAsync } = useSignMessage();
 
   const callbackUrl =
     initialCallbackUrl ||
@@ -46,8 +66,10 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
   const [email, setEmail] = useState("");
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingWallet, setLoadingWallet] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showInstall, setShowInstall] = useState(false);
 
   // Already logged in? Close the modal and land on the callback URL.
   useEffect(() => {
@@ -74,6 +96,7 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
     const resetLoadingState = () => {
       setLoadingGoogle(false);
       setLoadingEmail(false);
+      setLoadingWallet(false);
     };
 
     window.addEventListener("pageshow", resetLoadingState);
@@ -127,6 +150,100 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
     sendMagicLink();
   };
 
+  // Login con wallet: conecta MetaMask, pide nonce, firma el mensaje SIWE y
+  // entra con el proveedor "siwe" (ver libs/auth.js). Si el usuario rechaza
+  // la firma o falla la verificación, se muestra error sin cerrar el modal.
+  const handleWallet = async () => {
+    setErrorMsg("");
+    setShowInstall(false);
+    setLoadingWallet(true);
+    try {
+      if (!hasInjectedProvider()) {
+        setShowInstall(true);
+        throw new Error("no-wallet");
+      }
+      const connector = await resolveWalletConnector(connectors);
+      if (!connector) {
+        setShowInstall(true);
+        throw new Error("no-wallet");
+      }
+
+      let activeAddress = isConnected ? address : null;
+      if (!activeAddress) {
+        try {
+          const result = await connectAsync({ connector });
+          activeAddress = result?.accounts?.[0] || null;
+        } catch (connectError) {
+          console.error("connect wallet failed:", connectError);
+          const kind = classifyConnectError(connectError);
+          if (kind === "no-provider") setShowInstall(true);
+          throw connectError;
+        }
+      }
+      if (!activeAddress) {
+        throw new Error("no-wallet");
+      }
+
+      const nonceRes = await fetch("/api/auth/siwe/nonce");
+      if (!nonceRes.ok) {
+        throw new Error("nonce");
+      }
+      const { nonce } = await nonceRes.json();
+
+      const message = new SiweMessage({
+        domain: window.location.host,
+        address: activeAddress,
+        statement: `Entrar a ${config.appName}`,
+        uri: window.location.origin,
+        version: "1",
+        chainId: chainId || 1,
+        nonce,
+      });
+      const prepared = message.prepareMessage();
+      const signature = await signMessageAsync({ message: prepared });
+
+      const res = await signIn("siwe", {
+        // Se manda el texto firmado tal cual (siwe v3 ya no acepta JSON).
+        message: prepared,
+        signature,
+        redirect: false,
+        callbackUrl,
+      });
+
+      if (res?.error) {
+        setErrorMsg(getAuthErrorMessage(res.error));
+        try {
+          await disconnectAsync();
+        } catch {
+          // noop: la desconexión es mejor esfuerzo
+        }
+      }
+      // Si no hay error, el efecto de `status === "authenticated"` cierra el
+      // modal y navega al callbackUrl.
+    } catch (e) {
+      if (e?.message === "no-wallet") {
+        setErrorMsg(
+          "No detectamos una wallet en este navegador. Instala MetaMask e inténtalo de nuevo."
+        );
+      } else if (classifyConnectError(e) === "rejected") {
+        setErrorMsg(
+          "Aprobá la conexión y la firma en tu wallet para continuar."
+        );
+      } else if (classifyConnectError(e) === "no-provider") {
+        setShowInstall(true);
+        setErrorMsg(
+          "No detectamos una wallet en este navegador. Instala MetaMask e inténtalo de nuevo."
+        );
+      } else {
+        setErrorMsg(
+          e?.shortMessage || e?.message || getAuthErrorMessage()
+        );
+      }
+    } finally {
+      setLoadingWallet(false);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Tarjeta sólida siempre, sin glass ni glow: el backdrop-blur y las
@@ -162,6 +279,19 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
           <div role="alert" className="alert alert-error mb-6 py-3 text-sm">
             <span>{errorMsg}</span>
           </div>
+        )}
+        {showInstall && !emailSent && (
+          <a
+            href={METAMASK_DOWNLOAD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-outline w-full mb-6 gap-3"
+          >
+            <span aria-hidden="true" className="flex">
+              <MetaMaskIcon size={20} />
+            </span>
+            Instalar MetaMask
+          </a>
         )}
 
         {emailSent ? (
@@ -219,7 +349,7 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
             <button
               className="btn btn-outline w-full border-base-content/20 gap-3 hover:border-primary/60"
               onClick={handleGoogle}
-              disabled={loadingGoogle || loadingEmail}
+              disabled={loadingGoogle || loadingEmail || loadingWallet}
             >
               {loadingGoogle ? (
                 <span className="loading loading-spinner loading-xs" />
@@ -227,6 +357,21 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
                 <GoogleIcon />
               )}
               Continuar con Google
+            </button>
+
+            <button
+              className="btn btn-outline w-full border-base-content/20 gap-3 hover:border-primary/60 mt-3"
+              onClick={handleWallet}
+              disabled={loadingGoogle || loadingEmail || loadingWallet}
+            >
+              {loadingWallet ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : (
+                <span aria-hidden="true" className="flex">
+                  <MetaMaskIcon size={20} />
+                </span>
+              )}
+              Continuar con MetaMask
             </button>
 
             <div className="divider text-xs text-base-content/40">
@@ -266,7 +411,7 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
               <button
                 type="submit"
                 className="btn btn-primary w-full"
-                disabled={loadingEmail || loadingGoogle}
+                disabled={loadingEmail || loadingGoogle || loadingWallet}
               >
                 {loadingEmail ? (
                   <span className="loading loading-spinner loading-xs" />

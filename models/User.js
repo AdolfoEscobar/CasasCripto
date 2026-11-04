@@ -42,6 +42,19 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Wallet de Ethereum verificada por firma SIWE (login con MetaMask).
+    // Sparse + unique: la mayoría no tiene wallet, pero una dirección solo
+    // puede pertenecer a una cuenta.
+    walletAddress: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      sparse: true,
+      unique: true,
+    },
+    walletVerifiedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

@@ -416,7 +416,7 @@ const DIRECTORY_FAQS = [
   },
   {
     q: "¿Cómo publico mi propiedad en una de estas ciudades?",
-    a: "Crea tu cuenta gratis, sube tu propiedad indicando qué criptomonedas aceptas (USDC, USDT, BTC, ETH) y aparece en su estado y ciudad tras una revisión manual.",
+    a: "Crea tu cuenta gratis, sube tu propiedad indicando qué criptomonedas aceptas (ETH, USDC, USDT) y aparece en su estado y ciudad tras una revisión manual.",
   },
   {
     q: "¿En qué países puedo buscar propiedades?",

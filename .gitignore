@@ -44,4 +44,10 @@ public/sitemap-0.xml
 .env*
 !.env.example
 
+# foundry (contratos): dependencias y artefactos. Primera vez: `forge install`.
+contracts/lib/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
 logs

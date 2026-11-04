@@ -69,6 +69,11 @@ const adminLinks = [
     label: "Propiedades",
     icon: BuildingOffice2Icon,
   },
+  {
+    href: "/admin/dashboard/deals",
+    label: "Deals escrow",
+    icon: CurrencyDollarIcon,
+  },
 ];
 
 function NavSectionLabel({ children }) {

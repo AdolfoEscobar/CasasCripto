@@ -52,7 +52,7 @@ export async function generateMetadata({ searchParams }) {
           : "";
     return getSEOTags({
       title: `${subject} que aceptan cripto | Casas Cripto`,
-      description: `Explora casas, departamentos y terrenos ${op}publicados por propietarios verificados que aceptan USDC, USDT, BTC y ETH. Busca por estado y ciudad.`,
+      description: `Explora casas, departamentos y terrenos ${op}publicados por propietarios verificados que aceptan ETH, USDC y USDT. Busca por estado y ciudad.`,
       canonicalUrlRelative: "/propiedades",
     });
   }
@@ -72,7 +72,7 @@ export async function generateMetadata({ searchParams }) {
 const HUB_FAQS = [
   {
     q: "¿Cómo compro una propiedad con criptomonedas en Casas Cripto?",
-    a: "Explora los listados por estado o ciudad, elige una propiedad que acepte tu cripto (cada listado indica cuáles: USDC, USDT, BTC, ETH) y contacta directo al propietario. El cierre de la operación se acuerda entre comprador y propietario.",
+    a: "Explora los listados por estado o ciudad, elige una propiedad que acepte tu cripto (cada listado indica cuáles: ETH, USDC, USDT) y contacta directo al propietario. El cierre de la operación se acuerda entre comprador y propietario.",
   },
   {
     q: "¿Publicar mi propiedad cuesta algo?",
@@ -84,7 +84,7 @@ const HUB_FAQS = [
   },
   {
     q: "¿Qué criptomonedas puedo usar para comprar?",
-    a: "Depende de cada propietario: cada propiedad indica si acepta USDC, USDT, BTC, ETH u otras. Usa los listados por estado y ciudad para encontrar la propiedad que acepte tu cripto.",
+    a: "Depende de cada propietario: cada propiedad indica si acepta ETH, USDC o USDT en la red Ethereum. Usa los listados por estado y ciudad para encontrar la propiedad que acepte tu cripto.",
   },
   {
     q: "¿Casas Cripto cobra comisión por comprar?",
@@ -178,7 +178,7 @@ export default async function PropiedadesPage({ searchParams }) {
                 <>
                   Listados reales publicados por propietarios y agentes
                   verificados, con revisión manual antes de publicarse. Explora
-                  por estado o ciudad y paga con USDC, USDT, BTC o ETH.
+                  por estado o ciudad y paga con ETH, USDC o USDT.
                 </>
               )}
             </p>

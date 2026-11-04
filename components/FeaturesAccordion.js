@@ -2,13 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
 import ButtonAuthCta from "./ButtonAuthCta";
+import CryptoIcon from "./CryptoIcon";
 
 const steps = [
   {
     number: "01",
     title: "Lista tu propiedad gratis",
     description:
-      "Publica en minutos e indica qué aceptas: USDC, USDT, BTC o ETH. Revisamos cada propiedad a mano antes de publicarla. Sin tarjeta, sin letra chica.",
+      "Publica en minutos e indica qué aceptas: ETH, USDC o USDT en la red Ethereum. Revisamos cada propiedad a mano antes de publicarla. Sin tarjeta, sin letra chica.",
   },
   {
     number: "02",
@@ -86,7 +87,17 @@ const FeaturesAccordion = () => {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-extrabold text-primary">US$ 480,000</p>
-                  <p className="text-xs opacity-70 mt-0.5">Acepta USDC · BTC</p>
+                  <p className="text-xs opacity-70 mt-0.5 flex items-center justify-end gap-1">
+                    Acepta
+                    <span aria-hidden="true" className="flex">
+                      <CryptoIcon symbol="USDC" size={12} />
+                    </span>
+                    USDC ·
+                    <span aria-hidden="true" className="flex">
+                      <CryptoIcon symbol="ETH" size={12} />
+                    </span>
+                    ETH
+                  </p>
                 </div>
               </figcaption>
             </div>

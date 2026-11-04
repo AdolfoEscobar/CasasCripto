@@ -13,7 +13,8 @@ import config from "@/config";
 // consulta Mongo una vez y le pasa datos planos ya serializables al cliente
 // interactivo (carrusel + filtros). El home usa ISR (ver app/page.js), así
 // que los listados nuevos aparecen solos sin rebuild manual.
-const SUPPORTED_CRYPTOS = ["USDC", "USDT", "BTC", "ETH"];
+// Solo cadena de Ethereum (mainnet): BTC requeriría WBTC y queda fuera.
+const SUPPORTED_CRYPTOS = ["ETH", "USDC", "USDT"];
 const MAX_ITEMS = 6;
 
 const MarketplacePreview = async () => {

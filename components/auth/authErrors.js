@@ -10,6 +10,8 @@ export const AUTH_ERROR_MESSAGES = {
   Verification:
     "El enlace de acceso venció o ya fue usado. Solicita uno nuevo.",
   AccessDenied: "No tienes permiso para acceder con esta cuenta.",
+  CredentialsSignin:
+    "No pudimos verificar tu firma. Reconecta tu wallet e inténtalo de nuevo.",
   Default: "Ocurrió un problema al iniciar sesión. Inténtalo de nuevo.",
 };
 

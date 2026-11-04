@@ -54,7 +54,7 @@ export default function DemoAIClient() {
     try {
       const data = await callAi(base, "listing-copy", {
         ...copyForm,
-        cryptoAccepted: ["USDC", "BTC"],
+        cryptoAccepted: ["USDC", "ETH"],
       });
       setCopyResult(data);
     } catch (e) {

@@ -63,6 +63,8 @@ ${config.appName} es una plataforma inmobiliaria en operación que conecta propi
 
 Publicar propiedades en el Sitio es actualmente gratuito. No se garantizan resultados de venta ni volumen de leads.
 
+Operaciones con escrow (beta): el Sitio ofrece un contrato de custodia no-custodial en la red de pruebas Sepolia para intermediar operaciones con ETH, USDC o USDT, con una comisión de 1.5 % descontada al vendedor al liberar fondos. Es software experimental: úsalo bajo tu propio riesgo, verifica cada transacción en tu wallet y ten en cuenta que las reglas y comisiones pueden cambiar.
+
 3. Donaciones
 
 Las donaciones realizadas a través del Sitio (en MXN vía Stripe o directamente en criptomonedas a las direcciones publicadas) son aportes voluntarios para apoyar el desarrollo del producto. No constituyen una compra de bienes o servicios, no son reembolsables salvo error de procesamiento, y no otorgan participación societaria, derechos de inversión ni expectativa de retorno.

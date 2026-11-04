@@ -8,6 +8,7 @@ import CryptoIcon from "@/components/CryptoIcon";
 import FaqAccordion from "@/components/FaqAccordion";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PropertySearchHero from "@/components/PropertySearchHero";
+import MakeOfferButton from "@/components/MakeOfferButton";
 import { getPropertyBySlug, getCityData } from "@/libs/propertyGeo";
 import {
   getSEOTags,
@@ -329,21 +330,30 @@ export default async function PropertyDetailPage({ params }) {
                     </div>
                   )}
 
+                  <MakeOfferButton
+                    property={{
+                      id: property.id,
+                      title: property.title,
+                      price: property.price,
+                      currency: property.currency,
+                      cryptoAccepted: property.cryptoAccepted || [],
+                    }}
+                  />
+
                   {property.contactEmail && (
                     <a
                       href={`mailto:${property.contactEmail}?subject=${encodeURIComponent(
                         `Interesado en: ${property.title}`,
                       )}`}
-                      className="btn btn-primary btn-block"
+                      className="btn btn-outline btn-block"
                     >
                       Contactar al propietario
                     </a>
                   )}
 
                   <p className="text-xs opacity-50 text-center">
-                    El cierre de la operación es directo entre comprador y
-                    propietario. Casas Cripto no procesa el pago de la compra
-                    hoy.
+                    Oferta con escrow en Ethereum (beta, red Sepolia) o trato
+                    directo con el propietario por correo.
                   </p>
                 </div>
               </div>

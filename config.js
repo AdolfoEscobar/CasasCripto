@@ -5,7 +5,7 @@ const config = {
   // Máx ~160 caracteres: es el default de meta description y OG en todo el
   // sitio, y Google trunca lo que exceda en los resultados.
   appDescription:
-    "El directorio de propiedades que aceptan cripto. Publica gratis o encuentra casas, departamentos y terrenos y paga con USDC, USDT, BTC o ETH.",
+    "El directorio de propiedades que aceptan cripto. Publica gratis o encuentra casas, departamentos y terrenos y paga con ETH, USDC o USDT.",
   // REQUIRED (no https://, no trailing slash). DEBE ser el dominio primario
   // de Vercel: el apex (casascripto.com) redirige 308 → www, así que si esto
   // apuntara al apex, TODOS los canonicals, el sitemap y el JSON-LD
@@ -75,7 +75,7 @@ const config = {
         price: 0,
         features: [
           { name: "Hasta 20 propiedades listadas" },
-          { name: "Indica qué criptos aceptas (USDC, USDT, BTC, ETH)" },
+          { name: "Indica qué criptos aceptas (ETH, USDC, USDT)" },
           { name: "Perfil de propietario verificado" },
           { name: "Etiqueta crypto-friendly" },
           { name: "Soporte por email" },
@@ -102,7 +102,7 @@ const config = {
         maxProperties: 100,
         features: [
           { name: "Hasta 100 propiedades listadas" },
-          { name: "Indica qué criptos aceptas (USDC, USDT, BTC, ETH)" },
+          { name: "Indica qué criptos aceptas (ETH, USDC, USDT)" },
           { name: "Perfil premium de agente verificado" },
           { name: "Analítica de leads e inversionistas" },
           { name: "Posición destacada en el marketplace" },
@@ -203,6 +203,21 @@ const config = {
           "Tokenomics, auditoría de contratos y lanzamiento condicionado a cumplimiento regulatorio.",
       },
     ],
+  },
+  // Escrow on-chain (CasasEscrow.sol en contracts/). Decisiones de producto:
+  // árbitro = wallet admin, comisión 1.5 % al vendedor, oferta 7 días,
+  // depósito 3 días con reembolso. Corre en Sepolia hasta pasar auditoría +
+  // legal; mainnet se activa poniendo NEXT_PUBLIC_ESCROW_MAINNET.
+  escrow: {
+    feeBps: 150,
+    offerDays: 7,
+    depositDays: 3,
+    contracts: {
+      1: process.env.NEXT_PUBLIC_ESCROW_MAINNET || null,
+      11155111: process.env.NEXT_PUBLIC_ESCROW_SEPOLIA || null,
+    },
+    arbiter: process.env.NEXT_PUBLIC_ARBITER_ADDRESS || null,
+    feeRecipient: process.env.NEXT_PUBLIC_FEE_RECIPIENT || null,
   },
   aws: {
     // If you use AWS S3/Cloudfront, put values in here

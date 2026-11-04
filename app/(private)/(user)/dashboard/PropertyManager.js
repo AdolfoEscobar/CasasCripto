@@ -11,7 +11,8 @@ import {
 } from "@/libs/propertyImages";
 import { prepareImageForUpload } from "@/libs/clientImage";
 
-const CRYPTO_OPTIONS = ["USDC", "USDT", "BTC", "ETH"];
+// Solo cadena de Ethereum (mainnet): BTC requeriría WBTC y queda fuera.
+const CRYPTO_OPTIONS = ["ETH", "USDC", "USDT"];
 
 const emptyForm = {
   title: "",
@@ -956,7 +957,8 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
 
           <div>
             <p className="text-sm font-medium mb-2">
-              Criptomonedas que aceptas
+              Criptomonedas que aceptas{" "}
+              <span className="opacity-60 font-normal">(red Ethereum)</span>
             </p>
             <div className="flex flex-wrap gap-2">
               {CRYPTO_OPTIONS.map((symbol) => (

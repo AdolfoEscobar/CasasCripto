@@ -501,6 +501,12 @@ const PropertySearchHero = ({
   base = "/propiedades",
 }) => {
   const [sheetOpen, setSheetOpen] = useState(false);
+  // El resumen se calcula desde window.location: hasta el mount se renderiza
+  // el fallback (igual que en SSR) para no romper la hidratación.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Bloquea el scroll del fondo mientras el sheet está abierto.
   useEffect(() => {
@@ -522,6 +528,7 @@ const PropertySearchHero = ({
       title: "Buscar propiedades",
       sub: "Ciudad · Tipo · Operación",
     };
+    if (!mounted) return fallback;
     try {
       const params = new URLSearchParams(window.location.search);
       const geo = guessGeoFromPath(window.location.pathname);
@@ -558,7 +565,7 @@ const PropertySearchHero = ({
       return fallback;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sheetOpen]);
+  }, [sheetOpen, mounted]);
 
   return (
     <>

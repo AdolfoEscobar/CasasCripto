@@ -168,7 +168,7 @@ export const articles = [
       },
       {
         q: "¿Dónde encuentro casas que acepten criptomonedas?",
-        a: "En marketplaces especializados como Casas Cripto, donde cada listado indica qué criptomonedas acepta el vendedor (USDC, USDT, BTC, ETH) y puedes filtrar por ciudad.",
+        a: "En marketplaces especializados como Casas Cripto, donde cada listado indica qué criptomonedas acepta el vendedor (ETH, USDC, USDT) y puedes filtrar por ciudad.",
       },
     ],
     content: (
@@ -244,8 +244,8 @@ export const articles = [
             <Link href="/propiedades" className={styles.link}>
               Casas Cripto
             </Link>{" "}
-            cada listado indica si el propietario acepta USDC, USDT, BTC o
-            ETH, y puedes explorar por ciudad. Contacta al vendedor y
+            cada listado indica si el propietario acepta ETH, USDC o USDT,
+            y puedes explorar por ciudad. Contacta al vendedor y
             confirma por escrito qué monedas acepta antes de avanzar.
           </p>
           <h3 className={styles.h3}>2. Acuerda precio, moneda y tipo de cambio</h3>
@@ -393,7 +393,7 @@ export const articles = [
 
         <CtaMarketplace
           title="¿Listo para comprar tu casa con cripto?"
-          text="Explora propiedades verificadas cuyos vendedores ya aceptan USDC, USDT, BTC y ETH. Sin intermediarios innecesarios y con revisión manual de cada listado."
+          text="Explora propiedades verificadas cuyos vendedores ya aceptan ETH, USDC y USDT. Sin intermediarios innecesarios y con revisión manual de cada listado."
         />
       </>
     ),
@@ -879,8 +879,8 @@ export const articles = [
             comisiones de red y lo que el vendedor esté dispuesto a aceptar.
           </p>
           <p className={styles.p}>
-            En Casas Cripto cada listado indica si el vendedor acepta USDC,
-            USDT, BTC o ETH, así que puedes filtrar desde el inicio por la
+            En Casas Cripto cada listado indica si el vendedor acepta ETH,
+            USDC o USDT, así que puedes filtrar desde el inicio por la
             moneda que prefieres usar.
           </p>
         </section>
@@ -1015,7 +1015,7 @@ export const articles = [
 
         <CtaMarketplace
           title="Filtra propiedades por la cripto que aceptan"
-          text="En Casas Cripto cada listado muestra si el vendedor acepta USDC, USDT, BTC o ETH. Encuentra tu próxima propiedad crypto-friendly hoy."
+          text="En Casas Cripto cada listado muestra si el vendedor acepta ETH, USDC o USDT. Encuentra tu próxima propiedad crypto-friendly hoy."
         />
       </>
     ),
@@ -1678,7 +1678,7 @@ export const articles = [
       },
       {
         q: "¿Qué criptomonedas puedo indicar que acepto?",
-        a: "USDC, USDT, BTC y ETH. Marca las que aceptes y los compradores filtrarán tu listado según la moneda con la que quieren pagar.",
+        a: "ETH, USDC y USDT en la red Ethereum. Marca las que aceptes y los compradores filtrarán tu listado según la moneda con la que quieren pagar.",
       },
       // PLANES OCULTOS (temporal, hasta tracción): FAQ de destacar (pago) —
       // el botón "Destacar" del dashboard está oculto, así que esta FAQ no aplica.
@@ -1743,8 +1743,9 @@ export const articles = [
               Precio en USD y ubicación exacta (país, estado, ciudad).
             </li>
             <li className={styles.li}>
-              Criptomonedas que aceptas: marca USDC, USDT, BTC y/o ETH. Este
-              es el campo que te hace visible para compradores cripto.
+              Criptomonedas que aceptas: marca ETH, USDC y/o USDT (red
+              Ethereum). Este es el campo que te hace visible para
+              compradores cripto.
             </li>
             <li className={styles.li}>
               Fotos con URLs de buena calidad (mínimo 5, ideal 10+).
@@ -1827,8 +1828,8 @@ export const articles = [
             ¿Qué criptomonedas puedo indicar que acepto?
           </h3>
           <p className={styles.p}>
-            USDC, USDT, BTC y ETH. Los compradores filtran tu listado según
-            su moneda.
+            ETH, USDC y USDT en la red Ethereum. Los compradores filtran
+            tu listado según su moneda.
           </p>
           {/* PLANES OCULTOS (temporal, hasta tracción): FAQ de pago para destacar.
           <h3 className={styles.h3}>

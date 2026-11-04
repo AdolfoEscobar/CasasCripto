@@ -28,10 +28,10 @@ const faqList = [
     // liquidación on-chain automatizada forma parte del roadmap."
     answer: (
       <p>
-        Cada propiedad indica qué criptomonedas acepta el propietario (USDC,
-        USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el
-        cierre; las donaciones se procesan con Stripe. La liquidación on-chain
-        automatizada forma parte del roadmap.
+        Cada propiedad indica qué criptomonedas acepta el propietario (ETH,
+        USDC o USDT en la red Ethereum). Casas Cripto conecta a ambas partes y
+        acompaña el cierre; las donaciones se procesan con Stripe. La
+        liquidación on-chain automatizada forma parte del roadmap.
       </p>
     ),
   },
@@ -109,7 +109,7 @@ const HOME_FAQ_SCHEMA = [
   // "No. Las suscripciones y donaciones de este sitio son pagos de producto o apoyo voluntario, no instrumentos financieros."
   {
     q: "¿Cómo funciona el pago en criptomonedas?",
-    a: "Cada propiedad indica qué criptomonedas acepta el propietario (USDC, USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre; las donaciones se procesan con Stripe.",
+    a: "Cada propiedad indica qué criptomonedas acepta el propietario (ETH, USDC o USDT en la red Ethereum). Casas Cripto conecta a ambas partes y acompaña el cierre; las donaciones se procesan con Stripe.",
   },
   {
     q: "¿Esto es una oferta de inversión o de valores?",

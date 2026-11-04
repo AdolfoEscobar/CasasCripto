@@ -2,11 +2,19 @@ import NextAuth from "next-auth"
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
 import GoogleProvider from "next-auth/providers/google"
 import EmailProvider from "next-auth/providers/email"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { SiweMessage } from "siwe"
 import config from "@/config"
 import connectMongo from "./mongo"
 import connectMongoose from "./mongoose"
 import { deriveNameFromEmail } from "./deriveNameFromEmail.mjs"
 import User from "@/models/User"
+import { expectedSiweDomain, getRequestCookie } from "./siwe"
+
+const shortAddr = (address = "") =>
+  address.length >= 10
+    ? `${address.slice(0, 6)}…${address.slice(-4)}`
+    : address;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   
@@ -15,6 +23,72 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   
   // Add EmailProvider only for server-side usage (not edge-compatible)
   providers: [
+    // Login con wallet (MetaMask) por firma SIWE (EIP-4361). Flujo:
+    // 1. El cliente pide GET /api/auth/siwe/nonce (guarda nonce en cookie).
+    // 2. La wallet firma el mensaje SIWE con ese nonce.
+    // 3. signIn("siwe", { message, signature }) cae aquí: se verifica firma,
+    //    dominio y nonce, y se busca/crea el usuario por walletAddress.
+    // Credentials no usa el adapter: el find-or-create es manual.
+    CredentialsProvider({
+      id: "siwe",
+      name: "Ethereum",
+      credentials: {
+        message: { label: "Message", type: "text" },
+        signature: { label: "Signature", type: "text" },
+      },
+      async authorize(credentials, req) {
+        try {
+          if (!credentials?.message || !credentials?.signature) return null;
+          if (!connectMongo) return null;
+
+          const expectedNonce = getRequestCookie(req, "siwe-nonce");
+          if (!expectedNonce) return null;
+
+          const expectedDomain = expectedSiweDomain(req);
+          if (!expectedDomain) return null;
+
+          const siwe = new SiweMessage(credentials.message);
+          const result = await siwe.verify({
+            signature: credentials.signature,
+            domain: expectedDomain,
+            nonce: expectedNonce,
+          });
+          if (!result.success) return null;
+
+          const address = siwe.address.toLowerCase();
+          await connectMongoose();
+
+          let dbUser = await User.findOne({ walletAddress: address });
+          if (!dbUser) {
+            try {
+              dbUser = await User.create({
+                walletAddress: address,
+                walletVerifiedAt: new Date(),
+                role: "user",
+                name: shortAddr(address),
+              });
+            } catch {
+              // Carrera entre dos logins simultáneos: re-lee.
+              dbUser = await User.findOne({ walletAddress: address });
+              if (!dbUser) return null;
+            }
+          } else if (!dbUser.walletVerifiedAt) {
+            dbUser.walletVerifiedAt = new Date();
+            await dbUser.save();
+          }
+
+          return {
+            id: dbUser._id.toString(),
+            name: dbUser.name || shortAddr(address),
+            email: dbUser.email || undefined,
+            image: dbUser.image || undefined,
+          };
+        } catch (e) {
+          console.error("SIWE authorize failed:", e?.message || e);
+          return null;
+        }
+      },
+    }),
     // Follow the "Login with Email" tutorial to set up your email server
     // Requires a MongoDB database. Set MONGODB_URI env variable.
     ...(connectMongo
@@ -114,6 +188,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // y cubre el primer login con magic link (el token aún no trae
           // nombre porque se derivó al crear el usuario).
           session.user.name = dbUser?.name || session.user?.name || null;
+          session.user.walletAddress = dbUser?.walletAddress || null;
         } catch (error) {
           console.error("Error fetching user role:", error);
           session.user.role = token.role || "user";

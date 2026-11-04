@@ -2,10 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
 import ButtonAuthCta from "./ButtonAuthCta";
+import CryptoIcon from "./CryptoIcon";
 
 const trustBadges = [
   "Publicar es gratis",
-  "USDC · USDT · BTC · ETH",
+  "ETH · USDC · USDT",
   "Revisión manual",
   "Cierre acompañado",
 ];
@@ -32,9 +33,9 @@ const Hero = () => {
           </h1>
 
           <p className="text-base sm:text-lg opacity-70 leading-relaxed max-w-xl">
-            Publica gratis, indica qué aceptas (USDC, USDT, BTC o ETH) y recibe
-            compradores globales. Nosotros intermediamos para que el deal se
-            cierre.
+            Publica gratis, indica qué aceptas (ETH, USDC o USDT en la red
+            Ethereum) y recibe compradores globales. Nosotros intermediamos
+            para que el deal se cierre.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -56,8 +57,15 @@ const Hero = () => {
             {trustBadges.map((b) => (
               <span
                 key={b}
-                className="badge badge-ghost border border-base-content/10 text-xs"
+                className="badge badge-ghost border border-base-content/10 text-xs gap-1"
               >
+                {b === "ETH · USDC · USDT" && (
+                  <span aria-hidden="true" className="flex items-center gap-0.5">
+                    <CryptoIcon symbol="ETH" size={12} />
+                    <CryptoIcon symbol="USDC" size={12} />
+                    <CryptoIcon symbol="USDT" size={12} />
+                  </span>
+                )}
                 {b}
               </span>
             ))}
@@ -109,7 +117,17 @@ const Hero = () => {
             </span>
             <div className="text-sm">
               <p className="font-semibold">Pago en cripto</p>
-              <p className="opacity-60 text-xs">Acepta USDC · BTC</p>
+              <p className="opacity-60 text-xs flex items-center gap-1">
+                Acepta
+                <span aria-hidden="true" className="flex">
+                  <CryptoIcon symbol="USDC" size={12} />
+                </span>
+                USDC ·
+                <span aria-hidden="true" className="flex">
+                  <CryptoIcon symbol="ETH" size={12} />
+                </span>
+                ETH
+              </p>
             </div>
           </div>
         </div>

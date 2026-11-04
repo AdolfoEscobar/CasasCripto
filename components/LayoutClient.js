@@ -10,6 +10,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
 import { AuthModalProvider } from "@/components/auth/AuthModalContext";
+import Web3Provider from "@/components/Web3Provider";
 import config from "@/config";
 
 // El modal (headlessui Dialog + formulario) se carga en un chunk aparte en
@@ -60,7 +61,7 @@ const CrispChat = () => {
 // 5. CrispChat: Set Crisp customer chat support (see above)
 const ClientLayout = ({ children }) => {
   return (
-    <>
+    <Web3Provider>
       <SessionProvider>
         <AuthModalProvider>
           {/* Show a progress bar at the top when navigating between pages */}
@@ -89,7 +90,7 @@ const ClientLayout = ({ children }) => {
           <CrispChat />
         </AuthModalProvider>
       </SessionProvider>
-    </>
+    </Web3Provider>
   );
 };
 
