@@ -281,19 +281,18 @@ export default function DemoAIClient() {
           )}
         </section>
 
-        {/* CTA final */}
-        <div className="text-center space-y-3 pt-4">
-          <p className="opacity-70">
-            ¿Te gustó? Crea una cuenta gratis y publica tu propiedad usando esta
-            misma IA, sin límite diario tan estricto.
-          </p>
-          <button
-            className="btn btn-primary btn-sm rounded-full"
-            onClick={() => openAuthModal(config.auth.callbackUrl)}
-          >
-            Crear cuenta gratis
-          </button>
-        </div>
+        {/* CTA final: solo para invitados (logueado ya tiene cuenta y el
+            botón abriría el modal de login sin sentido). */}
+        {status === "unauthenticated" && (
+          <div className="text-center space-y-3 pt-4">
+            <button
+              className="btn btn-primary btn-sm rounded-full"
+              onClick={() => openAuthModal(config.auth.callbackUrl)}
+            >
+              Crear cuenta gratis
+            </button>
+          </div>
+        )}
       </div>
       <Footer />
     </main>

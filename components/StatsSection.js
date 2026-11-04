@@ -32,10 +32,10 @@ const StatsSection = () => {
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20">
         <div className="text-center mb-10 md:mb-12 max-w-2xl mx-auto">
           <p className="text-sm font-semibold text-primary mb-3">
-            Tracción real, sin humo
+            Números reales
           </p>
           <h2 className="font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
-            Construimos el producto antes de pedir el cheque
+            Producto funcionando antes de levantar capital
           </h2>
         </div>
 

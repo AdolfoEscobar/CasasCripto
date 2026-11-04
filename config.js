@@ -130,7 +130,7 @@ const config = {
     suggestedAmounts: [50, 100, 200, 500, 1000],
     minAmount: 50,
     description:
-      "Apoya el desarrollo de Casas Cripto. Las donaciones financian producto, cumplimiento regulatorio y expansión del marketplace.",
+      "Apoya a Casas Cripto. Las donaciones se destinan a marketing y crecimiento del marketplace: más difusión, más propietarios publicando y más compradores.",
   },
   // Narrativa de inversión — usada en la sección "Invierte" del landing.
   // No constituye una oferta de valores; ver secciones 2-4 de /tos.

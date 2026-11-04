@@ -133,8 +133,8 @@ const FeaturesAccordion = () => {
         </ol>
 
         <p className="mt-12 text-sm opacity-60 max-w-2xl leading-relaxed">
-          Sin custodia, sin token, sin humo — todavía. Primero el directorio
-          que funciona, después la infraestructura.{" "}
+          Hoy: directorio funcionando, sin custodia ni token. Primero tracción
+          real, después la infraestructura.{" "}
           <a href="#token" className="link link-primary">
             Ver roadmap
           </a>

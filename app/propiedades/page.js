@@ -35,19 +35,24 @@ export async function generateMetadata({ searchParams }) {
   const q = (sp.q || "").trim();
   if (!q) {
     // Sujeto según filtros (?tipo=casa&operacion=renta → "Casas en renta
-    // que aceptan cripto"). Sin operación, default "venta" (keyword
-    // principal; preserva el title actual indexable).
+    // que aceptan cripto"). Sin operación ("Todas") no se asume venta: el
+    // listado mezcla venta y renta.
     const filters = parseGeoFilters(sp);
     const subject = capFirst(
       keywordSubject({
         propertyType: filters.propertyType,
-        listingType: filters.listingType || "venta",
+        listingType: filters.listingType,
       }),
     );
-    const op = filters.listingType === "renta" ? "en renta" : "en venta";
+    const op =
+      filters.listingType === "renta"
+        ? "en renta "
+        : filters.listingType === "venta"
+          ? "en venta "
+          : "";
     return getSEOTags({
       title: `${subject} que aceptan cripto | Casas Cripto`,
-      description: `Explora casas, departamentos y terrenos ${op} publicados por propietarios verificados que aceptan USDC, USDT, BTC y ETH. Busca por estado y ciudad.`,
+      description: `Explora casas, departamentos y terrenos ${op}publicados por propietarios verificados que aceptan USDC, USDT, BTC y ETH. Busca por estado y ciudad.`,
       canonicalUrlRelative: "/propiedades",
     });
   }
@@ -108,11 +113,12 @@ export default async function PropiedadesPage({ searchParams }) {
   // directorio): el número siempre cuadra con la cuadrícula.
   const shownCount = filtersActive ? properties.length : totalCount;
   // H1 según filtros (?operacion=renta → "Propiedades en renta que aceptan
-  // cripto"). Sin operación, default "venta" (igual que el metadata).
+  // cripto"). Sin operación ("Todas") queda neutro: "Propiedades que
+  // aceptan cripto" (igual que el metadata).
   const hubSubject = capFirst(
     keywordSubject({
       propertyType: filters.propertyType,
-      listingType: filters.listingType || "venta",
+      listingType: filters.listingType,
     }),
   );
   const baseUrl = `https://${config.domainName}`;
