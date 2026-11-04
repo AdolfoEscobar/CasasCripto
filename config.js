@@ -146,7 +146,9 @@ const config = {
       },
       {
         label: "Modelo",
-        value: "Suscripción (SaaS) + comisión por cierre + token $CASA",
+        // PLANES OCULTOS (temporal, hasta tracción) — valor original:
+        // "Suscripción (SaaS) + comisión por cierre + token $CASA"
+        value: "Marketplace + comisión por cierre + token $CASA",
       },
       {
         label: "Tracción",
@@ -169,14 +171,18 @@ const config = {
       "Descuentos en comisiones de la plataforma",
       "Participación en gobernanza de futuras funciones",
       "Recompensas por referidos y actividad en el marketplace",
-      "Acceso prioritario a nuevos listados premium",
+      // PLANES OCULTOS (temporal, hasta tracción) — original:
+      // "Acceso prioritario a nuevos listados premium"
+      "Acceso prioritario a nuevos listados",
     ],
     roadmap: [
       {
         phase: "Fase 1",
         title: "Plataforma & fundaciones",
+        // PLANES OCULTOS (temporal, hasta tracción) — original:
+        // "Plataforma web, autenticación, suscripciones, panel admin y primer listado publicado (completado)."
         detail:
-          "Plataforma web, autenticación, suscripciones, panel admin y primer listado publicado (completado).",
+          "Plataforma web, autenticación, panel admin y primer listado publicado (completado).",
       },
       {
         phase: "Fase 2",

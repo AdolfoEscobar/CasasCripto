@@ -17,7 +17,8 @@ const quickLinks = [
   { href: "/propiedades", label: "Propiedades" },
   { href: "/demo-ai", label: "Demo Meta AI" },
   { href: "/blog", label: "Blog" },
-  { href: "/#pricing", label: "Planes" },
+  // PLANES OCULTOS (temporal, hasta tracción):
+  // { href: "/#pricing", label: "Planes" },
   { href: "/#invertir", label: "Invierte" },
 ];
 

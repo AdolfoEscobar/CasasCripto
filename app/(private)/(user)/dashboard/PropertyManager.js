@@ -391,22 +391,24 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
     }
   };
 
-  const [featuring, setFeaturing] = useState(null);
-
-  const handleFeature = async (propertyId) => {
-    setFeaturing(propertyId);
-    try {
-      const res = await apiClient.post("/stripe/create-featured-listing", {
-        propertyId,
-        successUrl: window.location.href,
-        cancelUrl: window.location.href,
-      });
-      window.location.href = res.url;
-    } catch (e) {
-      // apiClient already toasts the error
-      setFeaturing(null);
-    }
-  };
+  // PLANES OCULTOS (temporal, hasta tracción): pago para destacar listados.
+  // Para restaurar, descomenta este bloque y el botón "Destacar" de abajo.
+  // const [featuring, setFeaturing] = useState(null);
+  //
+  // const handleFeature = async (propertyId) => {
+  //   setFeaturing(propertyId);
+  //   try {
+  //     const res = await apiClient.post("/stripe/create-featured-listing", {
+  //       propertyId,
+  //       successUrl: window.location.href,
+  //       cancelUrl: window.location.href,
+  //     });
+  //     window.location.href = res.url;
+  //   } catch (e) {
+  //     // apiClient already toasts the error
+  //     setFeaturing(null);
+  //   }
+  // };
 
   // Muse Spark: redacta título + descripción en español a partir de notas
   // crudas del propietario + los datos ya elegidos en el formulario
@@ -530,7 +532,8 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             disabled={atLimit}
             onClick={() => setShowForm(true)}
           >
-            {atLimit ? "Límite de tu plan alcanzado" : "+ Nueva propiedad"}
+            {/* PLANES OCULTOS: texto original "Límite de tu plan alcanzado" */}
+            {atLimit ? "Límite alcanzado" : "+ Nueva propiedad"}
           </button>
         )}
       </div>
@@ -1042,6 +1045,9 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                     )}
                 </div>
                 <div className="flex gap-2 flex-wrap">
+                  {/* PLANES OCULTOS (temporal, hasta tracción): botón de pago
+                      para destacar. La insignia "Destacada hasta…" de arriba se
+                      mantiene porque solo refleja datos existentes.
                   {property.status === "published" && (
                     <button
                       className="btn btn-warning btn-xs"
@@ -1053,6 +1059,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                         : `Destacar ($${featuredListing?.price ?? 149})`}
                     </button>
                   )}
+                  */}
                   <button
                     className="btn btn-ghost btn-xs"
                     onClick={() => startEdit(property)}

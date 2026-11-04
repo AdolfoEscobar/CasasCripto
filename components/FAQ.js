@@ -21,23 +21,31 @@ const faqList = [
   },
   {
     question: "¿Cómo funciona el pago en criptomonedas?",
+    // PLANES OCULTOS (temporal, hasta tracción) — respuesta original:
+    // "Cada propiedad indica qué criptomonedas acepta el propietario (USDC,
+    // USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el
+    // cierre; los pagos de suscripción y donaciones se procesan con Stripe. La
+    // liquidación on-chain automatizada forma parte del roadmap."
     answer: (
       <p>
         Cada propiedad indica qué criptomonedas acepta el propietario (USDC,
         USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el
-        cierre; los pagos de suscripción y donaciones se procesan con Stripe. La
-        liquidación on-chain automatizada forma parte del roadmap.
+        cierre; las donaciones se procesan con Stripe. La liquidación on-chain
+        automatizada forma parte del roadmap.
       </p>
     ),
   },
   {
     question: "¿Esto es una oferta de inversión o de valores?",
+    // PLANES OCULTOS (temporal, hasta tracción) — respuesta original:
+    // "No. Las suscripciones y donaciones de este sitio son pagos de producto o
+    // apoyo voluntario, no instrumentos financieros. ..."
     answer: (
       <p>
-        No. Las suscripciones y donaciones de este sitio son pagos de producto o
-        apoyo voluntario, no instrumentos financieros. Cualquier futura ronda de
-        inversión formal se comunicará y ejecutará conforme a la regulación
-        aplicable, con la documentación legal correspondiente.
+        No. Las donaciones de este sitio son apoyo voluntario, no instrumentos
+        financieros. Cualquier futura ronda de inversión formal se comunicará y
+        ejecutará conforme a la regulación aplicable, con la documentación
+        legal correspondiente.
       </p>
     ),
   },
@@ -96,13 +104,16 @@ const HOME_FAQ_SCHEMA = [
     q: "¿Ya puedo publicar o buscar propiedades?",
     a: "Sí. El directorio está en vivo: puedes buscar propiedades y publicar la tuya gratis desde tu panel. Cada propiedad pasa por revisión manual antes de publicarse.",
   },
+  // PLANES OCULTOS (temporal, hasta tracción) — textos originales:
+  // "…acompaña el cierre; los pagos de suscripción y donaciones se procesan con Stripe."
+  // "No. Las suscripciones y donaciones de este sitio son pagos de producto o apoyo voluntario, no instrumentos financieros."
   {
     q: "¿Cómo funciona el pago en criptomonedas?",
-    a: "Cada propiedad indica qué criptomonedas acepta el propietario (USDC, USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre; los pagos de suscripción y donaciones se procesan con Stripe.",
+    a: "Cada propiedad indica qué criptomonedas acepta el propietario (USDC, USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre; las donaciones se procesan con Stripe.",
   },
   {
     q: "¿Esto es una oferta de inversión o de valores?",
-    a: "No. Las suscripciones y donaciones de este sitio son pagos de producto o apoyo voluntario, no instrumentos financieros.",
+    a: "No. Las donaciones de este sitio son apoyo voluntario, no instrumentos financieros.",
   },
   {
     q: `¿Qué es el token ${config.token.ticker} y cuándo lanza?`,

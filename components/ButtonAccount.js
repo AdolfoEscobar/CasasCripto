@@ -5,7 +5,8 @@ import { useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import apiClient from "@/libs/api";
+// PLANES OCULTOS (temporal, hasta tracción): apiClient solo se usaba para Facturación.
+// import apiClient from "@/libs/api";
 import Link from "next/link";
 import config from "@/config";
 
@@ -69,21 +70,23 @@ const ButtonAccount = ({ direction = "down", compact = false }) => {
 	const handleSignOut = () => {
 		signOut({ callbackUrl: "/" });
 	};
-	const handleBilling = async () => {
-		setIsLoading(true);
-
-		try {
-			const { url } = await apiClient.post("/stripe/create-portal", {
-				returnUrl: window.location.href,
-			});
-
-			window.location.href = url;
-		} catch (e) {
-			console.error(e);
-		}
-
-		setIsLoading(false);
-	};
+	// PLANES OCULTOS (temporal, hasta tracción): portal de facturación Stripe.
+	// Para restaurar, descomenta esta función y el botón "Facturación" de abajo.
+	// const handleBilling = async () => {
+	// 	setIsLoading(true);
+	//
+	// 	try {
+	// 		const { url } = await apiClient.post("/stripe/create-portal", {
+	// 			returnUrl: window.location.href,
+	// 		});
+	//
+	// 		window.location.href = url;
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 	}
+	//
+	// 	setIsLoading(false);
+	// };
 
 	// Don't show anything if not authenticated (we don't have any info about the user)
 	if (status === "unauthenticated") return null;
@@ -216,6 +219,7 @@ const ButtonAccount = ({ direction = "down", compact = false }) => {
 
 									<div className="divider my-0.5"></div>
 
+									{/* PLANES OCULTOS (temporal, hasta tracción): botón Facturación.
 									<button
 										className="flex items-center gap-2 hover:bg-base-300 duration-200 py-2.5 px-4 w-full rounded-lg font-medium cursor-pointer"
 										onClick={handleBilling}
@@ -234,6 +238,7 @@ const ButtonAccount = ({ direction = "down", compact = false }) => {
 										</svg>
 										Facturación
 									</button>
+									*/}
 
 									{/* Admin Panel link - only show if user is admin */}
 									{session?.user?.role === "admin" && (

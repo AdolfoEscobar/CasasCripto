@@ -6,6 +6,13 @@ import config from "@/config";
 // and adapt these Terms (especially the donation / future-token / investor
 // sections) before this product handles real money or real users.
 
+// PLANES OCULTOS (temporal, hasta tracción) — sección 2 original:
+// "2. Suscripciones de propietarios/agentes
+// Los planes "Básico" y "Premium" son suscripciones de producto que dan acceso
+// a funciones de listado de propiedades según lo descrito en la página de
+// precios. Puedes cancelar tu suscripción en cualquier momento desde tu panel
+// de cuenta; no se garantizan resultados de venta ni volumen de leads."
+
 export const metadata = getSEOTags({
   title: `Términos de servicio | ${config.appName}`,
   canonicalUrlRelative: "/tos",
@@ -52,9 +59,9 @@ Estos Términos y Condiciones ("Términos") rigen tu uso del sitio web ${config.
 
 ${config.appName} es una plataforma inmobiliaria en operación que conecta propietarios y agentes crypto-friendly con compradores interesados en adquirir propiedades usando criptomonedas. Algunas funciones descritas en el Sitio (custodia on-chain, token ${config.token.ticker}) se encuentran en construcción o en fase de diseño y pueden no estar disponibles todavía.
 
-2. Suscripciones de propietarios/agentes
+2. Publicación de propiedades
 
-Los planes "Básico" y "Premium" son suscripciones de producto que dan acceso a funciones de listado de propiedades según lo descrito en la página de precios. Puedes cancelar tu suscripción en cualquier momento desde tu panel de cuenta; no se garantizan resultados de venta ni volumen de leads.
+Publicar propiedades en el Sitio es actualmente gratuito. No se garantizan resultados de venta ni volumen de leads.
 
 3. Donaciones
 

@@ -1664,9 +1664,13 @@ export const articles = [
       alt: "Cómo publicar tu propiedad en Casas Cripto - tutorial",
     },
     faqs: [
+      // PLANES OCULTOS (temporal, hasta tracción) — respuesta original:
+      // "Sí. El plan Básico es gratis y te permite publicar hasta 20 propiedades
+      // sin tarjeta. Solo pagas si quieres Premium (más listados y analíticas) o
+      // destacar un listado para que aparezca primero."
       {
         q: "¿Publicar en Casas Cripto es gratis?",
-        a: "Sí. El plan Básico es gratis y te permite publicar hasta 20 propiedades sin tarjeta. Solo pagas si quieres Premium (más listados y analíticas) o destacar un listado para que aparezca primero.",
+        a: "Sí. Publicar es gratis y sin tarjeta: creas tu cuenta y subes tus propiedades en minutos.",
       },
       {
         q: "¿Cuánto tarda en publicarse mi propiedad?",
@@ -1676,10 +1680,12 @@ export const articles = [
         q: "¿Qué criptomonedas puedo indicar que acepto?",
         a: "USDC, USDT, BTC y ETH. Marca las que aceptes y los compradores filtrarán tu listado según la moneda con la que quieren pagar.",
       },
-      {
-        q: "¿Cómo destaco mi propiedad para vender más rápido?",
-        a: "Desde tu dashboard puedes destacar cualquier listado publicado con un pago único: aparece primero en el marketplace y en su página de ciudad durante 7 días.",
-      },
+      // PLANES OCULTOS (temporal, hasta tracción): FAQ de destacar (pago) —
+      // el botón "Destacar" del dashboard está oculto, así que esta FAQ no aplica.
+      // {
+      //   q: "¿Cómo destaco mi propiedad para vender más rápido?",
+      //   a: "Desde tu dashboard puedes destacar cualquier listado publicado con un pago único: aparece primero en el marketplace y en su página de ciudad durante 7 días.",
+      // },
     ],
     content: (
       <>
@@ -1697,9 +1703,10 @@ export const articles = [
             unos minutos y tu listado queda visible globalmente en cuanto
             pasa la revisión manual.
           </p>
+          {/* PLANES OCULTOS: original "…desde crear tu cuenta hasta destacar tu listado para vender más rápido." */}
           <p className={styles.p}>
             Este tutorial te lleva paso a paso desde crear tu cuenta hasta
-            destacar tu listado para vender más rápido.
+            publicar tu primer listado.
           </p>
         </section>
 
@@ -1711,8 +1718,9 @@ export const articles = [
               iniciar sesión
             </ButtonAuthCta>{" "}
             y crea tu cuenta con Google o con tu email (enlace mágico, sin
-            contraseña). Automáticamente quedas en el plan Básico gratuito:
-            hasta 20 propiedades, sin tarjeta y sin fecha de vencimiento.
+            contraseña).
+            {/* PLANES OCULTOS: original "Automáticamente quedas en el plan Básico gratuito: hasta 20 propiedades, sin tarjeta y sin fecha de vencimiento." */}
+            Publicar es gratis, sin tarjeta y sin fecha de vencimiento.
           </p>
         </section>
 
@@ -1765,6 +1773,7 @@ export const articles = [
           </p>
         </section>
 
+        {/* PLANES OCULTOS (temporal, hasta tracción): Paso 4 de pago para destacar.
         <section>
           <h2 className={styles.h2}>Paso 4 (opcional): destaca tu listado</h2>
           <p className={styles.p}>
@@ -1774,6 +1783,7 @@ export const articles = [
             directa de multiplicar las visitas de compradores calificados.
           </p>
         </section>
+        */}
 
         <section>
           <h2 className={styles.h2}>
@@ -1802,9 +1812,9 @@ export const articles = [
         <section>
           <h2 className={styles.h2}>Preguntas frecuentes</h2>
           <h3 className={styles.h3}>¿Publicar en Casas Cripto es gratis?</h3>
+          {/* PLANES OCULTOS: original "Sí. El plan Básico es gratis (hasta 20 propiedades, sin tarjeta). Premium y destacados son opcionales y de pago." */}
           <p className={styles.p}>
-            Sí. El plan Básico es gratis (hasta 20 propiedades, sin tarjeta).
-            Premium y destacados son opcionales y de pago.
+            Sí. Publicar es gratis y sin tarjeta.
           </p>
           <h3 className={styles.h3}>
             ¿Cuánto tarda en publicarse mi propiedad?
@@ -1820,6 +1830,7 @@ export const articles = [
             USDC, USDT, BTC y ETH. Los compradores filtran tu listado según
             su moneda.
           </p>
+          {/* PLANES OCULTOS (temporal, hasta tracción): FAQ de pago para destacar.
           <h3 className={styles.h3}>
             ¿Cómo destaco mi propiedad para vender más rápido?
           </h3>
@@ -1827,6 +1838,7 @@ export const articles = [
             Desde tu dashboard, con un pago único tu listado aparece primero
             durante 7 días.
           </p>
+          */}
         </section>
 
         <CtaMarketplace

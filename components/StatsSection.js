@@ -9,11 +9,12 @@ const stats = [
     label: "Criptos por propiedad",
     detail: "USDC, USDT, BTC y ETH en cada propiedad",
   },
-  {
-    value: "$299",
-    label: "Premium para agentes",
-    detail: "MXN/mes: destaca y escala tu portafolio",
-  },
+  // PLANES OCULTOS (temporal, hasta tracción):
+  // {
+  //   value: "$299",
+  //   label: "Premium para agentes",
+  //   detail: "MXN/mes: destaca y escala tu portafolio",
+  // },
   {
     value: "1.5%",
     label: "Comisión por cierre",
@@ -39,7 +40,8 @@ const StatsSection = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* PLANES OCULTOS: grid a 3 columnas mientras el stat Premium está oculto (original: xl:grid-cols-4) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {stats.map((s) => (
             <div
               key={s.label}

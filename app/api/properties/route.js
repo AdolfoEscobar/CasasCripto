@@ -97,9 +97,10 @@ export async function POST(req) {
     if (currentCount >= maxProperties) {
       return NextResponse.json(
         {
-          error: paidPlan
-            ? `Tu plan ${plan.name} permite hasta ${maxProperties} propiedad(es) activa(s).`
-            : `Alcanzaste el límite gratuito de ${maxProperties} propiedades activas. Actualiza a Premium para publicar más.`,
+          // PLANES OCULTOS (temporal, hasta tracción) — mensajes originales:
+          // paidPlan: `Tu plan ${plan.name} permite hasta ${maxProperties} propiedad(es) activa(s).`
+          // free: `Alcanzaste el límite gratuito de ${maxProperties} propiedades activas. Actualiza a Premium para publicar más.`
+          error: `Alcanzaste el límite de ${maxProperties} propiedades activas. Elimina o edita alguna existente para publicar una nueva.`,
         },
         { status: 403 }
       );

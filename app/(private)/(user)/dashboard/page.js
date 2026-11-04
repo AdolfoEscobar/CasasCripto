@@ -1,4 +1,5 @@
-import Link from "next/link";
+// PLANES OCULTOS (temporal, hasta tracción): Link solo se usaba para "Subir a Premium".
+// import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
@@ -47,6 +48,9 @@ export default async function Dashboard() {
           </p>
         </div>
 
+        {/* PLANES OCULTOS (temporal, hasta tracción): tarjeta "Plan actual" /
+            "Subir a Premium". La lógica de plan/maxProperties arriba se mantiene
+            porque el límite anti-abuso sigue aplicándose en silencio.
         <div className="glass-card rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="text-sm opacity-60">Plan actual</p>
@@ -67,6 +71,7 @@ export default async function Dashboard() {
             </Link>
           )}
         </div>
+        */}
 
         <PropertyManager
           maxProperties={plan?.maxProperties ?? 20}

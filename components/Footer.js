@@ -20,7 +20,8 @@ const columns = [
           ]
         : []),
       { label: "Características", href: "/#features" },
-      { label: "Planes", href: "/#pricing" },
+      // PLANES OCULTOS (temporal, hasta tracción):
+      // { label: "Planes", href: "/#pricing" },
       { label: "Blog", href: "/blog" },
     ],
   },

@@ -7,6 +7,11 @@ import config from "@/config";
 // marketplace launches, regional privacy laws like GDPR/CCPA, etc.) before
 // this product handles real user data at scale.
 
+// PLANES OCULTOS (temporal, hasta tracción) — textos originales:
+// - "…comunicarnos contigo sobre tu suscripción, donación o interés como inversionista."
+// - "Información de pago: procesada de forma segura por Stripe para suscripciones y donaciones. …"
+// - "Para operar tu cuenta y las funciones a las que te suscribes, procesar pagos y donaciones, …"
+
 export const metadata = getSEOTags({
   title: `Aviso de privacidad | ${config.appName}`,
   canonicalUrlRelative: "/privacy-policy",
@@ -53,8 +58,8 @@ Al acceder o usar el Sitio, aceptas los términos de esta Política de Privacida
 
 1.1 Datos personales
 
-Nombre y correo electrónico: para crear tu cuenta, autenticarte (Google o enlace mágico vía correo) y comunicarnos contigo sobre tu suscripción, donación o interés como inversionista.
-Información de pago: procesada de forma segura por Stripe para suscripciones y donaciones. No almacenamos los datos completos de tu tarjeta en nuestros servidores.
+Nombre y correo electrónico: para crear tu cuenta, autenticarte (Google o enlace mágico vía correo) y comunicarnos contigo sobre tu donación o interés como inversionista.
+Información de pago: procesada de forma segura por Stripe para donaciones. No almacenamos los datos completos de tu tarjeta en nuestros servidores.
 Rol de usuario: guardamos tu rol dentro de la plataforma (usuario, propietario/agente, admin) para controlar el acceso a funciones privadas.
 
 1.2 Datos no personales
@@ -63,7 +68,7 @@ Usamos cookies y tecnologías similares para entender el uso del Sitio, mejorar 
 
 2. Para qué usamos tus datos
 
-Para operar tu cuenta y las funciones a las que te suscribes, procesar pagos y donaciones, dar soporte, enviarte actualizaciones del proyecto (incluyendo, si lo autorizas, novedades sobre la ronda de inversión o el eventual token ${config.token.ticker}), y cumplir obligaciones legales y de prevención de fraude.
+Para operar tu cuenta y sus funciones, procesar donaciones, dar soporte, enviarte actualizaciones del proyecto (incluyendo, si lo autorizas, novedades sobre la ronda de inversión o el eventual token ${config.token.ticker}), y cumplir obligaciones legales y de prevención de fraude.
 
 3. Compartición de datos
 

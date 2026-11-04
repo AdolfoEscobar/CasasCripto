@@ -20,8 +20,9 @@ export async function POST(req) {
       if (!user?.customerId) {
         return NextResponse.json(
           {
-            error:
-              "Aún no tienes cuenta de facturación: primero suscríbete a Premium o destaca un listado.",
+            // PLANES OCULTOS (temporal, hasta tracción) — mensaje original:
+            // "Aún no tienes cuenta de facturación: primero suscríbete a Premium o destaca un listado."
+            error: "Aún no tienes movimientos de facturación en tu cuenta.",
           },
           { status: 400 }
         );

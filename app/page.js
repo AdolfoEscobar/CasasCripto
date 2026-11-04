@@ -3,7 +3,9 @@ import Problem from "@/components/Problem";
 import MarketplacePreview from "@/components/MarketplacePreview";
 import FeaturesAccordion from "@/components/FeaturesAccordion";
 import StatsSection from "@/components/StatsSection";
-import Pricing from "@/components/Pricing";
+// PLANES OCULTOS (temporal, hasta tracción): sección de planes fuera del home.
+// Para restaurar, descomenta el import y el <Pricing /> de abajo.
+// import Pricing from "@/components/Pricing";
 import TokenRoadmap from "@/components/TokenRoadmap";
 import InvestAndDonate from "@/components/InvestAndDonate";
 import FAQ from "@/components/FAQ";
@@ -35,7 +37,7 @@ export default function Home() {
         <MarketplacePreview />
         <FeaturesAccordion />
         <StatsSection />
-        <Pricing />
+        {/* PLANES OCULTOS (temporal, hasta tracción): <Pricing /> */}
         <TokenRoadmap />
         <InvestAndDonate />
         <FAQ />
