@@ -64,15 +64,6 @@ const FeaturesAccordion = () => {
                 Publicar gratis
               </ButtonAuthCta>
             </div>
-
-            <p className="text-sm opacity-70 leading-relaxed mt-8 pt-6 border-t border-base-content/10 max-w-xl">
-              <span className="font-semibold text-base-content">
-                Para inversionistas:{" "}
-              </span>
-              ingresos desde el día uno con Premium y destacados, comisión por
-              cierre en roadmap. Cada listado es una página que atrae tráfico
-              orgánico gratis.
-            </p>
           </div>
 
           {/* Visual: una ficha del directorio, sin mockups de producto falso */}
