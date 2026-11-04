@@ -29,17 +29,10 @@ const MobileTopbar = () => {
   return (
     <div className="sticky top-0 z-30 lg:hidden px-4 py-2.5 bg-base-100/85 backdrop-blur-xl border-b border-base-content/10">
       <div className="flex items-center gap-3">
-        <label
-          htmlFor="app-sidebar"
+        <button
+          type="button"
           aria-label="Abrir menú"
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              document.getElementById("app-sidebar")?.click();
-            }
-          }}
+          onClick={() => document.getElementById("app-sidebar")?.click()}
           className="btn btn-ghost btn-sm btn-circle shrink-0 min-w-[40px] min-h-[40px] ring-1 ring-primary/30 text-primary"
         >
           <svg
@@ -49,10 +42,11 @@ const MobileTopbar = () => {
             strokeWidth={2}
             stroke="currentColor"
             className="w-6 h-6"
+            aria-hidden="true"
           >
             <path strokeLinecap="round" d="M4 7.5h16M4 12h9.5M4 16.5h13" />
           </svg>
-        </label>
+        </button>
 
         <Link
           href="/"
@@ -141,6 +135,18 @@ export default function AppShell({ children }) {
     if (el) el.checked = false;
   }, [pathname]);
 
+  // Cierre por teclado con Escape (el overlay es pointer-only).
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        const el = document.getElementById("app-sidebar");
+        if (el) el.checked = false;
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     // `relative z-10`: pinta toda la app (barras, sidebar, contenido) por
     // encima del <AmbientBackground/> global (fondo `fixed` sin z-index).
@@ -156,11 +162,11 @@ export default function AppShell({ children }) {
       </div>
 
       <div className="drawer-side z-50">
-        <label
-          htmlFor="app-sidebar"
-          aria-label="Cerrar menú"
-          className="drawer-overlay"
-        ></label>
+        {/* Overlay pointer-only (default daisyUI): sin aria-label porque
+            <label> no admite nombre accesible sin rol, y el rol está
+            prohibido en label. El cierre por teclado es con Escape (ver
+            efecto en <AppShell/>). */}
+        <label htmlFor="app-sidebar" className="drawer-overlay"></label>
         <Sidebar />
       </div>
     </div>

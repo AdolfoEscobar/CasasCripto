@@ -118,10 +118,12 @@ const FeaturesAccordion = () => {
           ))}
         </ol>
 
-        <p className="mt-12 text-sm opacity-60 max-w-2xl leading-relaxed">
-          El directorio ya está en vivo: publica, vende y cierra directo con
-          cripto.{" "}
-          <a href="#token" className="link link-primary">
+        <p className="mt-12 text-sm max-w-2xl leading-relaxed">
+          <span className="opacity-60">
+            El directorio ya está en vivo: publica, vende y cierra directo con
+            cripto.{" "}
+          </span>
+          <a href="#token" className="link link-primary font-semibold">
             Ver roadmap
           </a>
         </p>

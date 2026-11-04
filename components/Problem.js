@@ -89,7 +89,7 @@ const Problem = () => {
                 <span className="flex items-center justify-center w-11 h-11 rounded-full border border-base-content/15 text-primary shrink-0">
                   {f.icon}
                 </span>
-                <span className="font-mono text-sm font-semibold text-base-content/40">
+                <span className="font-mono text-sm font-semibold text-base-content/70">
                   0{i + 1}
                 </span>
               </div>
