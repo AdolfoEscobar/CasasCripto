@@ -2,8 +2,6 @@
 
 **Casas Cripto** es un marketplace inmobiliario **elite** de propiedades que aceptan pago en criptomonedas. Conecta a propietarios/agentes crypto-friendly con compradores e **inversionistas** globales. Publicar un listado es **gratis** (plan Básico); Premium, los destacados y las donaciones son opcionales. El home sigue funcionando como pitch de producto/inversión: ronda pre-seed, roadmap del futuro token de utilidad (`$CASA`) y donaciones para apoyar el desarrollo. 🚀🏠
 
-> Este repo nace sobre el boilerplate **ShipFast** (Next.js), se rebrandeó a Casas Cripto y hoy incluye un marketplace real (modelo `Property`, dashboard de propietario, revisión admin y páginas públicas SEO), más un rediseño de UI/UX ("elite fintech": obsidiana + oro + cian) y navegación lateral tipo marketplace.
-
 ## Stack técnico
 
 - **Framework**: Next.js 16 (App Router) + React 19
