@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
+import ButtonAuthCta from "./ButtonAuthCta";
 
 const trustBadges = [
   "Publicar es gratis",
@@ -37,12 +38,12 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Link
+            <ButtonAuthCta
               href={config.auth.callbackUrl}
               className="btn btn-primary w-full sm:w-auto sm:btn-wide"
             >
               Publicar gratis
-            </Link>
+            </ButtonAuthCta>
             <Link
               href="/propiedades"
               className="btn btn-outline w-full sm:w-auto sm:btn-wide border-base-content/20"
@@ -76,10 +77,11 @@ const Hero = () => {
         <div className="relative lg:w-1/2 w-full max-w-md sm:max-w-xl lg:max-w-none">
           <div className="relative rounded-xl overflow-hidden border border-base-content/10">
             <Image
-              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80"
+              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=75"
               alt="Casa moderna listada en el directorio de Casas Cripto"
               className="w-full aspect-[4/3] object-cover"
               priority={true}
+              sizes="(max-width: 1024px) 100vw, 50vw"
               width={800}
               height={600}
             />

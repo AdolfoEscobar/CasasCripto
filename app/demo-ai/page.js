@@ -10,7 +10,7 @@ import DemoAIClient from "./DemoAIClient";
 export const metadata = getSEOTags({
   title: "Demo de Meta AI | Casas Cripto",
   description:
-    "Prueba en vivo cómo Casas Cripto usa Muse Spark, Muse Image y SAM 3.1 de Meta Model API para redactar, ilustrar y revisar listados inmobiliarios — Meta Global AI Developer Hackathon.",
+    "Demo en vivo: Casas Cripto usa IA de Meta para redactar, ilustrar y revisar listados inmobiliarios que aceptan cripto.",
   canonicalUrlRelative: "/demo-ai",
 });
 

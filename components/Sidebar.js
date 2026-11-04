@@ -15,10 +15,15 @@ import {
   QuestionMarkCircleIcon,
   UsersIcon,
   CpuChipIcon,
+  MapPinIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import logo from "@/app/icon.png";
 import config from "@/config";
 import SocialIcons from "./SocialIcons";
+import ButtonAuthCta from "./ButtonAuthCta";
+import { topCities } from "@/libs/geoDirectory.mjs";
+import { cityUrl } from "@/libs/propertyUrls.mjs";
 
 // El logo usa la misma tipografía display de los titulares (Sora vía
 // `font-display`) — el degradado dorado es el diferenciador de marca,
@@ -30,6 +35,7 @@ import SocialIcons from "./SocialIcons";
 const mainLinks = [
   { href: "/", label: "Inicio", icon: HomeIcon },
   { href: "/propiedades", label: "Propiedades", icon: BuildingOffice2Icon },
+  { href: "/propiedades/ciudad", label: "Ciudades", icon: MapPinIcon },
   // Demo pública (sin login) de Muse Spark/Image + SAM 3.1 — ver
   // app/demo-ai. Visible en la nav principal a propósito: es la forma más
   // rápida para un juez del hackathon (o alguien en redes) de probar la
@@ -105,6 +111,15 @@ const Sidebar = () => {
     if (el) el.checked = false;
   };
 
+  // Solo UN link activo: gana la coincidencia más específica. Sin esto, en
+  // /propiedades/ciudad se resaltaban "Propiedades" y "Ciudades" a la vez
+  // (ambos hacen startsWith). "/" solo activa en el home exacto.
+  const activeMainHref = mainLinks
+    .filter((link) =>
+      link.href === "/" ? pathname === "/" : pathname.startsWith(link.href),
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
     <div className="w-72 max-w-[85vw] h-full flex flex-col bg-base-200/95 lg:bg-base-100/60 lg:backdrop-blur-xl border-r border-base-content/10">
       {/* Logo */}
@@ -138,15 +153,73 @@ const Sidebar = () => {
             <NavLink
               key={link.href}
               {...link}
-              isActive={
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href)
-              }
+              isActive={link.href === activeMainHref}
               onNavigate={closeDrawer}
             />
           ))}
         </div>
+
+        {/* Acceso directo principal: publicar (abre login si no hay sesión,
+            va al panel si la hay). */}
+        <div>
+          <ButtonAuthCta
+            href={config.auth.callbackUrl}
+            className="btn btn-primary w-full rounded-xl"
+          >
+            + Publicar propiedad
+          </ButtonAuthCta>
+        </div>
+
+        {/* Cuenta: Mi panel siempre visible. Invitado → abre el login en el
+            lugar y cae en /dashboard; logueado → link normal con activo.
+            El wrapper cierra el drawer en móvil en ambos casos. */}
+        <div>
+          <NavSectionLabel>Cuenta</NavSectionLabel>
+          <div className="space-y-1" onClick={closeDrawer}>
+            <ButtonAuthCta
+              href="/dashboard"
+              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors duration-200 w-full text-left ${
+                pathname === "/dashboard" || pathname.startsWith("/dashboard/")
+                  ? "bg-primary/15 text-primary ring-1 ring-primary/25"
+                  : "text-base-content/75 hover:bg-base-content/5 hover:text-base-content"
+              }`}
+            >
+              <Squares2X2Icon className="w-5 h-5 shrink-0" />
+              <span className="truncate">Mi panel</span>
+            </ButtonAuthCta>
+          </div>
+        </div>
+
+        {/* Interlinking sitewide: las ciudades top en TODAS las páginas
+            reparten PageRank interno. Plegado para no alargar el sidebar
+            (los links igual están en el DOM para crawlers). */}
+        <details className="group">
+          <summary className="cursor-pointer px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wider text-base-content/40 list-none flex items-center justify-between rounded-xl hover:bg-base-content/5">
+            Ciudades populares
+            <span className="transition-transform group-open:rotate-180">
+              ▾
+            </span>
+          </summary>
+          <div className="mt-1 space-y-0.5">
+            {topCities.map((c) => (
+              <Link
+                key={`${c.stateSlug}/${c.citySlug}`}
+                href={cityUrl(c.stateSlug, c.citySlug)}
+                onClick={closeDrawer}
+                className="block rounded-lg px-3.5 py-1.5 text-sm text-base-content/75 hover:bg-base-content/5 hover:text-base-content"
+              >
+                {c.city}
+              </Link>
+            ))}
+            <Link
+              href="/propiedades/ciudad"
+              onClick={closeDrawer}
+              className="block rounded-lg px-3.5 py-1.5 text-sm font-medium text-primary hover:bg-base-content/5"
+            >
+              Ver todas →
+            </Link>
+          </div>
+        </details>
 
         <div>
           <NavSectionLabel>Casas Cripto</NavSectionLabel>

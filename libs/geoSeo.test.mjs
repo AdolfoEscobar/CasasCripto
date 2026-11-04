@@ -7,12 +7,14 @@ import {
   geoDescription,
   geoIntro,
   geoFaqs,
+  detailFaqs,
   listingTitle,
   listingDescription,
   summarizeListings,
   capFirst,
   isPropertyType,
   isListingType,
+  parseSortParam,
 } from "./geoSeo.mjs";
 
 describe("geoSeo", () => {
@@ -116,13 +118,42 @@ describe("geoSeo", () => {
       currency: "USD",
       topCryptos: ["USDC", "BTC"],
     });
-    assert.ok(faqs.length >= 3);
+    assert.ok(faqs.length >= 5);
     assert.match(faqs[0].q, /casas en venta en Delicias, Chihuahua/);
     assert.match(faqs[0].a, /3 casas en venta/);
     assert.match(faqs[1].a, /USDC, BTC/);
     faqs.forEach((f) => {
       assert.ok(f.q.length > 10 && f.a.length > 20);
     });
+  });
+
+  it("genera FAQs de detalle con datos reales del listado", () => {
+    const faqs = detailFaqs({
+      propertyType: "casa",
+      city: "Delicias",
+      state: "Chihuahua",
+      cryptoAccepted: ["USDC", "BTC"],
+      contactEmail: "dueño@example.com",
+    });
+    assert.equal(faqs.length, 3);
+    assert.match(faqs[0].a, /USDC, BTC/);
+    assert.match(faqs[1].a, /Contactar al propietario/);
+    faqs.forEach((f) => {
+      assert.ok(f.q.length > 10 && f.a.length > 20);
+    });
+
+    const vacias = detailFaqs({ city: "Delicias" });
+    assert.equal(vacias.length, 3);
+    assert.match(vacias[0].a, /aún no especifica/);
+    assert.match(vacias[1].a, /aún no muestra/);
+  });
+
+  it("valida el parámetro de orden (?orden=...)", () => {
+    assert.equal(parseSortParam("precio-asc"), "precio-asc");
+    assert.equal(parseSortParam("precio-desc"), "precio-desc");
+    assert.equal(parseSortParam("recientes"), "recientes");
+    assert.equal(parseSortParam("barato"), "recientes");
+    assert.equal(parseSortParam(undefined), "recientes");
   });
 
   it("resume listados con precios, criptos y ciudades top", () => {

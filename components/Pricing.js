@@ -1,6 +1,6 @@
-import Link from "next/link";
 import config from "@/config";
 import ButtonCheckout from "./ButtonCheckout";
+import ButtonAuthCta from "./ButtonAuthCta";
 
 // <Pricing/> muestra una sola opción de compra: Premium. Publicar siempre es
 // gratis (el plan Básico en config sigue gobernando los límites gratuitos),
@@ -100,12 +100,12 @@ const Pricing = () => {
 
         <p className="text-center text-sm text-base-content/60 mt-8">
           ¿Solo quieres publicar una propiedad?{" "}
-          <Link
+          <ButtonAuthCta
             href={config.auth.callbackUrl}
             className="link link-primary font-medium"
           >
             Es gratis, sin tarjeta
-          </Link>
+          </ButtonAuthCta>
         </p>
       </div>
     </section>

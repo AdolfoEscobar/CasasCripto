@@ -251,3 +251,21 @@ h2 {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   text-wrap: balance;
 }
+
+/* Manita en TODO lo clickeable: Tailwind v4 quitó `cursor: pointer` por
+   defecto y los botones/links "no se sienten" clickeables al pasar el
+   mouse. No toca inputs de texto (conservan su cursor de texto).
+   Deshabilitados muestran "no permitido". */
+button:not(:disabled),
+a,
+summary,
+select,
+input[type="checkbox"],
+input[type="radio"],
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

@@ -8,6 +8,12 @@ import config from "@/config";
 // It's applied to all subpages of /dashboard in /app/dashboard/*** pages
 // You can also add custom static UI elements like a Navbar, Sidebar, Footer, etc..
 // See https://shipfa.st/docs/tutorials/private-page
+//
+// Private pages are never indexed (also disallowed in robots.js).
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function LayoutPrivate({ children }) {
   const session = await auth();
 

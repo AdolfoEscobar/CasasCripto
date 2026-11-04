@@ -36,16 +36,16 @@ export default function UserForm({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
@@ -73,7 +73,7 @@ export default function UserForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -101,7 +101,7 @@ export default function UserForm({
           value={formData.name}
           onChange={handleChange}
           placeholder="Enter full name"
-          className={`input input-bordered w-full ${errors.name ? 'input-error' : ''}`}
+          className={`input input-bordered text-base w-full ${errors.name ? "input-error" : ""}`}
         />
         {errors.name && (
           <label className="label">
@@ -123,7 +123,7 @@ export default function UserForm({
           onChange={handleChange}
           placeholder="Enter email address"
           disabled={mode === "edit"}
-          className={`input input-bordered w-full ${errors.email ? 'input-error' : ''} ${mode === "edit" ? 'input-disabled' : ''}`}
+          className={`input input-bordered text-base w-full ${errors.email ? "input-error" : ""} ${mode === "edit" ? "input-disabled" : ""}`}
         />
         {errors.email && (
           <label className="label">
@@ -142,7 +142,7 @@ export default function UserForm({
           name="role"
           value={formData.role}
           onChange={handleChange}
-          className={`select select-bordered w-full ${errors.role ? 'select-error' : ''}`}
+          className={`select select-bordered text-base w-full ${errors.role ? "select-error" : ""}`}
         >
           {roleOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -158,21 +158,19 @@ export default function UserForm({
       </div>
 
       <div className="flex gap-4 pt-4">
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isLoading}
-        >
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
           {isLoading ? (
             <>
               <span className="loading loading-spinner loading-sm"></span>
               {mode === "create" ? "Creating..." : "Updating..."}
             </>
+          ) : mode === "create" ? (
+            "Create User"
           ) : (
-            mode === "create" ? "Create User" : "Update User"
+            "Update User"
           )}
         </button>
-        
+
         <button
           type="button"
           className="btn btn-ghost"

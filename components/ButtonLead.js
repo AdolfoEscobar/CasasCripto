@@ -50,7 +50,7 @@ const ButtonLead = ({
         ref={inputRef}
         autoComplete="email"
         placeholder={placeholder}
-        className="input input-bordered w-full placeholder:opacity-60"
+        className="input input-bordered text-base w-full placeholder:opacity-60"
         onChange={(e) => setEmail(e.target.value)}
       />
 

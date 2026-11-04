@@ -10,6 +10,7 @@ import {
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import config from "@/config";
+import { nextUrlTrigger } from "@/libs/authCta.mjs";
 
 // Evento global para abrir el modal de login desde fuera de React (ej. el
 // interceptor 401 de libs/api.js, que no puede usar hooks).
@@ -78,9 +79,12 @@ export function AuthModalUrlTrigger() {
   const openedRef = useRef(false);
 
   useEffect(() => {
-    if (openedRef.current) return;
-    if (searchParams.get("auth") !== "signin") return;
-    openedRef.current = true;
+    const decision = nextUrlTrigger({
+      authParam: searchParams.get("auth"),
+      opened: openedRef.current,
+    });
+    openedRef.current = decision.opened;
+    if (!decision.open) return;
 
     openAuthModal(searchParams.get("callbackUrl") || undefined);
 

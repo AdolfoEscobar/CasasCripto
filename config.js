@@ -1,9 +1,11 @@
 const config = {
   // REQUIRED
   appName: "Casas Cripto",
-  // REQUIRED: a short description of your app for SEO tags (can be overwritten)
+  // REQUIRED: a short description of your app for SEO tags (can be overwritten).
+  // Máx ~160 caracteres: es el default de meta description y OG en todo el
+  // sitio, y Google trunca lo que exceda en los resultados.
   appDescription:
-    "Casas Cripto es la plataforma inmobiliaria elite que conecta propietarios crypto-friendly con compradores e inversionistas globales. Lista, invierte o dona para construir el futuro del real estate en criptomonedas.",
+    "El directorio de propiedades que aceptan cripto. Publica gratis o encuentra casas, departamentos y terrenos y paga con USDC, USDT, BTC o ETH.",
   // REQUIRED (no https://, no trailing slash). DEBE ser el dominio primario
   // de Vercel: el apex (casascripto.com) redirige 308 → www, así que si esto
   // apuntara al apex, TODOS los canonicals, el sitemap y el JSON-LD
@@ -131,7 +133,7 @@ const config = {
       "Apoya el desarrollo de Casas Cripto. Las donaciones financian producto, cumplimiento regulatorio y expansión del marketplace.",
   },
   // Narrativa de inversión — usada en la sección "Invierte" del landing.
-  // No constituye una oferta de valores; ver config.legal.disclaimer.
+  // No constituye una oferta de valores; ver secciones 2-4 de /tos.
   investors: {
     contactEmail: "contactovoltixlabs@gmail.com",
     calendlyUrl: "", // agrega tu link de agenda cuando esté disponible
@@ -195,17 +197,6 @@ const config = {
           "Tokenomics, auditoría de contratos y lanzamiento condicionado a cumplimiento regulatorio.",
       },
     ],
-  },
-  // Textos legales. `disclaimer` (completo) solo aparece junto al contenido
-  // de inversión/token (TokenRoadmap) y en /tos. El Footer global usa
-  // `shortDisclaimer` + link a /tos: repetir el párrafo completo en TODAS las
-  // páginas solo añade boilerplate duplicado que diluye el contenido único
-  // de cada página (ver secciones 2-4 de /tos, que ya cubren todo esto).
-  legal: {
-    disclaimer:
-      "Casas Cripto es un directorio inmobiliario en operación que conecta propietarios que aceptan criptomonedas con compradores globales. Las suscripciones y donaciones de esta página son pagos de producto/apoyo voluntario, no instrumentos financieros. Nada en este sitio constituye una oferta de venta de valores, asesoría de inversión o garantía de retornos. El token $CASA es un concepto en diseño: su existencia, características y lanzamiento dependen de validación legal y regulatoria, y podrían no concretarse.",
-    shortDisclaimer:
-      "Las suscripciones y donaciones son pagos de producto y apoyo voluntario, no instrumentos financieros ni oferta de inversión.",
   },
   aws: {
     // If you use AWS S3/Cloudfront, put values in here

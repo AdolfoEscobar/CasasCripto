@@ -8,7 +8,7 @@ import config from "@/config";
 // this product handles real user data at scale.
 
 export const metadata = getSEOTags({
-  title: `Privacy Policy | ${config.appName}`,
+  title: `Aviso de privacidad | ${config.appName}`,
   canonicalUrlRelative: "/privacy-policy",
 });
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { del } from "@vercel/blob";
 import { auth } from "@/libs/auth";
 import connectMongo from "@/libs/mongoose";
@@ -48,7 +49,10 @@ export async function PATCH(req, { params }) {
 
     const property = await Property.findById(id);
     if (!property) {
-      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     }
 
     const isAdmin = session.user.role === "admin";
@@ -63,7 +67,15 @@ export async function PATCH(req, { params }) {
     // Misma validación de enums que en POST: tipo/operación alimentan el SEO
     // long-tail y los filtros, así que nunca aceptamos valores fuera de lista
     // (Mongoose los rechazaría con 500; mejor un 400 claro).
-    const VALID_TYPES = ["casa", "departamento", "terreno", "local", "oficina", "rancho", "edificio"];
+    const VALID_TYPES = [
+      "casa",
+      "departamento",
+      "terreno",
+      "local",
+      "oficina",
+      "rancho",
+      "edificio",
+    ];
     const VALID_LISTINGS = ["venta", "renta"];
     // El formulario manda "" cuando no hay tipo elegido: normalizar a
     // undefined (campo ausente) porque "" NO pasa la validación del enum de
@@ -71,10 +83,16 @@ export async function PATCH(req, { params }) {
     if (body.propertyType === "") body.propertyType = undefined;
     if (body.listingType === "") body.listingType = undefined;
     if (body.propertyType && !VALID_TYPES.includes(body.propertyType)) {
-      return NextResponse.json({ error: "Tipo de propiedad inválido" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tipo de propiedad inválido" },
+        { status: 400 },
+      );
     }
     if (body.listingType && !VALID_LISTINGS.includes(body.listingType)) {
-      return NextResponse.json({ error: "Operación inválida" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Operación inválida" },
+        { status: 400 },
+      );
     }
 
     if (
@@ -83,7 +101,7 @@ export async function PATCH(req, { params }) {
     ) {
       return NextResponse.json(
         { error: `Máximo ${MAX_PROPERTY_IMAGES} fotos por propiedad` },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (body.images !== undefined) {
@@ -100,10 +118,14 @@ export async function PATCH(req, { params }) {
       const { status, rejectionReason, ...rest } = body;
       if (status) {
         if (!["pending", "published", "rejected"].includes(status)) {
-          return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+          return NextResponse.json(
+            { error: "Invalid status" },
+            { status: 400 },
+          );
         }
         property.status = status;
-        property.rejectionReason = status === "rejected" ? rejectionReason || "" : "";
+        property.rejectionReason =
+          status === "rejected" ? rejectionReason || "" : "";
       }
       OWNER_EDITABLE_FIELDS.forEach((field) => {
         if (rest[field] !== undefined) property[field] = rest[field];
@@ -119,7 +141,10 @@ export async function PATCH(req, { params }) {
 
       // El dueño puede marcar el estado comercial (activa/en oferta/cerrada)
       // sin disparar una nueva revisión — es solo informativo hoy.
-      if (body.dealStatus && ["active", "under_offer", "closed"].includes(body.dealStatus)) {
+      if (
+        body.dealStatus &&
+        ["active", "under_offer", "closed"].includes(body.dealStatus)
+      ) {
         property.dealStatus = body.dealStatus;
       }
 
@@ -147,12 +172,17 @@ export async function PATCH(req, { params }) {
       }
     }
 
+    // Purga el ISR del marketplace (listados + home + conteos del héroe):
+    // la edición o aprobación se refleja al instante en vez de esperar 1h.
+    revalidatePath("/propiedades", "layout");
+    revalidatePath("/");
+    revalidatePath("/api/geo/listing-cities");
     return NextResponse.json({ data: property });
   } catch (error) {
     console.error("❌ Error updating property:", error);
     return NextResponse.json(
       { error: "Error updating property" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -171,7 +201,10 @@ export async function DELETE(req, { params }) {
 
     const property = await Property.findById(id);
     if (!property) {
-      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     }
 
     const isAdmin = session.user.role === "admin";
@@ -195,12 +228,16 @@ export async function DELETE(req, { params }) {
       }
     }
 
+    // Purga el ISR del marketplace (listados + home + conteos del héroe).
+    revalidatePath("/propiedades", "layout");
+    revalidatePath("/");
+    revalidatePath("/api/geo/listing-cities");
     return NextResponse.json({ data: { id } });
   } catch (error) {
     console.error("❌ Error deleting property:", error);
     return NextResponse.json(
       { error: "Error deleting property" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

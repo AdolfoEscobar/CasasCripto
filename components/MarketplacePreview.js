@@ -1,5 +1,5 @@
-import Link from "next/link";
 import MarketplacePreviewClient from "./MarketplacePreviewClient";
+import ButtonAuthCta from "./ButtonAuthCta";
 import { isCurrentlyFeatured } from "./PropertyCard";
 import { getMarketplaceData } from "@/libs/propertyGeo";
 import { propertyUrl } from "@/libs/propertyUrls.mjs";
@@ -85,9 +85,12 @@ const MarketplacePreview = async () => {
             Aún no hay listados visibles aquí. Sé el primero en publicar tu
             propiedad crypto-friendly.
           </p>
-          <Link href={config.auth.callbackUrl} className="btn btn-primary">
+          <ButtonAuthCta
+            href={config.auth.callbackUrl}
+            className="btn btn-primary"
+          >
             Publicar gratis
-          </Link>
+          </ButtonAuthCta>
         </div>
       </section>
     );

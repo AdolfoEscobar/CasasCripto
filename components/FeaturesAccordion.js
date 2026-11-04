@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
+import ButtonAuthCta from "./ButtonAuthCta";
 
 const steps = [
   {
@@ -56,12 +57,12 @@ const FeaturesAccordion = () => {
               >
                 Explorar propiedades
               </Link>
-              <Link
+              <ButtonAuthCta
                 href={config.auth.callbackUrl}
                 className="btn btn-outline sm:btn-wide border-base-content/20"
               >
                 Publicar gratis
-              </Link>
+              </ButtonAuthCta>
             </div>
 
             <p className="text-sm opacity-70 leading-relaxed mt-8 pt-6 border-t border-base-content/10 max-w-xl">

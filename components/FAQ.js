@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import config from "@/config";
+import { renderFaqSchema } from "@/libs/seo";
 
 // <FAQ> es una lista de <Item>. Agrega o edita preguntas aquí.
 const faqList = [
@@ -13,8 +14,8 @@ const faqList = [
         <a href="/propiedades" className="link link-primary">
           buscar propiedades
         </a>{" "}
-        y publicar la tuya gratis desde tu panel. Cada ficha pasa por
-        revisión manual antes de publicarse.
+        y publicar la tuya gratis desde tu panel. Cada ficha pasa por revisión
+        manual antes de publicarse.
       </p>
     ),
   },
@@ -22,11 +23,10 @@ const faqList = [
     question: "¿Cómo funciona el pago en criptomonedas?",
     answer: (
       <p>
-        Cada ficha indica qué criptomonedas acepta el propietario (USDC,
-        USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el
-        cierre; los pagos de suscripción y donaciones se procesan con
-        Stripe. La liquidación on-chain automatizada forma parte del
-        roadmap.
+        Cada ficha indica qué criptomonedas acepta el propietario (USDC, USDT,
+        BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre;
+        los pagos de suscripción y donaciones se procesan con Stripe. La
+        liquidación on-chain automatizada forma parte del roadmap.
       </p>
     ),
   },
@@ -34,10 +34,10 @@ const faqList = [
     question: "¿Esto es una oferta de inversión o de valores?",
     answer: (
       <p>
-        No. Las suscripciones y donaciones de este sitio son pagos de
-        producto o apoyo voluntario, no instrumentos financieros. Cualquier
-        futura ronda de inversión formal se comunicará y ejecutará conforme a
-        la regulación aplicable, con la documentación legal correspondiente.
+        No. Las suscripciones y donaciones de este sitio son pagos de producto o
+        apoyo voluntario, no instrumentos financieros. Cualquier futura ronda de
+        inversión formal se comunicará y ejecutará conforme a la regulación
+        aplicable, con la documentación legal correspondiente.
       </p>
     ),
   },
@@ -78,13 +78,43 @@ const faqList = [
     question: "¿Cómo protegen mis fondos y mis datos?",
     answer: (
       <p>
-        La autenticación usa proveedores verificados (Google / magic link),
-        los pagos corren sobre Stripe (PCI-DSS) y los datos tienen acceso
-        restringido por roles. Hoy no custodiamos fondos: el cierre en
-        cripto se acompaña caso por caso, y la custodia on-chain con
-        contratos auditados forma parte del roadmap.
+        La autenticación usa proveedores verificados (Google / magic link), los
+        pagos corren sobre Stripe (PCI-DSS) y los datos tienen acceso
+        restringido por roles. Hoy no custodiamos fondos: el cierre en cripto se
+        acompaña caso por caso, y la custodia on-chain con contratos auditados
+        forma parte del roadmap.
       </p>
     ),
+  },
+];
+
+// Espejo en texto plano de faqList para el schema FAQPage (las respuestas
+// visibles son JSX con links y el JSON-LD exige texto). Mantener
+// sincronizado con faqList de arriba.
+const HOME_FAQ_SCHEMA = [
+  {
+    q: "¿Ya puedo publicar o buscar propiedades?",
+    a: "Sí. El directorio está en vivo: puedes buscar propiedades y publicar la tuya gratis desde tu panel. Cada ficha pasa por revisión manual antes de publicarse.",
+  },
+  {
+    q: "¿Cómo funciona el pago en criptomonedas?",
+    a: "Cada ficha indica qué criptomonedas acepta el propietario (USDC, USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre; los pagos de suscripción y donaciones se procesan con Stripe.",
+  },
+  {
+    q: "¿Esto es una oferta de inversión o de valores?",
+    a: "No. Las suscripciones y donaciones de este sitio son pagos de producto o apoyo voluntario, no instrumentos financieros.",
+  },
+  {
+    q: `¿Qué es el token ${config.token.ticker} y cuándo lanza?`,
+    a: `${config.token.ticker} es un token de utilidad en diseño (${config.token.status.toLowerCase()}). No existe hoy, no se vende ni se pre-vende en este sitio.`,
+  },
+  {
+    q: "¿Cómo puedo invertir en Casas Cripto como fondo o ángel?",
+    a: `Escríbenos a ${config.investors.contactEmail} o déjanos tu email en la sección Invierte. Te compartiremos el pitch deck y nuestras métricas.`,
+  },
+  {
+    q: "¿Cómo protegen mis fondos y mis datos?",
+    a: "La autenticación usa proveedores verificados (Google / magic link), los pagos corren sobre Stripe (PCI-DSS) y los datos tienen acceso restringido por roles. Hoy no custodiamos fondos.",
   },
 ];
 
@@ -152,6 +182,7 @@ const FAQ = () => {
   return (
     // Sin bg propio: toma el fondo ambiental único de la landing.
     <section id="faq" className="scroll-mt-20 border-t border-base-content/10">
+      {renderFaqSchema(HOME_FAQ_SCHEMA)}
       <div className="py-20 md:py-28 px-5 sm:px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-10 md:gap-12">
         <div className="flex flex-col text-left basis-1/2">
           <p className="inline-block text-sm font-semibold text-primary mb-3">

@@ -66,7 +66,7 @@ export default function DemoAIClient() {
 
   // --- Muse Image: generar imagen ---
   const [imagePrompt, setImagePrompt] = useState(
-    "villa frente al mar en Tulum, estilo moderno, atardecer"
+    "villa frente al mar en Tulum, estilo moderno, atardecer",
   );
   const [imageLoading, setImageLoading] = useState(false);
   const [imageResult, setImageResult] = useState(null);
@@ -86,7 +86,7 @@ export default function DemoAIClient() {
 
   // --- SAM 3.1: revisión de privacidad ---
   const [scanUrl, setScanUrl] = useState(
-    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
   );
   const [scanLoading, setScanLoading] = useState(false);
   const [scanResult, setScanResult] = useState(null);
@@ -133,13 +133,15 @@ export default function DemoAIClient() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
-              className="input input-bordered input-sm w-full"
+              className="input input-bordered text-base input-sm w-full"
               placeholder="Ciudad"
               value={copyForm.city}
-              onChange={(e) => setCopyForm({ ...copyForm, city: e.target.value })}
+              onChange={(e) =>
+                setCopyForm({ ...copyForm, city: e.target.value })
+              }
             />
             <input
-              className="input input-bordered input-sm w-full"
+              className="input input-bordered text-base input-sm w-full"
               placeholder="País"
               value={copyForm.country}
               onChange={(e) =>
@@ -148,14 +150,16 @@ export default function DemoAIClient() {
             />
             <input
               type="number"
-              className="input input-bordered input-sm w-full"
+              className="input input-bordered text-base input-sm w-full"
               placeholder="Precio (USD)"
               value={copyForm.price}
-              onChange={(e) => setCopyForm({ ...copyForm, price: e.target.value })}
+              onChange={(e) =>
+                setCopyForm({ ...copyForm, price: e.target.value })
+              }
             />
           </div>
           <textarea
-            className="textarea textarea-bordered textarea-sm w-full"
+            className="textarea textarea-bordered text-base textarea-sm w-full"
             rows={2}
             placeholder="Notas rápidas (ej. 3 recámaras, alberca, acepta cripto)"
             value={copyForm.rawNotes}
@@ -180,7 +184,8 @@ export default function DemoAIClient() {
               <p className="text-sm opacity-80">{copyResult.description}</p>
               {copyResult.mock && (
                 <p className="text-xs opacity-50 pt-1">
-                  Vista previa — conecta MODEL_API_KEY para usar Muse Spark real.
+                  Vista previa — conecta MODEL_API_KEY para usar Muse Spark
+                  real.
                 </p>
               )}
             </div>
@@ -195,7 +200,7 @@ export default function DemoAIClient() {
           </h2>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
-              className="input input-bordered input-sm w-full"
+              className="input input-bordered text-base input-sm w-full"
               value={imagePrompt}
               onChange={(e) => setImagePrompt(e.target.value)}
             />
@@ -224,7 +229,8 @@ export default function DemoAIClient() {
               />
               {imageResult.mock && (
                 <p className="text-xs opacity-50">
-                  Vista previa — conecta MODEL_API_KEY para usar Muse Image real.
+                  Vista previa — conecta MODEL_API_KEY para usar Muse Image
+                  real.
                 </p>
               )}
             </div>
@@ -239,7 +245,7 @@ export default function DemoAIClient() {
           </h2>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
-              className="input input-bordered input-sm w-full"
+              className="input input-bordered text-base input-sm w-full"
               placeholder="https://…/foto.jpg (URL pública directa)"
               value={scanUrl}
               onChange={(e) => setScanUrl(e.target.value)}
@@ -278,8 +284,8 @@ export default function DemoAIClient() {
         {/* CTA final */}
         <div className="text-center space-y-3 pt-4">
           <p className="opacity-70">
-            ¿Te gustó? Crea una cuenta gratis y publica tu propiedad usando
-            esta misma IA, sin límite diario tan estricto.
+            ¿Te gustó? Crea una cuenta gratis y publica tu propiedad usando esta
+            misma IA, sin límite diario tan estricto.
           </p>
           <button
             className="btn btn-primary btn-sm rounded-full"

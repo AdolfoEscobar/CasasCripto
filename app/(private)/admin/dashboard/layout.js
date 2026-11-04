@@ -11,6 +11,12 @@ import config from "@/config";
 // Propiedades) ahora vive en el sidebar global (ver components/Sidebar.js),
 // que ya los muestra automáticamente cuando la ruta empieza con "/admin" —
 // por eso este layout ya no monta su propio drawer/Sidebar/MobileHeader.
+//
+// Private pages are never indexed (also disallowed in robots.js).
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function LayoutAdminPrivate({ children }) {
   const session = await auth();
 

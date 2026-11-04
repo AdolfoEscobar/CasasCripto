@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ButtonSignin from "./ButtonSignin";
 import ButtonAccount from "./ButtonAccount";
+import ButtonAuthCta from "./ButtonAuthCta";
+import SearchBar from "./SearchBar";
+import config from "@/config";
 
 // Header superior clásico, SOLO visible en desktop (lg+). Complementa al
 // sidebar izquierdo: accesos rápidos a las secciones clave a la izquierda y
@@ -43,6 +46,21 @@ const Topbar = () => {
           );
         })}
       </nav>
+
+      <div className="flex-1 flex justify-center min-w-0 px-2">
+        <SearchBar className="w-full max-w-md" id="site-search-desktop" />
+      </div>
+
+      {/* Acceso directo: en móvil vive en el drawer (sidebar), aquí solo
+          desktop amplio para no apretar el buscador. */}
+      <div className="hidden xl:block shrink-0">
+        <ButtonAuthCta
+          href={config.auth.callbackUrl}
+          className="btn btn-primary btn-sm rounded-full min-h-[40px]"
+        >
+          + Publicar
+        </ButtonAuthCta>
+      </div>
 
       <div className="flex items-center gap-2.5 shrink-0">
         {status === "authenticated" ? (

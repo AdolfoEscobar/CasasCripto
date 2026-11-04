@@ -21,6 +21,17 @@ export const LISTING_TYPES = {
   renta: "en renta",
 };
 
+// Órdenes de las páginas de listado (?orden=...). "recientes" es el default
+// y no aparece en la URL (ver geoPageUrl en propertyUrls.mjs).
+export const SORT_LABELS = {
+  recientes: "Recientes",
+  "precio-asc": "Menor precio",
+  "precio-desc": "Mayor precio",
+};
+
+export const parseSortParam = (v) =>
+  v && SORT_LABELS[v] ? v : "recientes";
+
 export const isPropertyType = (v) => Boolean(v && PROPERTY_TYPES[v]);
 export const isListingType = (v) => Boolean(v && LISTING_TYPES[v]);
 
@@ -176,7 +187,46 @@ export function geoFaqs({ propertyType, listingType, city, state, country, count
     q: `¿Cómo publico mi ${typeLabel} en ${place} para venderla en cripto?`,
     a: `Crea tu cuenta gratis en Casas Cripto, publica tu ${typeLabel} indicando qué criptomonedas aceptas y aparece en esta página tras una revisión manual. Publicar es gratis.`,
   });
+  faqs.push({
+    q: `¿Las ${subject} en ${place} están verificadas?`,
+    a: `Todo listado pasa por revisión manual antes de publicarse y cada propietario tiene un perfil verificado. Además, cada ficha muestra exactamente qué criptomonedas acepta.`,
+  });
+  faqs.push({
+    q: `¿Cómo se cierra la ${op} de una ${typeLabel} en ${place}?`,
+    a: `Eliges la ficha que acepte tu cripto y contactas directo al propietario para acordar el cierre entre ambas partes. Casas Cripto acompaña el proceso, pero hoy no procesa el pago de la compra.`,
+  });
   return faqs;
+}
+
+// FAQs de la ficha de detalle: 100% derivadas de los datos reales del
+// listado (criptos, contacto, ubicación). Se renderizan visibles + como
+// FAQPage JSON-LD para engordar fichas con descripción corta.
+export function detailFaqs(property = {}) {
+  const { city, state, cryptoAccepted, contactEmail } = property;
+  const typeLabel =
+    PROPERTY_TYPES[property.propertyType]?.singular || "propiedad";
+  const place = [city, state].filter(Boolean).join(", ") || "esta zona";
+  const cryptos = (cryptoAccepted || []).filter(Boolean);
+
+  return [
+    {
+      q: `¿Qué criptomonedas acepta esta ${typeLabel} en ${place}?`,
+      a:
+        cryptos.length > 0
+          ? `El propietario indica que acepta ${cryptos.join(", ")}. El cierre en cripto se acuerda directo entre comprador y propietario.`
+          : `Esta ficha aún no especifica qué criptomonedas acepta. Contacta directo al propietario para acordar la forma de pago.`,
+    },
+    {
+      q: `¿Cómo contacto al propietario de esta ${typeLabel} en ${place}?`,
+      a: contactEmail
+        ? `Usa el botón «Contactar al propietario» de esta ficha para escribirle directo por email y coordinar una visita o una oferta.`
+        : `Esta ficha aún no muestra un contacto directo. Vuelve pronto o explora más propiedades en ${place}.`,
+    },
+    {
+      q: `¿Cómo se cierra la compra de esta ${typeLabel}?`,
+      a: `El cierre es directo entre comprador y propietario: acuerdan precio, forma de pago en cripto y escrituración. Casas Cripto no procesa el pago de la compra.`,
+    },
+  ];
 }
 
 // Title tag de la página de detalle. Prioriza lo que rankea: título del

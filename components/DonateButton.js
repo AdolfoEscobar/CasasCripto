@@ -19,7 +19,7 @@ const DonateButton = ({ extraStyle }) => {
   const handleDonate = async () => {
     if (!amount || amount < (config.donations?.minAmount || 1)) {
       toast.error(
-        `El monto mínimo es $${config.donations?.minAmount || 1} MXN`
+        `El monto mínimo es $${config.donations?.minAmount || 1} MXN`,
       );
       return;
     }
@@ -69,7 +69,7 @@ const DonateButton = ({ extraStyle }) => {
           type="number"
           min={config.donations?.minAmount || 1}
           placeholder="Otro monto (MXN)"
-          className="grow"
+          className="grow text-base"
           value={customAmount}
           onChange={(e) => setCustomAmount(e.target.value)}
         />

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import config from "@/config";
+import ButtonAuthCta from "./ButtonAuthCta";
 import VerifiedBadge from "./VerifiedBadge";
 import PropertyImage from "./PropertyImage";
 
@@ -99,7 +100,6 @@ const FeaturedBanner = ({
             image={property.image}
             alt={`${property.title} en ${property.locationLabel}`}
             className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110 transition-transform duration-700 group-hover:scale-105"
-            eager
           />
         ) : (
           <div className="absolute inset-0">
@@ -408,12 +408,12 @@ const MarketplacePreviewClient = ({ items, categories, ticker }) => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
-            <Link
+            <ButtonAuthCta
               href={config.auth.callbackUrl}
               className="btn btn-primary w-full sm:w-auto"
             >
               Publicar gratis
-            </Link>
+            </ButtonAuthCta>
             <Link
               href="/propiedades"
               className="btn btn-outline border-base-content/20 w-full sm:w-auto"

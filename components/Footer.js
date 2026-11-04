@@ -1,8 +1,10 @@
-import Link from "next/link";
 import Image from "next/image";
+import FooterLink from "./FooterLink";
 import config from "@/config";
 import logo from "@/app/icon.png";
 import { SocialIcon } from "./SocialIcons";
+import { topCities } from "@/libs/geoDirectory.mjs";
+import { cityUrl } from "@/libs/propertyUrls.mjs";
 
 const columns = [
   {
@@ -62,7 +64,7 @@ const Footer = () => {
     <footer className="border-t border-base-content/10">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-20 flex flex-col gap-10 md:gap-12">
         <div className="text-center sm:text-left">
-          <Link
+          <FooterLink
             href="/"
             title={`${config.appName} homepage`}
             className="inline-flex gap-2 items-center"
@@ -77,7 +79,7 @@ const Footer = () => {
             <strong className="font-display text-lg font-extrabold tracking-tight text-gradient-gold leading-tight">
               {config.appName}
             </strong>
-          </Link>
+          </FooterLink>
 
           <p className="mt-3 text-sm text-base-content/80">{config.tagline}</p>
           <p className="mt-2 text-sm text-base-content/60">
@@ -117,25 +119,47 @@ const Footer = () => {
                     </li>
                   ) : (
                     <li key={link.label}>
-                      <Link href={link.href} className="link link-hover">
+                      <FooterLink href={link.href} className="link link-hover">
                         {link.label}
-                      </Link>
+                      </FooterLink>
                     </li>
-                  )
+                  ),
                 )}
               </ul>
             </div>
           ))}
         </nav>
 
-        <div className="border-t border-base-content/10 pt-6">
-          <p className="text-xs text-base-content/50 leading-relaxed max-w-4xl">
-            {config.legal.shortDisclaimer}{" "}
-            <Link href="/tos" className="link link-hover whitespace-nowrap">
-              Ver términos
-            </Link>
+        {/* Interlinking sitewide server-side (el que más pesa para crawlers):
+            destinos top en TODAS las páginas + link al directorio completo. */}
+        <nav
+          aria-label="Destinos populares"
+          className="border-t border-base-content/10 pt-6"
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3 text-center sm:text-left">
+            Destinos populares
           </p>
-        </div>
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm justify-center sm:justify-start">
+            {topCities.map((c) => (
+              <li key={`${c.stateSlug}/${c.citySlug}`}>
+                <FooterLink
+                  href={cityUrl(c.stateSlug, c.citySlug)}
+                  className="link link-hover opacity-70"
+                >
+                  {c.city}
+                </FooterLink>
+              </li>
+            ))}
+            <li>
+              <FooterLink
+                href="/propiedades/ciudad"
+                className="link link-hover font-medium"
+              >
+                Ver todas →
+              </FooterLink>
+            </li>
+          </ul>
+        </nav>
       </div>
     </footer>
   );

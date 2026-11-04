@@ -7,7 +7,7 @@ function TextArea({ label, error, register, registerOptions, ...props }) {
         <span className="label-text">{label}</span>
       </label>
       <textarea
-        className="textarea textarea-bordered w-full h-32"
+        className="textarea textarea-bordered text-base w-full h-32"
         {...register(props.name, registerOptions)}
         {...props}
       />

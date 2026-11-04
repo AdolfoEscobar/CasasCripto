@@ -22,6 +22,13 @@ export function cityUrl(stateSlug, citySlug) {
   return `/propiedades/${stateSlug}/${citySlug}`;
 }
 
+// Landing de país: /propiedades/pais/mexico. Con /pais/ explícito para no
+// colisionar con estados del mismo slug (ej. estado "panama" vs país
+// "panama") — ver knownCountry en geoDirectory.mjs.
+export function paisUrl(countrySlug) {
+  return `/propiedades/pais/${countrySlug}`;
+}
+
 // URL canónica de una propiedad. Si el documento ya tiene los 3 slugs
 // (cualquier propiedad creada o migrada después del rework SEO), devuelve la
 // URL con keywords; si no (documento viejo sin migrar), cae de vuelta a la
@@ -40,4 +47,51 @@ export function propertyUrl(property) {
 // Un slug real (letras + guiones, ej. "chihuahua") jamás matchea esto.
 export function isObjectIdParam(param) {
   return /^[0-9a-f]{24}$/i.test(param || "");
+}
+
+// URL de una página geo con filtros/orden/búsqueda (?tipo=casa&operacion=
+// venta&orden=precio-asc&q=...). Solo incluye parámetros con valor y omite
+// el orden default ("recientes") para URLs limpias. El canonical de estas
+// vistas siempre es la URL base sin query (ver cada generateMetadata).
+export function geoPageUrl(base, { q, tipo, operacion, orden } = {}) {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (tipo) params.set("tipo", tipo);
+  if (operacion) params.set("operacion", operacion);
+  if (orden && orden !== "recientes") params.set("orden", orden);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
+// Destino del héroe de búsqueda: con ciudad elegida va directo a su página;
+// con estado (sin ciudad) a la página del estado; con país a su landing
+// (que también acepta ?q= y filtros); con texto suelto al hub; solo filtros
+// se quedan en `base` (la página actual). `countrySlug` ya viene resuelto
+// por el llamador (este módulo no importa otros libs): si el país no es del
+// registro, el llamador lo manda como `q`.
+export function searchTarget({
+  base,
+  city,
+  state,
+  countrySlug,
+  q,
+  tipo,
+  operacion,
+} = {}) {
+  if (city?.stateSlug && city?.citySlug) {
+    return geoPageUrl(cityUrl(city.stateSlug, city.citySlug), {
+      tipo,
+      operacion,
+    });
+  }
+  if (state) {
+    return geoPageUrl(stateUrl(state), { tipo, operacion });
+  }
+  if (countrySlug) {
+    return geoPageUrl(paisUrl(countrySlug), { q, tipo, operacion });
+  }
+  if (q) {
+    return geoPageUrl("/propiedades", { q, tipo, operacion });
+  }
+  return geoPageUrl(base || "/propiedades", { tipo, operacion });
 }

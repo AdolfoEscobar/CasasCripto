@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import connectMongo from "@/libs/mongoose";
 import configFile from "@/config";
@@ -8,7 +9,9 @@ import Property from "@/models/Property";
 import { findCheckoutSession } from "@/libs/stripe";
 
 // Initialize Stripe only if the secret key is available
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // This is where we receive Stripe webhook events
@@ -18,8 +21,13 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export async function POST(req) {
   // Check if Stripe is configured
   if (!stripe || !webhookSecret) {
-    console.error("Stripe is not configured properly. Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET");
-    return NextResponse.json({ error: "Stripe configuration missing" }, { status: 500 });
+    console.error(
+      "Stripe is not configured properly. Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET",
+    );
+    return NextResponse.json(
+      { error: "Stripe configuration missing" },
+      { status: 500 },
+    );
   }
 
   await connectMongo();
@@ -60,6 +68,11 @@ export async function POST(req) {
             featured: true,
             featuredUntil,
           });
+
+          // Destacar reordena los listados: purga el ISR del marketplace.
+          revalidatePath("/propiedades", "layout");
+          revalidatePath("/");
+          revalidatePath("/api/geo/listing-cities");
 
           break;
         }
@@ -133,7 +146,7 @@ export async function POST(req) {
         // ❌ Revoke access to the product
         // The customer might have changed the plan (higher or lower plan, cancel soon etc...)
         const subscription = await stripe.subscriptions.retrieve(
-          data.object.id
+          data.object.id,
         );
         const user = await User.findOne({ customerId: subscription.customer });
 

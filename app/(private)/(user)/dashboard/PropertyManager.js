@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import apiClient from "@/libs/api";
 import { toast } from "react-hot-toast";
-import { MAX_PROPERTY_IMAGES, imageSrc, normalizeImage } from "@/libs/propertyImages";
+import {
+  MAX_PROPERTY_IMAGES,
+  imageSrc,
+  normalizeImage,
+} from "@/libs/propertyImages";
 import { prepareImageForUpload } from "@/libs/clientImage";
 
 const CRYPTO_OPTIONS = ["USDC", "USDT", "BTC", "ETH"];
@@ -247,7 +251,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
     const batch = files.slice(0, room);
     if (files.length > room) {
       toast.error(
-        `Solo se tomaron ${room} de ${files.length}: máximo ${MAX_PROPERTY_IMAGES} fotos`
+        `Solo se tomaron ${room} de ${files.length}: máximo ${MAX_PROPERTY_IMAGES} fotos`,
       );
     }
 
@@ -262,7 +266,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
           setForm((f) =>
             f.images.length >= MAX_PROPERTY_IMAGES
               ? f
-              : { ...f, images: [...f.images, res.data] }
+              : { ...f, images: [...f.images, res.data] },
           );
         } catch (err) {
           // Errores del API (4xx/5xx) ya los muestra apiClient con toast;
@@ -345,7 +349,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       toast.error(
         states.length > 0
           ? "Título, país, estado/provincia, ciudad y precio son obligatorios"
-          : "Título, país, ciudad y precio son obligatorios"
+          : "Título, país, ciudad y precio son obligatorios",
       );
       return;
     }
@@ -431,7 +435,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       toast.success(
         res.data.mock
           ? "Copy de muestra generado (conecta MODEL_API_KEY para usar Muse Spark real)"
-          : "Copy generado con Meta Muse Spark"
+          : "Copy generado con Meta Muse Spark",
       );
     } catch (e) {
       // apiClient already toasts the error
@@ -464,7 +468,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
       toast.success(
         res.data.mock
           ? "Imagen de muestra agregada (conecta MODEL_API_KEY para usar Muse Image real)"
-          : "Imagen generada con Meta Muse Image"
+          : "Imagen generada con Meta Muse Image",
       );
     } catch (e) {
       // apiClient already toasts the error
@@ -547,7 +551,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             </p>
             <textarea
               placeholder="Notas rápidas para la IA (ej. 3 recámaras, alberca, a 2 cuadras de la playa)"
-              className="textarea textarea-bordered textarea-sm w-full"
+              className="textarea textarea-bordered text-base textarea-sm w-full"
               rows={2}
               value={aiNotes}
               onChange={(e) => setAiNotes(e.target.value)}
@@ -571,13 +575,13 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
               required
               type="text"
               placeholder="Título (ej. Villa frente al mar)"
-              className="input input-bordered w-full"
+              className="input input-bordered text-base w-full"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
             <select
               required
-              className="select select-bordered w-full"
+              className="select select-bordered text-base w-full"
               value={form.country}
               onChange={(e) => {
                 const name = e.target.value;
@@ -615,7 +619,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             {states.length > 0 && (
               <select
                 required
-                className="select select-bordered w-full"
+                className="select select-bordered text-base w-full"
                 value={form.state}
                 onChange={(e) => {
                   const name = e.target.value;
@@ -637,7 +641,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
 
             <select
               required
-              className="select select-bordered w-full disabled:opacity-50"
+              className="select select-bordered text-base w-full disabled:opacity-50"
               disabled={!countryCode || (states.length > 0 && !stateCode)}
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -658,9 +662,11 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
               ))}
             </select>
             <select
-              className="select select-bordered w-full"
+              className="select select-bordered text-base w-full"
               value={form.propertyType}
-              onChange={(e) => setForm({ ...form, propertyType: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, propertyType: e.target.value })
+              }
               title="Tipo de propiedad (mejora tu posicionamiento en Google)"
             >
               <option value="">Tipo de propiedad (opcional)</option>
@@ -674,9 +680,11 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
             </select>
             <select
               required
-              className="select select-bordered w-full"
+              className="select select-bordered text-base w-full"
               value={form.listingType}
-              onChange={(e) => setForm({ ...form, listingType: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, listingType: e.target.value })
+              }
             >
               <option value="venta">En venta</option>
               <option value="renta">En renta</option>
@@ -686,14 +694,14 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
               type="number"
               min="0"
               placeholder="Precio (USD)"
-              className="input input-bordered w-full"
+              className="input input-bordered text-base w-full"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
             />
             <input
               type="email"
               placeholder="Email de contacto"
-              className="input input-bordered w-full"
+              className="input input-bordered text-base w-full"
               value={form.contactEmail}
               onChange={(e) =>
                 setForm({ ...form, contactEmail: e.target.value })
@@ -703,7 +711,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
 
           <textarea
             placeholder="Descripción"
-            className="textarea textarea-bordered w-full"
+            className="textarea textarea-bordered text-base w-full"
             rows={3}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -712,7 +720,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
           <input
             type="text"
             placeholder="Zona o dirección (opcional, ej. Centro, frente al mar)"
-            className="input input-bordered w-full"
+            className="input input-bordered text-base w-full"
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
           />
@@ -846,7 +854,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
               <input
                 type="url"
                 placeholder="...o pega una URL de foto (https://...)"
-                className="input input-bordered input-sm w-full"
+                className="input input-bordered text-base input-sm w-full"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -882,7 +890,7 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                 <input
                   type="text"
                   placeholder="Ej. villa frente al mar en Tulum, estilo moderno, atardecer"
-                  className="input input-bordered input-sm w-full"
+                  className="input input-bordered text-base input-sm w-full"
                   value={aiImagePrompt}
                   onChange={(e) => setAiImagePrompt(e.target.value)}
                 />
@@ -943,7 +951,9 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
           </div>
 
           <div>
-            <p className="text-sm font-medium mb-2">Criptomonedas que aceptas</p>
+            <p className="text-sm font-medium mb-2">
+              Criptomonedas que aceptas
+            </p>
             <div className="flex flex-wrap gap-2">
               {CRYPTO_OPTIONS.map((symbol) => (
                 <button
@@ -1010,7 +1020,9 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                       new Date(property.featuredUntil) > new Date() && (
                         <span className="badge badge-sm badge-warning">
                           Destacada hasta{" "}
-                          {new Date(property.featuredUntil).toLocaleDateString()}
+                          {new Date(
+                            property.featuredUntil,
+                          ).toLocaleDateString()}
                         </span>
                       )}
                   </div>
@@ -1020,11 +1032,12 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                     {property.country ? `, ${property.country}` : ""} · $
                     {property.price?.toLocaleString()} {property.currency}
                   </p>
-                  {property.status === "rejected" && property.rejectionReason && (
-                    <p className="text-xs text-error mt-1">
-                      Motivo: {property.rejectionReason}
-                    </p>
-                  )}
+                  {property.status === "rejected" &&
+                    property.rejectionReason && (
+                      <p className="text-xs text-error mt-1">
+                        Motivo: {property.rejectionReason}
+                      </p>
+                    )}
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {property.status === "published" && (

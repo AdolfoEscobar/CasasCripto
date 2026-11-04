@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { Crisp } from "crisp-sdk-web";
 import { SessionProvider } from "next-auth/react";
@@ -9,8 +10,12 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
 import { AuthModalProvider } from "@/components/auth/AuthModalContext";
-import AuthModal from "@/components/auth/AuthModal";
 import config from "@/config";
+
+// El modal (headlessui Dialog + formulario) se carga en un chunk aparte en
+// vez de en el bundle inicial: la mayoría de visitas nunca lo abre y así no
+// paga su JS. Sigue dentro del provider y con SSR, solo cambia el split.
+const AuthModal = dynamic(() => import("@/components/auth/AuthModal"));
 
 // Crisp customer chat support:
 // This component is separated from ClientLayout because it needs to be wrapped with <SessionProvider> to use useSession() hook

@@ -1,15 +1,32 @@
 import Link from "next/link";
+import { notFound, permanentRedirect } from "next/navigation";
 import Footer from "@/components/Footer";
+import ButtonAuthCta from "@/components/ButtonAuthCta";
 import PropertyCard from "@/components/PropertyCard";
 import FaqAccordion from "@/components/FaqAccordion";
+import PropertySearchHero from "@/components/PropertySearchHero";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCityData, parseGeoFilters } from "@/libs/propertyGeo";
+import {
+  SortPills,
+  StatsStrip,
+  RelatedSearches,
+} from "@/components/GeoWidgets";
 import {
   getSEOTags,
   renderBreadcrumbSchema,
   renderFaqSchema,
   renderItemListSchema,
 } from "@/libs/seo";
-import { stateUrl, cityUrl, propertyUrl } from "@/libs/propertyUrls.mjs";
+import {
+  stateUrl,
+  cityUrl,
+  paisUrl,
+  propertyUrl,
+  geoPageUrl,
+} from "@/libs/propertyUrls.mjs";
+import { knownCity, knownCountry } from "@/libs/geoDirectory.mjs";
+import { slugify } from "@/libs/slugify.js";
 import {
   geoTitle,
   geoDescription,
@@ -18,12 +35,13 @@ import {
   keywordSubject,
   capFirst,
   summarizeListings,
-  PROPERTY_TYPES,
-  LISTING_TYPES,
 } from "@/libs/geoSeo.mjs";
 import config from "@/config";
 
-export const dynamic = "force-dynamic";
+// ISR 1h: el HTML se cachea en el edge (TTFB bajo → PageSpeed) y se purga
+// al publicar/aprobar/editar/borrar (ver app/api/properties). Cada URL con
+// query cachea su propia variante: los filtros siguen correctos.
+export const revalidate = 3600;
 
 // Página SEO por ciudad: /propiedades/chihuahua/delicias. La ciudad SIEMPRE
 // va anidada bajo su estado — eso desambigua ("Guadalajara" en Jalisco vs
@@ -33,91 +51,89 @@ export async function generateMetadata({ params, searchParams }) {
   const sp = (await searchParams) || {};
   const filters = parseGeoFilters(sp);
   const data = await getCityData(param, ciudad, filters);
+  // Misma política que el estado: con inventario siempre; vacía solo si la
+  // pareja estado/ciudad está en el registro curado. Lo demás es 404 (el
+  // render llama notFound(); aquí se devuelve respaldo con noindex).
+  if (data.totalCount === 0 && !knownCity(param, ciudad)) {
+    const tags = getSEOTags({
+      title: "Página no encontrada | Casas Cripto",
+      canonicalUrlRelative: cityUrl(param, ciudad),
+    });
+    tags.robots = "noindex, follow";
+    return tags;
+  }
+  const known = data.totalCount === 0 ? knownCity(param, ciudad) : null;
+  const cityName = known?.city || data.cityName;
+  const stateName = known?.state || data.stateName;
+  const country = known ? known.country : data.country;
   const stats = summarizeListings(data.properties);
 
-  const tags = getSEOTags({
-    title: geoTitle({
-      ...filters,
-      city: data.cityName,
-      state: data.stateName,
-      country: data.country,
-    }),
+  return getSEOTags({
+    title: geoTitle({ ...filters, city: cityName, state: stateName, country }),
     description: geoDescription({
       ...filters,
-      city: data.cityName,
-      state: data.stateName,
-      country: data.country,
+      city: cityName,
+      state: stateName,
+      country,
       ...stats,
       cryptos: stats.topCryptos,
     }),
     canonicalUrlRelative: cityUrl(param, ciudad),
   });
-  // Ciudad sin listados: existe (CTA) pero no se indexa hasta tener contenido.
-  if (data.totalCount === 0) tags.robots = "noindex, follow";
-  return tags;
-}
-
-function FilterChips({ param, ciudad, filters }) {
-  const tipoActive = filters.propertyType;
-  const opActive = filters.listingType;
-  const hrefFor = (tipo, operacion) => {
-    const q = new URLSearchParams();
-    if (tipo) q.set("tipo", tipo);
-    if (operacion) q.set("operacion", operacion);
-    const qs = q.toString();
-    return `${cityUrl(param, ciudad)}${qs ? `?${qs}` : ""}`;
-  };
-  return (
-    <div className="flex flex-col items-center gap-3 mb-8">
-      <div className="flex flex-wrap justify-center gap-2">
-        <Link
-          href={hrefFor(null, opActive)}
-          className={`badge badge-lg min-h-[40px] ${!tipoActive ? "badge-primary" : "badge-ghost border border-base-content/20"}`}
-        >
-          Todo
-        </Link>
-        {Object.entries(PROPERTY_TYPES).map(([key, labels]) => (
-          <Link
-            key={key}
-            href={hrefFor(key, opActive)}
-            className={`badge badge-lg min-h-[40px] ${tipoActive === key ? "badge-primary" : "badge-ghost border border-base-content/20"}`}
-          >
-            {capFirst(labels.plural)}
-          </Link>
-        ))}
-      </div>
-      <div className="flex flex-wrap justify-center gap-2">
-        {Object.entries(LISTING_TYPES).map(([key, label]) => (
-          <Link
-            key={key}
-            href={hrefFor(tipoActive, opActive === key ? null : key)}
-            className={`badge badge-lg min-h-[40px] ${opActive === key ? "badge-secondary" : "badge-ghost border border-base-content/20"}`}
-          >
-            {capFirst(label)}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 export default async function CiudadPage({ params, searchParams }) {
   const { param, ciudad } = await params;
   const sp = (await searchParams) || {};
   const filters = parseGeoFilters(sp);
-  const { properties, totalCount, cityName, stateName, country, siblingCities } =
-    await getCityData(param, ciudad, filters);
+  const data = await getCityData(param, ciudad, filters);
+  const { properties, totalCount, siblingCities } = data;
+  if (totalCount === 0 && !knownCity(param, ciudad)) notFound();
+  // Canónicas en minúsculas (ver página de estado): 301 preservando filtros.
+  if (param !== param.toLowerCase() || ciudad !== ciudad.toLowerCase()) {
+    permanentRedirect(
+      geoPageUrl(cityUrl(param.toLowerCase(), ciudad.toLowerCase()), {
+        tipo: sp.tipo,
+        operacion: sp.operacion,
+        orden: sp.orden,
+      }),
+    );
+  }
+  const known = totalCount === 0 ? knownCity(param, ciudad) : null;
+  const cityName = known?.city || data.cityName;
+  const stateName = known?.state || data.stateName;
+  const country = known ? known.country : data.country;
+  const countrySlug = slugify(country);
+  const countryCrumb =
+    countrySlug && knownCountry(countrySlug)
+      ? { label: country, slug: countrySlug }
+      : null;
   const stats = summarizeListings(properties);
   const subject = keywordSubject(filters);
   const filtersActive = Boolean(filters.propertyType || filters.listingType);
   const shownCount = filtersActive ? properties.length : totalCount;
-  const geo = { ...filters, city: cityName, state: stateName, country, ...stats };
+  const geo = {
+    ...filters,
+    city: cityName,
+    state: stateName,
+    country,
+    ...stats,
+  };
   const intro = geoIntro(geo);
   const faqs = geoFaqs(geo);
   const baseUrl = `https://${config.domainName}`;
 
   const breadcrumbItems = [
+    { name: "Inicio", url: `${baseUrl}/` },
     { name: "Propiedades", url: `${baseUrl}/propiedades` },
+    ...(countryCrumb
+      ? [
+          {
+            name: countryCrumb.label,
+            url: `${baseUrl}${paisUrl(countryCrumb.slug)}`,
+          },
+        ]
+      : []),
     { name: stateName, url: `${baseUrl}${stateUrl(param)}` },
     { name: cityName, url: `${baseUrl}${cityUrl(param, ciudad)}` },
   ];
@@ -130,28 +146,32 @@ export default async function CiudadPage({ params, searchParams }) {
         properties.map((p) => ({
           name: p.title,
           url: `${baseUrl}${propertyUrl(p)}`,
-        }))
+        })),
       )}
       <main className="min-h-screen">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16 md:py-24">
-          <div className="text-sm breadcrumbs mb-6 opacity-70 justify-center">
-            <ul>
-              <li>
-                <Link href="/propiedades">Propiedades</Link>
-              </li>
-              <li>
-                <Link href={stateUrl(param)} title={stateName}>
-                  {stateName}
-                </Link>
-              </li>
-              <li className="min-w-0">
-                <span className="truncate max-w-[40vw] block" title={cityName}>
-                  {cityName}
-                </span>
-              </li>
-            </ul>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-12 md:pt-16 pb-16 md:pb-24">
+          <div className="mb-8">
+            <PropertySearchHero
+              idPrefix="city-search"
+              base={cityUrl(param, ciudad)}
+            />
           </div>
-
+          <Breadcrumbs
+            items={[
+              { label: "Inicio", href: "/" },
+              { label: "Propiedades", href: "/propiedades" },
+              ...(countryCrumb
+                ? [
+                    {
+                      label: countryCrumb.label,
+                      href: paisUrl(countryCrumb.slug),
+                    },
+                  ]
+                : []),
+              { label: stateName, href: stateUrl(param) },
+              { label: cityName },
+            ]}
+          />
           <div className="text-center max-w-2xl mx-auto mb-8">
             <p className="font-medium text-primary mb-3">
               <Link href={stateUrl(param)} className="link link-hover">
@@ -161,22 +181,35 @@ export default async function CiudadPage({ params, searchParams }) {
             </p>
             <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">
               {capFirst(subject)} en {cityName}, {stateName}
-              {shownCount > 0 && (
-                <span className="opacity-50 text-2xl sm:text-3xl lg:text-4xl"> ({shownCount})</span>
-              )}
             </h1>
             <p className="opacity-70 leading-relaxed">{intro}</p>
+            {known?.guide && (
+              <p className="opacity-70 leading-relaxed mt-4">{known.guide}</p>
+            )}
           </div>
 
-          {totalCount > 0 && (
-            <FilterChips param={param} ciudad={ciudad} filters={filters} />
-          )}
+          <StatsStrip
+            minPrice={stats.minPrice}
+            currency={stats.currency}
+            topCryptos={stats.topCryptos}
+          />
+
+          {/* Inmediatez (igual que el hub): el héroe es el único filtro;
+              aquí solo queda el conteo discreto + orden. */}
+          <SortPills
+            base={cityUrl(param, ciudad)}
+            filters={filters}
+            sort={filters.sort}
+            count={shownCount}
+          />
 
           {properties.length === 0 ? (
             <div className="glass-card rounded-2xl p-10 text-center max-w-xl mx-auto flex flex-col items-center gap-4">
               <p className="font-bold text-xl">
                 {totalCount === 0 ? (
-                  <>Todavía no hay {subject} en {cityName}</>
+                  <>
+                    Todavía no hay {subject} en {cityName}
+                  </>
                 ) : (
                   <>Sin resultados para este filtro en {cityName}</>
                 )}
@@ -194,7 +227,10 @@ export default async function CiudadPage({ params, searchParams }) {
                 ) : (
                   <>
                     Prueba con otro tipo u operación, o{" "}
-                    <Link href={cityUrl(param, ciudad)} className="link link-primary">
+                    <Link
+                      href={cityUrl(param, ciudad)}
+                      className="link link-primary"
+                    >
                       ver todo {cityName}
                     </Link>
                     .
@@ -202,18 +238,22 @@ export default async function CiudadPage({ params, searchParams }) {
                 )}
               </p>
               {totalCount === 0 && (
-                <Link
-                  href="/dashboard"
+                <ButtonAuthCta
+                  href={config.auth.callbackUrl}
                   className="btn btn-primary max-w-full whitespace-normal text-center"
                 >
                   Publicar en {cityName} gratis
-                </Link>
+                </ButtonAuthCta>
               )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
-              {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+              {properties.map((property, i) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  eager={i === 0}
+                />
               ))}
             </div>
           )}
@@ -235,6 +275,13 @@ export default async function CiudadPage({ params, searchParams }) {
                 ))}
               </div>
             </section>
+          )}
+
+          {totalCount > 0 && (
+            <RelatedSearches
+              base={cityUrl(param, ciudad)}
+              place={`${cityName}, ${stateName}`}
+            />
           )}
 
           <FaqAccordion

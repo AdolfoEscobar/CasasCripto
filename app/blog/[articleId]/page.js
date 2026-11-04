@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { articles } from "../_assets/content";
 import BadgeCategory from "../_assets/components/BadgeCategory";
 import Avatar from "../_assets/components/Avatar";
-import { getSEOTags, renderBreadcrumbSchema } from "@/libs/seo";
+import { getSEOTags, renderBreadcrumbSchema, safeJsonLd } from "@/libs/seo";
 import config from "@/config";
 
 export async function generateStaticParams() {
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }) {
             alt: article.image.alt,
           },
         ],
-        locale: "es_ES",
+        locale: "es_MX",
         type: "article",
         publishedTime: article.publishedAt,
         modifiedTime: article.updatedAt || article.publishedAt,
@@ -128,13 +128,13 @@ export default async function Article({ params }) {
       <script
         type="application/ld+json"
         id={`json-ld-article-${article.slug}`}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(blogPostingSchema) }}
       />
       {faqSchema && (
         <script
           type="application/ld+json"
           id={`json-ld-faq-${article.slug}`}
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
         />
       )}
       {renderBreadcrumbSchema([

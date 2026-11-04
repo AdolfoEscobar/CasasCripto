@@ -7,7 +7,7 @@ import config from "@/config";
 // sections) before this product handles real money or real users.
 
 export const metadata = getSEOTags({
-  title: `Terms and Conditions | ${config.appName}`,
+  title: `Términos de servicio | ${config.appName}`,
   canonicalUrlRelative: "/tos",
 });
 

@@ -5,23 +5,34 @@ import connectMongo from "@/libs/mongoose";
 import Property from "@/models/Property";
 import { leanArrayToJSON, leanToJSON } from "@/libs/leanToJSON";
 import { slugify, unslugify } from "@/libs/slugify";
-import { isPropertyType, isListingType } from "@/libs/geoSeo.mjs";
+import {
+  isPropertyType,
+  isListingType,
+  parseSortParam,
+} from "@/libs/geoSeo.mjs";
+import { knownCountry } from "@/libs/geoDirectory.mjs";
 
-// Destacadas vigentes primero, luego por fecha. Mismo criterio en hub,
-// estado, ciudad y sitemap para que el orden sea consistente en todo el sitio.
-export function sortFeaturedFirst(properties) {
+// Destacadas vigentes primero, luego según `sort` (?orden=...): recientes
+// conserva el -createdAt de Mongo (sort estable), precio-asc/desc ordenan
+// por precio. Mismo criterio en hub, estado y ciudad.
+export function sortFeaturedFirst(properties, sort = "recientes") {
   const now = Date.now();
+  const isFeatured = (p) =>
+    p.featured && p.featuredUntil && new Date(p.featuredUntil).getTime() > now;
+  const price = (p) => Number(p.price) || 0;
   return [...properties].sort((a, b) => {
-    const aFeatured =
-      a.featured && a.featuredUntil && new Date(a.featuredUntil).getTime() > now;
-    const bFeatured =
-      b.featured && b.featuredUntil && new Date(b.featuredUntil).getTime() > now;
-    return Number(bFeatured) - Number(aFeatured);
+    const byFeatured = Number(isFeatured(b)) - Number(isFeatured(a));
+    if (byFeatured !== 0) return byFeatured;
+    if (sort === "precio-asc") return price(a) - price(b);
+    if (sort === "precio-desc") return price(b) - price(a);
+    return 0;
   });
 }
 
-// Filtros válidos de query params (?tipo=casa&operacion=venta). Valores
-// inválidos se ignoran (no rompen la página ni generan URLs canónicas raras).
+// Filtros válidos de query params (?tipo=casa&operacion=venta&orden=...).
+// Valores inválidos se ignoran (no rompen la página ni generan URLs
+// canónicas raras). `sort` nunca entra al query de Mongo (ver
+// filtersToQuery): se aplica en memoria vía sortFeaturedFirst.
 export function parseGeoFilters(searchParams = {}) {
   const propertyType = isPropertyType(searchParams?.tipo)
     ? searchParams.tipo
@@ -29,7 +40,17 @@ export function parseGeoFilters(searchParams = {}) {
   const listingType = isListingType(searchParams?.operacion)
     ? searchParams.operacion
     : null;
-  return { propertyType, listingType };
+  return {
+    propertyType,
+    listingType,
+    sort: parseSortParam(searchParams?.orden),
+  };
+}
+
+// Escapa texto libre para usarlo en RegExp de Mongo ($or de búsqueda).
+// Sin esto, una búsqueda como "(a" tumbaría el query con SyntaxError.
+export function escapeRegExp(text) {
+  return (text || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function filtersToQuery({ propertyType, listingType }) {
@@ -67,7 +88,7 @@ export async function getStateData(stateSlug, filters = {}) {
     ]),
   ]);
 
-  const sorted = sortFeaturedFirst(properties);
+  const sorted = sortFeaturedFirst(properties, filters.sort);
   const stateName =
     properties.find((p) => p.state)?.state ||
     properties[0]?.country ||
@@ -111,7 +132,7 @@ export async function getCityData(stateSlug, citySlug, filters = {}) {
     ]),
   ]);
 
-  const sorted = sortFeaturedFirst(properties);
+  const sorted = sortFeaturedFirst(properties, filters.sort);
   return {
     properties: leanArrayToJSON(JSON.parse(JSON.stringify(sorted))),
     totalCount,
@@ -122,6 +143,85 @@ export async function getCityData(stateSlug, citySlug, filters = {}) {
     siblingCities: cityAgg
       .filter((c) => c._id && c._id !== citySlug)
       .map((c) => ({ slug: c._id, name: c.city, count: c.count })),
+  };
+}
+
+// Landing de país (/propiedades/pais/mexico): listados del país con ?q=,
+// filtros y orden, más agregados por estado/ciudad para navegar hacia abajo.
+// Casa por countrySlug (docs nuevos) o nombre exacto del registro (docs sin
+// migrar todavía) — ver knownCountry en libs/geoDirectory.mjs.
+export async function getCountryData(
+  countrySlug,
+  { q = "", filters = {} } = {},
+) {
+  await connectMongo();
+  const known = knownCountry(countrySlug);
+  const term = (q || "").trim();
+  const searchQuery = term
+    ? {
+        $or: ["title", "city", "state", "country", "location"].map((field) => ({
+          [field]: { $regex: escapeRegExp(term), $options: "i" },
+        })),
+      }
+    : {};
+  const geoQuery = {
+    $or: [{ countrySlug }, ...(known ? [{ country: known.name }] : [])],
+  };
+  const [properties, totalCount, stateAgg, cityAgg] = await Promise.all([
+    Property.find({
+      status: "published",
+      ...geoQuery,
+      ...filtersToQuery(filters),
+      ...searchQuery,
+    })
+      .sort("-createdAt")
+      .lean(),
+    Property.countDocuments({ status: "published", ...geoQuery }),
+    Property.aggregate([
+      { $match: { status: "published", ...geoQuery } },
+      {
+        $group: {
+          _id: "$stateSlug",
+          name: { $first: "$state" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]),
+    Property.aggregate([
+      { $match: { status: "published", ...geoQuery } },
+      {
+        $group: {
+          _id: { stateSlug: "$stateSlug", citySlug: "$citySlug" },
+          city: { $first: "$city" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]),
+  ]);
+
+  const sorted = sortFeaturedFirst(properties, filters.sort);
+  return {
+    properties: leanArrayToJSON(JSON.parse(JSON.stringify(sorted))),
+    totalCount,
+    countryName:
+      known?.name || properties[0]?.country || unslugify(countrySlug),
+    states: stateAgg
+      .filter((s) => s._id)
+      .map((s) => ({
+        slug: s._id,
+        name: s.name || unslugify(s._id),
+        count: s.count,
+      })),
+    cities: cityAgg
+      .filter((c) => c._id?.stateSlug && c._id?.citySlug)
+      .map((c) => ({
+        stateSlug: c._id.stateSlug,
+        slug: c._id.citySlug,
+        name: c.city || unslugify(c._id.citySlug),
+        count: c.count,
+      })),
   };
 }
 
@@ -165,6 +265,10 @@ async function healGeoSlugs(property) {
   }
   const stateSlug = slugify(property.state || property.country);
   if (property.stateSlug !== stateSlug) patch.stateSlug = stateSlug;
+  const countrySlug = slugify(property.country);
+  if (countrySlug && property.countrySlug !== countrySlug) {
+    patch.countrySlug = countrySlug;
+  }
   if (!property.propertySlug) {
     const base = slugify(property.title).slice(0, 60) || "propiedad";
     patch.propertySlug = `${base}-${property._id.toString().slice(-6)}`;
@@ -196,10 +300,29 @@ export async function getPropertyByCitySlugAny(slug) {
 }
 
 // Hub: todas las publicadas + agregados por estado y por ciudad.
-export async function getMarketplaceData() {
+// Hub + directorio: todas las publicadas (con búsqueda ?q= y filtros
+// aplicados), más agregados GLOBALES por estado/ciudad (sin filtrar: son
+// navegación, no resultados). `totalCount` es el inventario global para el
+// H1 del hub sin filtros.
+export async function getMarketplaceData({ q = "", filters = {}, sort } = {}) {
   await connectMongo();
-  const [properties, stateAgg, cityAgg] = await Promise.all([
-    Property.find({ status: "published" }).sort("-createdAt").lean(),
+  const term = (q || "").trim();
+  const searchQuery = term
+    ? {
+        $or: ["title", "city", "state", "country", "location"].map((field) => ({
+          [field]: { $regex: escapeRegExp(term), $options: "i" },
+        })),
+      }
+    : {};
+  const [properties, totalCount, stateAgg, cityAgg] = await Promise.all([
+    Property.find({
+      status: "published",
+      ...filtersToQuery(filters),
+      ...searchQuery,
+    })
+      .sort("-createdAt")
+      .lean(),
+    Property.countDocuments({ status: "published" }),
     Property.aggregate([
       { $match: { status: "published" } },
       {
@@ -228,8 +351,9 @@ export async function getMarketplaceData() {
 
   return {
     properties: leanArrayToJSON(
-      JSON.parse(JSON.stringify(sortFeaturedFirst(properties)))
+      JSON.parse(JSON.stringify(sortFeaturedFirst(properties, sort))),
     ),
+    totalCount,
     states: stateAgg
       .filter((s) => s._id)
       .map((s) => ({

@@ -20,7 +20,7 @@ export const revalidate = 3600;
 // https://casascripto.com y https://www.casascripto.com (o con slash
 // final distinto) como contenido duplicado y diluya autoridad.
 export const metadata = getSEOTags({
-  title: "Casas Cripto | El directorio de propiedades que aceptan cripto",
+  title: "Casas Cripto | Compra casas con criptomonedas",
   canonicalUrlRelative: "/",
 });
 

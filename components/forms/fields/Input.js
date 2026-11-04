@@ -15,7 +15,7 @@ function Input({
       </label>
       <input
         type={type}
-        className="input input-bordered w-full"
+        className="input input-bordered text-base w-full"
         {...register(props.name, registerOptions)}
         {...props}
       />

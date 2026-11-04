@@ -3,6 +3,7 @@
 //   - citySlug: "delicias-mexico" (legacy) → "delicias"
 //   - legacyCitySlug: guarda el valor anterior para los redirects 301
 //   - stateSlug: slugify(state || country)
+//   - countrySlug: slugify(country) — alimenta /propiedades/pais/*
 //   - propertySlug: slugify(title).slice(0,60) + "-" + últimos 6 del _id
 //   - listingType: "venta" si falta
 //
@@ -61,6 +62,7 @@ async function main() {
   for (const doc of docs) {
     const newCitySlug = slug(doc.city);
     const newStateSlug = slug(doc.state || doc.country);
+    const newCountrySlug = slug(doc.country);
     const base = slug(doc.title).slice(0, 60) || "propiedad";
     const newPropertySlug =
       doc.propertySlug || `${base}-${doc._id.toString().slice(-6)}`;
@@ -68,6 +70,7 @@ async function main() {
     const needsUpdate =
       doc.citySlug !== newCitySlug ||
       doc.stateSlug !== newStateSlug ||
+      (newCountrySlug && doc.countrySlug !== newCountrySlug) ||
       !doc.propertySlug ||
       !doc.listingType;
 
@@ -93,6 +96,7 @@ async function main() {
           $set: {
             citySlug: newCitySlug,
             stateSlug: newStateSlug,
+            ...(newCountrySlug && { countrySlug: newCountrySlug }),
             propertySlug: newPropertySlug,
             listingType: doc.listingType || "venta",
             ...(legacyCitySlug && { legacyCitySlug }),

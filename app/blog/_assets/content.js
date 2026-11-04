@@ -1,5 +1,5 @@
 import Link from "next/link";
-import SignInInlineButton from "@/components/auth/SignInInlineButton";
+import ButtonAuthCta from "@/components/ButtonAuthCta";
 
 // ==================================================================================================================================================================
 // BLOG CATEGORIES 🏷️
@@ -111,9 +111,9 @@ const CtaMarketplace = ({ title, text }) => (
       <Link href="/propiedades" className="btn btn-primary">
         Ver propiedades crypto-friendly
       </Link>
-      <Link href="/dashboard" className="btn btn-ghost">
+      <ButtonAuthCta href="/dashboard" className="btn btn-ghost">
         Publicar gratis
-      </Link>
+      </ButtonAuthCta>
     </div>
   </div>
 );
@@ -453,9 +453,9 @@ export const articles = [
             En esta guía te explicamos las ventajas de vender aceptando
             cripto, cómo fijar el precio sin exponerte a la volatilidad y
             cómo{" "}
-            <Link href="/dashboard" className={styles.link}>
+            <ButtonAuthCta href="/dashboard" className={styles.link}>
               publicar tu propiedad gratis en Casas Cripto
-            </Link>{" "}
+            </ButtonAuthCta>{" "}
             para llegar a esos compradores.
           </p>
         </section>
@@ -1707,9 +1707,9 @@ export const articles = [
           <h2 className={styles.h2}>Paso 1: crea tu cuenta gratis</h2>
           <p className={styles.p}>
             Entra a{" "}
-            <SignInInlineButton className={styles.link}>
+            <ButtonAuthCta href="/dashboard" className={styles.link}>
               iniciar sesión
-            </SignInInlineButton>{" "}
+            </ButtonAuthCta>{" "}
             y crea tu cuenta con Google o con tu email (enlace mágico, sin
             contraseña). Automáticamente quedas en el plan Básico gratuito:
             hasta 20 propiedades, sin tarjeta y sin fecha de vencimiento.
@@ -1720,9 +1720,9 @@ export const articles = [
           <h2 className={styles.h2}>Paso 2: crea tu listado en el dashboard</h2>
           <p className={styles.p}>
             En{" "}
-            <Link href="/dashboard" className={styles.link}>
+            <ButtonAuthCta href="/dashboard" className={styles.link}>
               tu dashboard
-            </Link>{" "}
+            </ButtonAuthCta>{" "}
             haz clic en crear propiedad y completa:
           </p>
           <ul className={styles.ul}>

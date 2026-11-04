@@ -11,7 +11,9 @@ export const isCurrentlyFeatured = (property) =>
   property.featuredUntil &&
   new Date(property.featuredUntil).getTime() > Date.now();
 
-const PropertyCard = ({ property }) => (
+// `eager` solo para la primera tarjeta de cada grid: es la candidata a LCP
+// y cargarla lazy retrasa el Largest Contentful Paint en PageSpeed.
+const PropertyCard = ({ property, eager = false }) => (
   <Link
     href={propertyUrl(property)}
     className={`glass-card rounded-2xl overflow-hidden flex flex-col hover:ring-2 hover:ring-primary/50 transition-shadow ${
@@ -38,6 +40,7 @@ const PropertyCard = ({ property }) => (
           alt={`${property.title} en ${property.city}${property.state ? `, ${property.state}` : ""}`}
           className="w-full aspect-[4/3] object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          eager={eager}
         />
       ) : (
         <div className="w-full aspect-[4/3] bg-base-300 flex items-center justify-center text-base-content/30">

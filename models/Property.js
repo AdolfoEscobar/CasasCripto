@@ -81,6 +81,14 @@ const propertySchema = mongoose.Schema(
       trim: true,
       index: true,
     },
+    // Slug del país (ej. "México" -> "mexico"). Alimenta las páginas de país
+    // (/propiedades/pais/mexico) y deja lista una futura migración a URLs con
+    // país si la escala global la exige. Generado en pre("save").
+    countrySlug: {
+      type: String,
+      trim: true,
+      index: true,
+    },
     // Valor ANTERIOR de citySlug (formato "ciudad-pais", ej. "delicias-mexico").
     // Solo existe en documentos migrados: sirve para resolver redirects 301 de
     // las URLs viejas /propiedades/ciudad/[slug] a la nueva estructura. Los
@@ -215,6 +223,9 @@ propertySchema.pre("save", function (next) {
     !this.stateSlug
   ) {
     this.stateSlug = slugify(this.state || this.country);
+  }
+  if (this.isModified("country") || !this.countrySlug) {
+    this.countrySlug = slugify(this.country);
   }
   if (!this.propertySlug) {
     const base = slugify(this.title).slice(0, 60) || "propiedad";

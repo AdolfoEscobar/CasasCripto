@@ -1,5 +1,6 @@
 import Link from "next/link";
 import config from "@/config";
+import ButtonAuthCta from "./ButtonAuthCta";
 
 // Sin fondo propio (ni foto, ni overlay): toma el fondo ambiental único
 // de la landing (app/page.js), igual que el resto de secciones, para que
@@ -21,12 +22,12 @@ const CTA = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
-              <Link
+              <ButtonAuthCta
                 href={config.auth.callbackUrl}
                 className="btn btn-primary glow-primary w-full sm:w-auto sm:min-w-[13rem]"
               >
                 Listar mi propiedad
-              </Link>
+              </ButtonAuthCta>
               <Link
                 href="#invertir"
                 className="btn btn-outline border-base-content/30 w-full sm:w-auto sm:min-w-[10rem]"

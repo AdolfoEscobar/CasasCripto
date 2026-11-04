@@ -154,8 +154,7 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
             <span className="text-gradient-gold">{config.appName}</span>
           </h1>
           <p className="mt-2 text-sm text-base-content/60">
-            Accede o crea tu cuenta para gestionar tus propiedades e
-            inversiones
+            Accede o crea tu cuenta para gestionar tus propiedades e inversiones
           </p>
         </div>
 
@@ -254,7 +253,7 @@ const SignInCard = ({ initialCallbackUrl = null, onClose = null }) => {
                   type="email"
                   placeholder="tucorreo@ejemplo.com"
                   aria-label="Correo electrónico"
-                  className="grow"
+                  className="grow text-base"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"

@@ -11,7 +11,7 @@ export default function PageSizeSelect({ value, onChange }) {
   return (
     <div className="form-control">
       <select
-        className="select select-bordered"
+        className="select select-bordered text-base"
         value={value || "10"}
         onChange={(e) => onChange(e.target.value)}
       >
