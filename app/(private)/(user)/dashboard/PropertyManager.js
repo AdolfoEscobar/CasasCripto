@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import apiClient from "@/libs/api";
+import CryptoIcon from "@/components/CryptoIcon";
 import { toast } from "react-hot-toast";
 import {
   MAX_PROPERTY_IMAGES,
@@ -960,12 +961,13 @@ const PropertyManager = ({ maxProperties = 1, featuredListing }) => {
                   type="button"
                   key={symbol}
                   onClick={() => toggleCrypto(symbol)}
-                  className={`badge badge-lg cursor-pointer ${
+                  className={`badge badge-lg cursor-pointer gap-1.5 ${
                     form.cryptoAccepted.includes(symbol)
                       ? "badge-primary"
                       : "badge-ghost border border-base-content/20"
                   }`}
                 >
+                  <CryptoIcon symbol={symbol} size={18} />
                   {symbol}
                 </button>
               ))}

@@ -6,32 +6,18 @@ import config from "@/config";
 import ButtonAuthCta from "./ButtonAuthCta";
 import VerifiedBadge from "./VerifiedBadge";
 import PropertyImage from "./PropertyImage";
+import CryptoIcon from "./CryptoIcon";
 
 // UI interactiva de la sección "el directorio": carrusel destacado + filtros
 // + grid + ticker. Recibe listados REALES ya mapeados desde el Server
 // Component (ver ./MarketplacePreview.js) — aquí no hay mockups ni precios
 // inventados: todo lo que se muestra sale de propiedades publicadas.
-const tickerStyles = {
-  BTC: { bg: "bg-primary/15", text: "text-primary" },
-  ETH: { bg: "bg-accent/15", text: "text-accent" },
-  USDC: { bg: "bg-secondary/15", text: "text-secondary" },
-  USDT: { bg: "bg-success/15", text: "text-success" },
-};
-
 const cryptoNames = {
   BTC: "Bitcoin",
   ETH: "Ethereum",
   USDC: "USD Coin",
   USDT: "Tether",
 };
-
-const CryptoDot = ({ symbol, bg, text, className = "w-9 h-9 text-xs" }) => (
-  <span
-    className={`inline-flex items-center justify-center rounded-full font-bold shrink-0 ${bg} ${text} ${className}`}
-  >
-    {symbol.slice(0, 1)}
-  </span>
-);
 
 // Placeholder neutro cuando el listado no tiene fotos (nunca una foto falsa:
 // eso implicaría que la propiedad se ve así).
@@ -193,8 +179,9 @@ const FeaturedBanner = ({
                     property.cryptos.map((c) => (
                       <span
                         key={c}
-                        className="badge badge-ghost border border-base-content/20 text-[10px] sm:text-xs"
+                        className="badge badge-ghost border border-base-content/20 text-[10px] sm:text-xs gap-1"
                       >
+                        <CryptoIcon symbol={c} size={12} />
                         {c}
                       </span>
                     ))
@@ -361,20 +348,12 @@ const MarketplacePreviewClient = ({ items, categories, ticker }) => {
           </p>
           <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-1 -mx-1 px-1">
             {ticker.map((c) => {
-              const style = tickerStyles[c.symbol] || {
-                bg: "bg-base-300",
-                text: "",
-              };
               return (
                 <div
                   key={c.symbol}
                   className="flex items-center gap-2.5 rounded-xl border border-base-content/10 px-3.5 py-2.5 shrink-0"
                 >
-                  <CryptoDot
-                    symbol={c.symbol}
-                    bg={style.bg}
-                    text={style.text}
-                  />
+                  <CryptoIcon symbol={c.symbol} size={36} />
                   <div>
                     <p className="font-semibold text-sm leading-tight">
                       {c.symbol}{" "}
@@ -382,18 +361,13 @@ const MarketplacePreviewClient = ({ items, categories, ticker }) => {
                         {cryptoNames[c.symbol] || ""}
                       </span>
                     </p>
-                    <p className="text-xs opacity-80">
-                      {c.count > 0
-                        ? `Aceptada en ${c.count} ficha${c.count === 1 ? "" : "s"}`
-                        : "Sin fichas aún"}
-                    </p>
                   </div>
                 </div>
               );
             })}
           </div>
           <p className="text-xs opacity-50 mt-3">
-            Cada ficha indica qué cryptos acepta su propietario.
+            Cada propiedad indica qué cryptos acepta su propietario.
           </p>
         </div>
 

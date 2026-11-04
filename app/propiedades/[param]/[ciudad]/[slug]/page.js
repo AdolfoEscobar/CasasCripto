@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyImage from "@/components/PropertyImage";
+import CryptoIcon from "@/components/CryptoIcon";
 import FaqAccordion from "@/components/FaqAccordion";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PropertySearchHero from "@/components/PropertySearchHero";
@@ -318,8 +319,9 @@ export default async function PropertyDetailPage({ params }) {
                         {property.cryptoAccepted.map((c) => (
                           <span
                             key={c}
-                            className="badge badge-primary badge-outline"
+                            className="badge badge-primary badge-outline gap-1.5"
                           >
+                            <CryptoIcon symbol={c} size={16} />
                             {c}
                           </span>
                         ))}

@@ -6,6 +6,7 @@ import {
   capFirst,
 } from "@/libs/geoSeo.mjs";
 import { geoPageUrl } from "@/libs/propertyUrls.mjs";
+import CryptoIcon from "./CryptoIcon";
 
 // Widgets compartidos de las páginas de listado (hub, estado, ciudad):
 // mismo UX estilo portal (filtros, orden, stats, búsquedas relacionadas) en
@@ -53,20 +54,33 @@ export function SortPills({ base, filters, sort, q, count }) {
 }
 
 // Franja de datos reales bajo el H1, estilo portales grandes ("desde $X ·
-// aceptan USDC, BTC"). El conteo vive en <SortPills/>, aquí no se repite.
+// aceptan [iconos] USDC, BTC"). El conteo vive en <SortPills/>, aquí no se
+// repite.
 export function StatsStrip({ minPrice, currency, topCryptos }) {
-  const bits = [
-    minPrice
-      ? `desde $${Number(minPrice).toLocaleString("en-US")} ${currency || "USD"}`
-      : null,
-    (topCryptos || []).length > 0
-      ? `Aceptan: ${topCryptos.slice(0, 4).join(", ")}`
-      : null,
-  ].filter(Boolean);
-  if (bits.length === 0) return null;
+  const cryptos = (topCryptos || []).slice(0, 4);
+  const priceBit = minPrice
+    ? `desde $${Number(minPrice).toLocaleString("en-US")} ${currency || "USD"}`
+    : null;
+  if (!priceBit && cryptos.length === 0) return null;
   return (
     <p className="text-center text-sm font-medium opacity-80 mb-8">
-      {bits.join("  ·  ")}
+      {priceBit}
+      {priceBit && cryptos.length > 0 ? "  ·  " : ""}
+      {cryptos.length > 0 && (
+        <>
+          Aceptan:{" "}
+          {cryptos.map((c, i) => (
+            <span
+              key={c}
+              className="inline-flex items-center gap-1 whitespace-nowrap"
+            >
+              {i > 0 ? ", " : ""}
+              <CryptoIcon symbol={c} size={14} />
+              {c}
+            </span>
+          ))}
+        </>
+      )}
     </p>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PropertyImage from "./PropertyImage";
+import CryptoIcon from "./CryptoIcon";
 import { propertyUrl } from "@/libs/propertyUrls.mjs";
 import { PROPERTY_TYPES, LISTING_TYPES, capFirst } from "@/libs/geoSeo.mjs";
 
@@ -62,7 +63,9 @@ const PropertyCard = ({ property, eager = false }) => (
       )}
     </div>
     <div className="p-5 flex flex-col gap-2 flex-1">
-      <p className="font-bold text-lg leading-snug line-clamp-2">{property.title}</p>
+      <p className="font-bold text-lg leading-snug line-clamp-2">
+        {property.title}
+      </p>
       <p className="text-sm opacity-60 truncate">
         {property.city}
         {property.country ? `, ${property.country}` : ""}
@@ -72,14 +75,19 @@ const PropertyCard = ({ property, eager = false }) => (
         LISTING_TYPES[property.listingType]) && (
         <p className="text-xs font-medium text-primary">
           {capFirst(
-            [PROPERTY_TYPES[property.propertyType]?.singular, LISTING_TYPES[property.listingType]]
+            [
+              PROPERTY_TYPES[property.propertyType]?.singular,
+              LISTING_TYPES[property.listingType],
+            ]
               .filter(Boolean)
-              .join(" ")
+              .join(" "),
           )}
         </p>
       )}
       {property.description && (
-        <p className="text-sm opacity-70 line-clamp-2">{property.description}</p>
+        <p className="text-sm opacity-70 line-clamp-2">
+          {property.description}
+        </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-3 border-t border-base-content/10">
         <span className="font-extrabold text-gradient-gold whitespace-nowrap">
@@ -89,8 +97,9 @@ const PropertyCard = ({ property, eager = false }) => (
           {(property.cryptoAccepted || []).map((c) => (
             <span
               key={c}
-              className="badge badge-ghost border border-base-content/10 text-xs"
+              className="badge badge-ghost border border-base-content/10 text-xs gap-1"
             >
+              <CryptoIcon symbol={c} size={14} />
               {c}
             </span>
           ))}
