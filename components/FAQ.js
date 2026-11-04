@@ -14,8 +14,8 @@ const faqList = [
         <a href="/propiedades" className="link link-primary">
           buscar propiedades
         </a>{" "}
-        y publicar la tuya gratis desde tu panel. Cada ficha pasa por revisión
-        manual antes de publicarse.
+        y publicar la tuya gratis desde tu panel. Cada propiedad pasa por
+        revisión manual antes de publicarse.
       </p>
     ),
   },
@@ -23,9 +23,9 @@ const faqList = [
     question: "¿Cómo funciona el pago en criptomonedas?",
     answer: (
       <p>
-        Cada ficha indica qué criptomonedas acepta el propietario (USDC, USDT,
-        BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre;
-        los pagos de suscripción y donaciones se procesan con Stripe. La
+        Cada propiedad indica qué criptomonedas acepta el propietario (USDC,
+        USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el
+        cierre; los pagos de suscripción y donaciones se procesan con Stripe. La
         liquidación on-chain automatizada forma parte del roadmap.
       </p>
     ),
@@ -94,11 +94,11 @@ const faqList = [
 const HOME_FAQ_SCHEMA = [
   {
     q: "¿Ya puedo publicar o buscar propiedades?",
-    a: "Sí. El directorio está en vivo: puedes buscar propiedades y publicar la tuya gratis desde tu panel. Cada ficha pasa por revisión manual antes de publicarse.",
+    a: "Sí. El directorio está en vivo: puedes buscar propiedades y publicar la tuya gratis desde tu panel. Cada propiedad pasa por revisión manual antes de publicarse.",
   },
   {
     q: "¿Cómo funciona el pago en criptomonedas?",
-    a: "Cada ficha indica qué criptomonedas acepta el propietario (USDC, USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre; los pagos de suscripción y donaciones se procesan con Stripe.",
+    a: "Cada propiedad indica qué criptomonedas acepta el propietario (USDC, USDT, BTC o ETH). Casas Cripto conecta a ambas partes y acompaña el cierre; los pagos de suscripción y donaciones se procesan con Stripe.",
   },
   {
     q: "¿Esto es una oferta de inversión o de valores?",

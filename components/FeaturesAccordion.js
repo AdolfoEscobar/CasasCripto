@@ -8,7 +8,7 @@ const steps = [
     number: "01",
     title: "Lista tu propiedad gratis",
     description:
-      "Publica en minutos e indica qué aceptas: USDC, USDT, BTC o ETH. Revisamos cada ficha a mano antes de publicarla. Sin tarjeta, sin letra chica.",
+      "Publica en minutos e indica qué aceptas: USDC, USDT, BTC o ETH. Revisamos cada propiedad a mano antes de publicarla. Sin tarjeta, sin letra chica.",
   },
   {
     number: "02",
@@ -30,7 +30,10 @@ const steps = [
 // evita prometer escrow, KYC automático o el token $CASA (todo roadmap).
 const FeaturesAccordion = () => {
   return (
-    <section id="features" className="scroll-mt-20 border-t border-base-content/10">
+    <section
+      id="features"
+      className="scroll-mt-20 border-t border-base-content/10"
+    >
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 md:py-28">
         <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-16 items-start">
           {/* Intro editorial */}
@@ -46,15 +49,12 @@ const FeaturesAccordion = () => {
 
             <p className="text-base sm:text-lg opacity-70 leading-relaxed mt-5 max-w-xl">
               No somos un banco ni un exchange. Somos el punto de encuentro:
-              propiedades verificadas que aceptan criptomonedas y un equipo
-              que intermedia para que el deal se cierre.
+              propiedades que aceptan criptomonedas y un equipo que intermedia
+              para que el deal se cierre.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <Link
-                href="/propiedades"
-                className="btn btn-primary sm:btn-wide"
-              >
+              <Link href="/propiedades" className="btn btn-primary sm:btn-wide">
                 Explorar propiedades
               </Link>
               <ButtonAuthCta
@@ -69,9 +69,9 @@ const FeaturesAccordion = () => {
               <span className="font-semibold text-base-content">
                 Para inversionistas:{" "}
               </span>
-              ingresos desde el día uno con Premium y destacados, comisión
-              por cierre en roadmap. Cada listado es una página que atrae
-              tráfico orgánico gratis.
+              ingresos desde el día uno con Premium y destacados, comisión por
+              cierre en roadmap. Cada listado es una página que atrae tráfico
+              orgánico gratis.
             </p>
           </div>
 
@@ -86,9 +86,6 @@ const FeaturesAccordion = () => {
                 height={525}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-base-100/95 via-base-100/20 to-transparent" />
-              <span className="absolute top-4 left-4 badge badge-sm font-semibold bg-base-100/90 border-base-content/15">
-                Verificada
-              </span>
               <figcaption className="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between gap-4">
                 <div>
                   <p className="font-bold text-lg leading-tight">
@@ -98,14 +95,12 @@ const FeaturesAccordion = () => {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-extrabold text-primary">US$ 480,000</p>
-                  <p className="text-xs opacity-70 mt-0.5">
-                    Acepta USDC · BTC
-                  </p>
+                  <p className="text-xs opacity-70 mt-0.5">Acepta USDC · BTC</p>
                 </div>
               </figcaption>
             </div>
             <p className="text-xs opacity-50 mt-3">
-              Ficha ilustrativa del directorio — fotografía de referencia.
+              Propiedad ilustrativa del directorio — fotografía de referencia.
             </p>
           </figure>
         </div>
@@ -133,8 +128,8 @@ const FeaturesAccordion = () => {
         </ol>
 
         <p className="mt-12 text-sm opacity-60 max-w-2xl leading-relaxed">
-          Hoy: directorio funcionando, sin custodia ni token. Primero tracción
-          real, después la infraestructura.{" "}
+          El directorio ya está en vivo: publica, vende y cierra directo con
+          cripto.{" "}
           <a href="#token" className="link link-primary">
             Ver roadmap
           </a>

@@ -412,7 +412,7 @@ const DIRECTORY_FAQS = [
   },
   {
     q: "¿Por qué aparecen ciudades sin propiedades?",
-    a: "Son ciudades populares donde ya puedes publicar gratis y estrenar el mercado local. Al publicar, tu ficha aparece al instante en la página de esa ciudad.",
+    a: "Son ciudades populares donde ya puedes publicar gratis y estrenar el mercado local. Al publicar, tu propiedad aparece al instante en la página de esa ciudad.",
   },
   {
     q: "¿Cómo publico mi propiedad en una de estas ciudades?",

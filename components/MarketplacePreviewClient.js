@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import config from "@/config";
 import ButtonAuthCta from "./ButtonAuthCta";
-import VerifiedBadge from "./VerifiedBadge";
 import PropertyImage from "./PropertyImage";
 import CryptoIcon from "./CryptoIcon";
 
@@ -137,18 +136,15 @@ const FeaturedBanner = ({
                 <h3 className="font-extrabold text-2xl sm:text-3xl lg:text-4xl tracking-tight">
                   {property.title}
                 </h3>
-                <VerifiedBadge className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="flex items-center gap-2 text-sm sm:text-base opacity-80">
                 <span>{property.locationLabel}</span>
-                <span className="opacity-50">·</span>
-                <span>Propietario verificado</span>
               </div>
               <Link
                 href={property.url}
                 className="btn btn-primary btn-sm sm:btn-md mt-3"
               >
-                Ver ficha
+                Ver propiedad
               </Link>
             </div>
 
@@ -233,10 +229,7 @@ const TrendingCard = ({ property }) => (
       )}
     </div>
     <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-1.5">
-        <p className="font-bold truncate">{property.title}</p>
-        <VerifiedBadge className="w-3.5 h-3.5" />
-      </div>
+      <p className="font-bold truncate">{property.title}</p>
       <p className="text-xs opacity-60 mt-0.5 truncate">
         {property.locationLabel}
       </p>
@@ -288,7 +281,7 @@ const MarketplacePreviewClient = ({ items, categories, ticker }) => {
             En vivo en el directorio
           </h2>
           <p className="opacity-70 leading-relaxed">
-            Fichas reales publicadas por propietarios verificados, con precio,
+            Propiedades reales publicadas por propietarios, con precio,
             ubicación y criptos aceptadas.
           </p>
           <Link

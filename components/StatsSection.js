@@ -6,7 +6,7 @@ const stats = [
   },
   {
     value: "4",
-    label: "Criptos por ficha",
+    label: "Criptos por propiedad",
     detail: "USDC, USDT, BTC y ETH en cada propiedad",
   },
   {
@@ -35,7 +35,7 @@ const StatsSection = () => {
             Números reales
           </p>
           <h2 className="font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
-            Producto funcionando antes de levantar capital
+            Casas Cripto en números
           </h2>
         </div>
 

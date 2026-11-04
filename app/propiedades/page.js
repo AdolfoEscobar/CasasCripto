@@ -84,7 +84,7 @@ const HUB_FAQS = [
   },
   {
     q: "¿Qué criptomonedas puedo usar para comprar?",
-    a: "Depende de cada propietario: cada ficha indica si acepta USDC, USDT, BTC, ETH u otras. Usa los listados por estado y ciudad para encontrar la propiedad que acepte tu cripto.",
+    a: "Depende de cada propietario: cada propiedad indica si acepta USDC, USDT, BTC, ETH u otras. Usa los listados por estado y ciudad para encontrar la propiedad que acepte tu cripto.",
   },
   {
     q: "¿Casas Cripto cobra comisión por comprar?",

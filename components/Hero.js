@@ -32,9 +32,9 @@ const Hero = () => {
           </h1>
 
           <p className="text-base sm:text-lg opacity-70 leading-relaxed max-w-xl">
-            Publica gratis, indica qué aceptas (USDC, USDT, BTC o ETH) y
-            recibe compradores globales. Nosotros intermediamos para que el
-            deal se cierre.
+            Publica gratis, indica qué aceptas (USDC, USDT, BTC o ETH) y recibe
+            compradores globales. Nosotros intermediamos para que el deal se
+            cierre.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -108,7 +108,7 @@ const Hero = () => {
               </svg>
             </span>
             <div className="text-sm">
-              <p className="font-semibold">Ficha verificada</p>
+              <p className="font-semibold">Pago en cripto</p>
               <p className="opacity-60 text-xs">Acepta USDC · BTC</p>
             </div>
           </div>
