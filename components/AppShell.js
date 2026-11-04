@@ -153,7 +153,14 @@ export default function AppShell({ children }) {
     <div className="drawer lg:drawer-open relative z-10">
       <ScrollToTop />
       <BackToTopButton />
-      <input id="app-sidebar" type="checkbox" className="drawer-toggle" />
+      {/* Checkbox de estado del drawer (invisible): con nombre accesible
+          para lectores de pantalla; el botón visible "Abrir menú" lo opera. */}
+      <input
+        id="app-sidebar"
+        type="checkbox"
+        className="drawer-toggle"
+        aria-label="Mostrar u ocultar el menú de navegación"
+      />
 
       <div className="drawer-content flex flex-col min-h-screen min-w-0">
         <MobileTopbar />
