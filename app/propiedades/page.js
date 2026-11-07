@@ -145,18 +145,18 @@ export default async function PropiedadesPage({ searchParams }) {
         })),
       )}
       <main className="min-h-screen">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-12 md:pt-16 pb-16 md:pb-24">
-          {/* Héroe de búsqueda estilo portal: el del header sirve para
-              navegar, este para refinar el inventario con filtros. */}
-          <div className="mb-8">
-            <PropertySearchHero idPrefix="hub-search" />
-          </div>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-6 md:pt-8 pb-16 md:pb-24">
           <Breadcrumbs
             items={[
               { label: "Inicio", href: "/" },
               { label: q ? `Buscar: ${q}` : "Propiedades" },
             ]}
           />
+          {/* Héroe de búsqueda estilo portal: el del header sirve para
+              navegar, este para refinar el inventario con filtros. */}
+          <div className="mb-8">
+            <PropertySearchHero idPrefix="hub-search" />
+          </div>
           <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="font-medium text-primary mb-3">Marketplace</p>
             <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">

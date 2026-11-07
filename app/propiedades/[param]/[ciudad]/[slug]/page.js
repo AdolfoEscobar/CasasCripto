@@ -178,17 +178,7 @@ export default async function PropertyDetailPage({ params }) {
       <main className="min-h-screen">
         {/* Contenedor 7xl como en listados: héroe y breadcrumb arrancan en
             la misma X; el cuerpo de la ficha se estrecha a 5xl dentro. */}
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-12 md:pt-16 pb-16 md:pb-24">
-          <div className="mb-8">
-            <PropertySearchHero
-              idPrefix="detail-search"
-              base={
-                property.stateSlug && property.citySlug
-                  ? cityUrl(property.stateSlug, property.citySlug)
-                  : "/propiedades"
-              }
-            />
-          </div>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-6 md:pt-8 pb-16 md:pb-24">
           <Breadcrumbs
             items={[
               { label: "Inicio", href: "/" },
@@ -220,6 +210,16 @@ export default async function PropertyDetailPage({ params }) {
               { label: property.title },
             ]}
           />
+          <div className="mb-8">
+            <PropertySearchHero
+              idPrefix="detail-search"
+              base={
+                property.stateSlug && property.citySlug
+                  ? cityUrl(property.stateSlug, property.citySlug)
+                  : "/propiedades"
+              }
+            />
+          </div>
 
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">

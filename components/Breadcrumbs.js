@@ -3,7 +3,7 @@ import { Fragment } from "react";
 
 // Migas visibles ÚNICAS del marketplace (hub, estado, ciudad, detalle,
 // directorio, país): misma posición (izquierda, como los portales), misma
-// altura (justo bajo el héroe de búsqueda), mismo estilo y misma raíz
+// altura (justo sobre el héroe de búsqueda), mismo estilo y misma raíz
 // ("Inicio >"). Incluyen el país cuando aplica (Propiedades > México >
 // Chihuahua...), igual que la jerarquía del sitio. `items` es
 // [{ label, href? }]: el último sin href es la página actual (truncado si

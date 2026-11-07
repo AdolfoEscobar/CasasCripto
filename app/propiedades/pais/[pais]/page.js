@@ -142,13 +142,7 @@ export default async function PaisPage({ params, searchParams }) {
         })),
       )}
       <main className="min-h-screen">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-12 md:pt-16 pb-16 md:pb-24">
-          <div className="mb-8">
-            <PropertySearchHero
-              idPrefix="country-search"
-              base={paisUrl(pais)}
-            />
-          </div>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-6 md:pt-8 pb-16 md:pb-24">
           <Breadcrumbs
             items={[
               { label: "Inicio", href: "/" },
@@ -156,6 +150,12 @@ export default async function PaisPage({ params, searchParams }) {
               { label: q ? `Buscar: ${q}` : country },
             ]}
           />
+          <div className="mb-8">
+            <PropertySearchHero
+              idPrefix="country-search"
+              base={paisUrl(pais)}
+            />
+          </div>
 
           <div className="text-center max-w-2xl mx-auto mb-8">
             <p className="font-medium text-primary mb-3">País</p>
